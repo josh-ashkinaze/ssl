@@ -81,14 +81,11 @@ if __name__ == "__main__":
         lambda x: f"'{x} companion'",
     ]
 
-    # Advice patterns
     advice_patterns = [
         lambda x: f"'advice from {x}'",
         lambda x: f"'{x}' AND ('advice')",
     ]
 
-
-    # Combine all patterns
     for pattern_list in [role_patterns, advice_patterns]:
         for pattern in pattern_list:
             topics['ai_social'].extend([pattern(i) for i in topics['ai']])

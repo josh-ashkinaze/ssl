@@ -27,8 +27,8 @@ logging.basicConfig(filename=f"{os.path.splitext(os.path.basename(__file__))[0]}
 
 # Parameters
 ###################
-n_days = 30
-font_scale = 2
+n_days = 21
+font_scale = 2.2
 mypal = make_aesthetic(font_scale=font_scale)
 ai_events = [
     {
@@ -74,7 +74,7 @@ def smooth_df(df, events, ndays):
     return df
 
 if __name__ == '__main__':
-    mypal = make_aesthetic()
+    mypal = make_aesthetic(font_scale=font_scale)
     df = pd.read_csv("../../data/clean/wide_2014-11-30_2024-11-27_34412234_ai_social.csv")
     df['date'] = pd.to_datetime(df['date'])
     df = df.query("plain + ai_social>0")
@@ -105,13 +105,13 @@ if __name__ == '__main__':
                  linewidth=1)
 
     pre_gpt_levels = df[df['date'] < pd.Timestamp(ai_events[0]['date'])]['social_prop'].mean()
-    plt.axhline(pre_gpt_levels, color='gray', linestyle='-.', label=f'Pre-{ai_events[0]['name']} Mean', linewidth=1)
+    plt.axhline(pre_gpt_levels, color='gray', linestyle='-.', label=f'Pre-{ai_events[0]['name']} Mean', linewidth=2)
 
     for event in ai_events:
         plt.axvline(x=pd.Timestamp(event['date']),
                     color=event['color'],
                     linestyle='dashed',
-                    linewidth=1)
+                    linewidth=2)
 
     plt.ylabel(f'Proportion\n({n_days}-Day Exponential Weighted Avg)')
     plt.xlabel('Date')
