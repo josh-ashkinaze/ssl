@@ -1,8 +1,13 @@
 """
 Author: Joshua Ashkinaze
 
-Description: Cleans the daily level AI newspaper data from MediaCloud.
-We want to
+Description: Nice time series plot of AI social role as prop of AI news stories
+
+Input:
+    - wide_2014-11-30_2024-11-27_34412234_ai_social.csv: Daily level AI newspaper data from MediaCloud
+
+Output:
+    - ai_social_{n}_ewm_days.pdf: the ts plot
 
 Date: 2024-11-27 18:28:39
 """
@@ -117,5 +122,6 @@ if __name__ == '__main__':
     plt.xticks(rotation=0)
     plt.legend(frameon=True, bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.tight_layout()
+    plt.savefig(f"../../plots/ai_social_{n_days}_ewm_days.pdf", dpi=300)
     plt.savefig(f"../../plots/ai_social_{n_days}_ewm_days.png", dpi=300)
 
