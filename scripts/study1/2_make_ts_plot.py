@@ -58,23 +58,12 @@ def smooth_df(df, events, ndays, method='ewm'):
             span=ndays,
         ).mean()
 
-        df['se'] = df['social_prop'].ewm(
-            span=ndays,
-        ).std() / np.sqrt(ndays)
-
     elif method == 'rolling':
         df['smooth'] = df['social_prop'].rolling(
             window=ndays,
             center=True
         ).mean()
 
-        df['se'] = df['social_prop'].rolling(
-            window=ndays,
-            center=True
-        ).std() / np.sqrt(ndays)
-
-    df['ci_upper'] = df['smooth'] + 1.96 * df['se']
-    df['ci_lower'] = df['smooth'] - 1.96 * df['se']
 
     df['period'] = pd.cut(df['date'],
                           bins=[pd.Timestamp.min] +
@@ -91,10 +80,12 @@ if __name__ == '__main__':
 
     # make sure we get same kinda graph with different settings
     n_days = [7, 14, 21, 30]
+
     method_names = {
         'ewm': 'EWMA', # add 20-day span EWMA
         'rolling': 'MA'
     }
+
 
     for n_days in n_days:
         for method, method_name in method_names.items():
@@ -108,12 +99,6 @@ if __name__ == '__main__':
                             palette=['black'] + [e['color'] for e in ai_events],
                             alpha=0.9,
                             s=50)
-
-            plt.fill_between(df['date'],
-                             df['ci_lower'],
-                             df['ci_upper'],
-                             alpha=0.1,
-                             color='gray')
 
             sns.lineplot(data=df,
                          x='date',
