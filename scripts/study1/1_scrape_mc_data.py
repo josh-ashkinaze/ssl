@@ -34,16 +34,22 @@ logging.info("Start date: %s", START_DATE)
 logging.info("End date: %s", END_DATE)
 logging.info("Collection: %s", COLLECTION)
 
+TOPICS = {
+    'ai': ['ai', 'chatbot', 'artificial intelligence'],
+    'social_terms': ['therapist', 'psychologist', 'counselor', 'coach', 'scout', 'teacher'],
+    'social_actions': ['advice', 'emotional support'],
+    'ai_social': []
+}
 
 def assign_category(row):
-    if any(query in row['query'] for query in topics['ai_social']):
+    if any(query in row['query'] for query in TOPICS['ai_social']):
         return 'ai_social'
     else:
         return 'plain'
 
 
 def extract_core_term(x):
-    core_terms = ['ai', 'chatbot', 'artificial intelligence']
+    core_terms = ['ai', 'chatbot','artificial intelligence']
     for term in core_terms:
         if term in x:
             return term
@@ -51,8 +57,7 @@ def extract_core_term(x):
         return None
 
 def extract_social_term(x):
-    social_terms = ['advice', 'therapist', 'coach', 'advisor', 'friend']
-    for term in social_terms:
+    for term in TOPICS['social_terms']:
         if term in x:
             return term
     else:
@@ -62,47 +67,32 @@ def extract_social_term(x):
 
 if __name__ == "__main__":
 
-    # 1. Make topics
+    # 1. Make TOPICS
     ################################
-    topics = {
-        'ai': ['ai', 'chatbot', 'artificial intelligence'],
-        'ai_social': []
-    }
+    for ai in TOPICS['ai']:
+        for social in TOPICS['social_terms']:
+            TOPICS['ai_social'].append(f"'{ai} {social}'")
+        for action in TOPICS['social_actions']:
+            TOPICS['ai_social'].append(f"'{action} from {ai}'")
+            TOPICS['ai_social'].append(f"('{ai} provides {action}') OR ('{ai} provided {action}')")
 
-    # Social roles
-    role_patterns = [
-        lambda x: f"'{x} therapist'",
-        lambda x: f"'{x} counselor'",
-        lambda x: f"'{x} psychologist'",
-        lambda x: f"'{x} coach'",
-        lambda x: f"'{x} mentor'",
-        lambda x: f"'{x} tutor'",
-        lambda x: f"'{x} friend'",
-        lambda x: f"'{x} companion'",
-    ]
-
-    advice_patterns = [
-        lambda x: f"'advice from {x}'",
-        lambda x: f"'{x}' AND ('advice')",
-    ]
-
-    for pattern_list in [role_patterns, advice_patterns]:
-        for pattern in pattern_list:
-            topics['ai_social'].extend([pattern(i) for i in topics['ai']])
     
-    logging.info(topics)
+    logging.info(TOPICS)
+
+    for key, value in TOPICS.items():
+        logging.info(f"Lists and lengths...{key}: {len(value)}")
     
 
     
     # 2. Run queries
     ################################
     api = MC_API_KEY
-    run = dict_kw_list_over_time(kw_dict=topics,
+    run = dict_kw_list_over_time(kw_dict=TOPICS,
                                  collection=COLLECTION,
-                                         start_date=START_DATE,
-                                         end_date=END_DATE,
-                                         api_key=api,
-                                         n_jobs=-1)
+                                 start_date=START_DATE,
+                                 end_date=END_DATE,
+                                 api_key=api,
+                                 n_jobs=-1)
     logging.info("got data")
     
     
@@ -110,7 +100,7 @@ if __name__ == "__main__":
     # 3. Basic Clean data
     ################################
     run['category'] = run.apply(assign_category, axis=1)
-    run['is_social'] = run['query'].apply(lambda x:1 if x in topics['ai_social'] else 0)
+    run['is_social'] = run['query'].apply(lambda x:1 if x in TOPICS['ai_social'] else 0)
     run['core_term'] = run['query'].apply(extract_core_term)
     run['social_term'] = run['query'].apply(extract_social_term)
     run.to_csv(f"../../data/raw/{START_DATE}_{END_DATE}_{COLLECTION}_ai_social.csv", index=False)
@@ -123,7 +113,6 @@ if __name__ == "__main__":
     wide_df['date'] = pd.to_datetime(wide_df['date'])
     wide_df['ai_social'] = wide_df['ai_social'].astype(int)
     wide_df['plain'] = wide_df['plain'].astype(int)
-    wide_df['social_prop'] = wide_df['ai_social'] / (
-            wide_df['ai_social'] + wide_df['plain']
-    )
+    wide_df['social_prop'] = wide_df['ai_social'] / wide_df['plain']
+
     wide_df.to_csv(f"../../data/clean/wide_{START_DATE}_{END_DATE}_{COLLECTION}_ai_social.csv", index=False)
