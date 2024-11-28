@@ -28,10 +28,8 @@ logging.basicConfig(filename=f"{os.path.splitext(os.path.basename(__file__))[0]}
 
 # Parameters
 ###################
-n_days = 30
-method = 'rolling'
-font_scale = 2.2
 
+font_scale = 2.2
 mypal = make_aesthetic(font_scale=font_scale)
 ai_events = [
     {
@@ -48,9 +46,9 @@ ai_events = [
     }
 ]
 logging.info("Parameters...")
-logging.info("n_days: %s", n_days)
 logging.info("font_scale: %s", font_scale)
 logging.info("ai_events: %s", ai_events)
+
 ###################
 
 
@@ -58,13 +56,12 @@ def smooth_df(df, events, ndays, method='ewm'):
     if method == 'ewm':
         df['smooth'] = df['social_prop'].ewm(
             span=ndays,
-            adjust=False
         ).mean()
 
         df['se'] = df['social_prop'].ewm(
             span=ndays,
-            adjust=False
         ).std() / np.sqrt(ndays)
+
     elif method == 'rolling':
         df['smooth'] = df['social_prop'].rolling(
             window=ndays,
@@ -95,7 +92,7 @@ if __name__ == '__main__':
     # make sure we get same kinda graph with different settings
     n_days = [7, 14, 21, 30]
     method_names = {
-        'ewm': 'EWMA',
+        'ewm': 'EWMA', # add 20-day span EWMA
         'rolling': 'MA'
     }
 
