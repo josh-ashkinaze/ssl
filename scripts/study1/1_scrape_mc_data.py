@@ -56,7 +56,9 @@ def assign_category(row):
 
 
 def extract_core_term(x):
-    core_terms = ["ai", "a.i.", "chatbot", "artificial intelligence"]
+    core_terms = TOPICS["ai"]
+    core_terms = [i.lower() for i in core_terms]
+    x = x.lower()
     for term in core_terms:
         if term in x:
             return term

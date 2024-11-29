@@ -7,8 +7,7 @@ Input:
     - wide_2014-11-30_2024-11-27_34412234_ai_social.csv: Daily level AI newspaper data from MediaCloud
 
 Output:
-    Plots with fn like
-    - ai_social_{n}_{ewm}_days.pdf: the ts plot
+    Plots with fn like s1_[other params]
 
 Date: 2024-11-27 18:28:39
 """
@@ -142,7 +141,7 @@ if __name__ == "__main__":
                 )
 
                 pre_gpt_levels = df[df["date"] < pd.Timestamp(ai_events[0]["date"])][
-                    "social_prop"
+                   dv
                 ].mean()
                 plt.axhline(
                     pre_gpt_levels,
