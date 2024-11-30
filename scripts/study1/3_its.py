@@ -136,6 +136,7 @@ arima_model = pm.auto_arima(y,
                             max_q=3,
                             trace=True,
                             error_action='ignore',
+                            random_state=42,
                             suppress_warnings=True)
 
 # Plot results
@@ -174,12 +175,14 @@ plt.savefig("../../plots/its_ai_social.png", dpi=300)
 ###################################
 print("\nOLS Results:")
 print(ols_model.summary())
+print("R2:", ols_model.rsquared)
 
 print("\nARIMA Results:")
 print("Model order:", arima_model.order)
 print("\nCoefficients:")
 print(arima_model.arima_res_.params.round(4))
 print(arima_model.summary())
+print("R2:", r2_score(y, arima_model.fittedvalues()))
 ###################################
 ###################################
 
