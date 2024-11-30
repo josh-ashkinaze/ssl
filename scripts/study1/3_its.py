@@ -105,7 +105,7 @@ def summarize_ts_fit(dates, y, yhat):
 ###################################
 df = pd.read_csv("../../data/clean/wide_2020-01-01_2024-11-29_34412234_ai_social.csv")
 df['date'] = pd.to_datetime(df['date'])
-df['idx'] = [i for i in range(len(df))]
+df['trend'] = [i+1 for i in range(len(df))]
 df = df.set_index('date')
 
 # Define interventions
@@ -119,8 +119,8 @@ df = add_shocks(df, interventions)
 
 # Create matrix
 ###################################
-shock_cols = [c for c in df.columns if "_trend" in c or "_level" in c]
-X = df[shock_cols]
+shock_cols = [c for c in df.columns if  "_level" in c]
+X = df[shock_cols + ['trend']]
 y = df['social_prop']
 
 # 1. Simple OLS
