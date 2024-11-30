@@ -35,6 +35,7 @@ logging.basicConfig(
 
 font_scale = 2.2
 mypal = make_aesthetic(font_scale=font_scale)
+fn = "../../data/clean/wide_2020-01-01_2024-11-29_34412234_ai_social.csv"
 ai_events = [
     {
         "name": "InstructGPT",
@@ -95,12 +96,110 @@ def smooth_df(df, dv, events, ndays, method="ewm", frac=0.1):
     return df
 
 
-if __name__ == "__main__":
-    mypal = make_aesthetic(font_scale=font_scale)
-    fn = "../../data/clean/wide_2020-01-01_2024-11-29_34412234_ai_social.csv"
+def plot_multi_freq_trends():
+    """
+    Plot z-score trends with confidence intervals for AI-related phrases at multiple frequencies.
+    """
+
+    # Read in df
     dates = fn.split("_")[1:3]
     dates = "_".join(dates)
+    df = pd.read_csv(fn)
+    df["date"] = pd.to_datetime(df["date"])
+    df = df.set_index("date")
+    df = df.query("plain + ai_social>0")
+    for var in ["ai_social", "plain"]:
+        df[f"{var}_z"] = (df[var] - df[var].mean()) / df[var].std()
 
+    frequencies = [("Daily", "D"), ("Weekly", "W"), ("Monthly", "M"), ("Yearly", "Y")]
+
+    fig, axes = plt.subplots(len(frequencies), 1, figsize=(24, 12))
+
+    for idx, (title_prefix, freq) in enumerate(frequencies):
+        grouped = (
+            df.groupby(pd.Grouper(freq=freq))
+            .agg(
+                {
+                    "ai_social_z": ["mean", "std", "count"],
+                    "plain_z": ["mean", "std", "count"],
+                }
+            )
+            .reset_index()
+        )
+
+        grouped.columns = [
+            "date",
+            "ai_social_mean",
+            "ai_social_std",
+            "ai_social_count",
+            "plain_mean",
+            "plain_std",
+            "plain_count",
+        ]
+
+        # Calculate confidence intervals
+        z = 1.96
+        for var in ["ai_social", "plain"]:
+            grouped[f"{var}_ci_upper"] = grouped[f"{var}_mean"] + z * grouped[
+                f"{var}_std"
+            ] / np.sqrt(grouped[f"{var}_count"])
+            grouped[f"{var}_ci_lower"] = grouped[f"{var}_mean"] - z * grouped[
+                f"{var}_std"
+            ] / np.sqrt(grouped[f"{var}_count"])
+
+        ax = axes[idx]
+
+        # change to ax.scatter for scatterplot
+        plot_func = ax.plot
+
+        plot_func(
+            grouped["date"],
+            grouped["ai_social_mean"],
+            label="Social AI Phrases",
+            color="#D41876",
+        )
+        ax.fill_between(
+            grouped["date"],
+            grouped["ai_social_ci_lower"],
+            grouped["ai_social_ci_upper"],
+            alpha=0.2,
+            color="#D41876",
+        )
+
+        plot_func(
+            grouped["date"],
+            grouped["plain_mean"],
+            label="All AI Phrases",
+            color="#00A896",
+        )
+        ax.fill_between(
+            grouped["date"],
+            grouped["plain_ci_lower"],
+            grouped["plain_ci_upper"],
+            alpha=0.2,
+            color="#00A896",
+        )
+
+        title_str = f"{title_prefix} Trends"
+        if freq != "D":
+            title_str += " with 95% CIs"
+        ax.set_title(title_str)
+        ax.set_xlabel("")
+        ax.set_ylabel("Z-Score")
+        ax.legend(loc="upper left", edgecolor="white")
+        ax.tick_params(axis="x", rotation=45)
+
+    axes[-1].set_xlabel("Date")
+    plt.tight_layout()
+    plt.savefig(f"../../plots/all_trends_{dates}.png", dpi=300)
+    return fig
+
+
+if __name__ == "__main__":
+    plot_multi_freq_trends()
+    mypal = make_aesthetic(font_scale=font_scale)
+    dates = fn.split("_")[1:3]
+    dates = "_".join(dates)
     df = pd.read_csv(fn)
     df["date"] = pd.to_datetime(df["date"])
     df = df.query("plain + ai_social>0")
@@ -143,7 +242,7 @@ if __name__ == "__main__":
                 )
 
                 pre_gpt_levels = df[df["date"] < pd.Timestamp(ai_events[0]["date"])][
-                   dv
+                    dv
                 ].mean()
                 plt.axhline(
                     pre_gpt_levels,
@@ -168,4 +267,7 @@ if __name__ == "__main__":
                 plt.legend(frameon=True, loc="upper left")
                 plt.tight_layout()
                 # plt.savefig(f"../../plots/ai_social_{n_days}_{method}_days.pdf", dpi=300)
-                plt.savefig(f"../../plots/s1_{dv}_{n_days}_{method}_{dates}_days.png", dpi=300)
+                plt.savefig(
+                    f"../../plots/s1_{dv}_{n_days}_{method}_{dates}_days.png", dpi=300
+                )
+                plt.close()
