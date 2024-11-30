@@ -7,11 +7,7 @@ import mediacloud.api
 
 
 def query_count_over_time(
-        query,
-        collection,
-        start_date,
-        end_date,
-        api_key
+    query, collection, start_date, end_date, api_key
 ) -> pd.DataFrame:
     """
     Get story counts from MediaCloud collection based on query and date range.
@@ -54,21 +50,18 @@ def query_count_over_time(
     """
     mc_search = mediacloud.api.SearchApi(api_key)
 
-    start_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
-    end_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
+    start_dt = datetime.strptime(start_date, "%Y-%m-%d").date()
+    end_dt = datetime.strptime(end_date, "%Y-%m-%d").date()
 
     try:
         results = mc_search.story_count_over_time(
-            query,
-            start_dt,
-            end_dt,
-            collection_ids=[collection]
+            query, start_dt, end_dt, collection_ids=[collection]
         )
 
         df = pd.DataFrame.from_dict(results)
-        df['date'] = pd.to_datetime(df['date'])
-        df['query'] = query
-        df['collection'] = collection
+        df["date"] = pd.to_datetime(df["date"])
+        df["query"] = query
+        df["collection"] = collection
         print(df)
 
         return df
@@ -79,12 +72,7 @@ def query_count_over_time(
 
 
 def multiple_query_count_over_time(
-        queries,
-        collection,
-        start_date,
-        end_date,
-        api_key,
-        n_jobs
+    queries, collection, start_date, end_date, api_key, n_jobs
 ) -> pd.DataFrame:
     """
     Get story counts for multiple queries, optionally in parallel.
@@ -129,7 +117,7 @@ def multiple_query_count_over_time(
             collection=collection,
             start_date=start_date,
             end_date=end_date,
-            api_key=api_key
+            api_key=api_key,
         )
 
     if n_jobs is None:
@@ -141,7 +129,9 @@ def multiple_query_count_over_time(
     else:
         all_dfs = Parallel(n_jobs=n_jobs)(
             delayed(process_query)(query)
-            for query in tqdm(queries, desc=f"Processing queries in parallel (n_jobs={n_jobs})")
+            for query in tqdm(
+                queries, desc=f"Processing queries in parallel (n_jobs={n_jobs})"
+            )
         )
         all_dfs = [df for df in all_dfs if df is not None]
 
@@ -150,16 +140,11 @@ def multiple_query_count_over_time(
         return pd.DataFrame()
 
     final_df = pd.concat(all_dfs, ignore_index=True)
-    final_df['date'] = pd.to_datetime(final_df['date'])
+    final_df["date"] = pd.to_datetime(final_df["date"])
     return final_df
 
 
-def dict_kw_list_over_time(kw_dict,
-                           collection,
-                           start_date,
-                           end_date,
-                           api_key,
-                           n_jobs):
+def dict_kw_list_over_time(kw_dict, collection, start_date, end_date, api_key, n_jobs):
     """
     Get story counts for multiple queries across multiple categories.
 
@@ -196,9 +181,9 @@ def dict_kw_list_over_time(kw_dict,
             start_date=start_date,
             end_date=end_date,
             api_key=api_key,
-            n_jobs=n_jobs
+            n_jobs=n_jobs,
         )
-        df['category'] = kw
+        df["category"] = kw
         if df is not None:
             dfs.append(df)
     return pd.concat(dfs, ignore_index=True)
@@ -217,11 +202,13 @@ def flatten_list(list_of_lists: List[List]) -> List:
     return [item for sublist in list_of_lists for item in sublist]
 
 
-def long2wide(tdf: pd.DataFrame,
-              date_col: str = 'date',
-              cat_col: str = 'cat',
-              count_col: str = 'count',
-              how='sum') -> pd.DataFrame:
+def long2wide(
+    tdf: pd.DataFrame,
+    date_col: str = "date",
+    cat_col: str = "cat",
+    count_col: str = "count",
+    how="sum",
+) -> pd.DataFrame:
     """Convert long format DataFrame to wide format using pivot.
 
     This is useful for if you have multiple terms per category, and each day you
@@ -255,10 +242,12 @@ def long2wide(tdf: pd.DataFrame,
         2024-01-01 15    7
         2024-01-02 3     0
     """
-    assert how in ['sum', 'mean', 'median'], "Bad option!! see docs"
+    assert how in ["sum", "mean", "median"], "Bad option!! see docs"
 
     grouped = tdf.groupby([date_col, cat_col])[count_col].agg(how).reset_index()
-    result = grouped.pivot(index=date_col, columns=cat_col, values=count_col).reset_index()
+    result = grouped.pivot(
+        index=date_col, columns=cat_col, values=count_col
+    ).reset_index()
     result[date_col] = pd.to_datetime(result[date_col])
     # fill NaN values with 0 for dates where a category had no entries
     return result.fillna(0)
