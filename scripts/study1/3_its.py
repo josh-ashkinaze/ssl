@@ -6,9 +6,8 @@ Description: Runs OLS and ARIMAX models on the AI Social data for an ITS.
 Date: 2024-11-29 22:06:50
 """
 
-
-
 import numpy as np
+from stargazer.stargazer import Stargazer
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -16,37 +15,44 @@ import statsmodels.api as sm
 import pmdarima as pm
 from src.helpers import make_aesthetic
 
-
 mypal = make_aesthetic()
+
+
+MODES = ["daily", "weekly"]
+
 
 def add_shocks(df, shock_list, pulse_window=0, types=None):
     """Add shock variables to dataframe"""
     df = df.copy()
 
     if types is None:
-        types = ['level', 'pulse', 'trend', 'pre_trend']
+        types = ["level", "pulse", "trend", "pre_trend"]
 
-    df['time'] = (df.index - df.index.min()).days
+    df["time"] = (df.index - df.index.min()).days
 
     for shock in shock_list:
-        name = shock['name']
-        date = pd.to_datetime(shock['date'])
+        name = shock["name"]
+        date = pd.to_datetime(shock["date"])
 
-        if 'level' in types:
-            df[f'{name}_level'] = (df.index >= date).astype(int)
+        if "level" in types:
+            df[f"{name}_level"] = (df.index >= date).astype(int)
 
-        if 'pulse' in types:
+        if "pulse" in types:
             if pulse_window == 0:
-                df[f'{name}_pulse'] = (df.index == date).astype(int)
+                df[f"{name}_pulse"] = (df.index == date).astype(int)
             else:
                 end_date = date + pd.Timedelta(days=pulse_window)
-                df[f'{name}_pulse'] = ((df.index >= date) & (df.index < end_date)).astype(int)
+                df[f"{name}_pulse"] = (
+                    (df.index >= date) & (df.index < end_date)
+                ).astype(int)
 
-        if 'trend' in types:
-            df[f'{name}_trend'] = np.where(df.index >= date, (df.index - date).days, 0)
+        if "trend" in types:
+            df[f"{name}_trend"] = np.where(df.index >= date, (df.index - date).days, 0)
 
-        if 'pre_trend' in types:
-            df[f'{name}_pretrend'] = np.where(df.index < date, (date - df.index).days, 0)
+        if "pre_trend" in types:
+            df[f"{name}_pretrend"] = np.where(
+                df.index < date, (date - df.index).days, 0
+            )
 
     return df
 
@@ -72,11 +78,11 @@ def summarize_ts_fit(dates, y, yhat):
 
     # Plot fits
     plt.figure(figsize=(12, 6))
-    plt.plot(dates, y, 'b.', alpha=0.5, label='Observed', markersize=2)
-    plt.plot(dates, yhat, 'r-', label='Fitted', alpha=0.2)
-    plt.title('Time Series Fit')
-    plt.xlabel('Date')
-    plt.ylabel('Value')
+    plt.plot(dates, y, "b.", alpha=0.5, label="Observed", markersize=2)
+    plt.plot(dates, yhat, "r-", label="Fitted", alpha=0.2)
+    plt.title("Time Series Fit")
+    plt.xlabel("Date")
+    plt.ylabel("Value")
     plt.legend()
     plt.tight_layout()
     plt.show()
@@ -84,114 +90,176 @@ def summarize_ts_fit(dates, y, yhat):
     # Plot residuals
     residuals = y - yhat
     plt.figure(figsize=(12, 4))
-    plt.plot(dates, residuals, 'k.', alpha=0.5)
-    plt.axhline(y=0, color='r', linestyle='-', alpha=0.3)
-    plt.title('Residuals Over Time')
-    plt.xlabel('Date')
-    plt.ylabel('Residual')
+    plt.plot(dates, residuals, "k.", alpha=0.5)
+    plt.axhline(y=0, color="r", linestyle="-", alpha=0.3)
+    plt.title("Residuals Over Time")
+    plt.xlabel("Date")
+    plt.ylabel("Residual")
     plt.tight_layout()
     plt.show()
 
     # Return metrics
-    return {
-        'rmse': rmse,
-        'mae': mae,
-        'mape': mape,
-        'r2': r2
-    }
+    return {"rmse": rmse, "mae": mae, "mape": mape, "r2": r2}
 
 
-# Load and prepare data
-###################################
-df = pd.read_csv("../../data/clean/wide_2020-01-01_2024-11-29_34412234_ai_social.csv")
-df['date'] = pd.to_datetime(df['date'])
-df['trend'] = [i+1 for i in range(len(df))]
-df = df.set_index('date')
+if __name__ == "__main__":
 
-# Define interventions
-###################################
-interventions = [
-    {"name": "InstructGPT Paper", "date": "2022-01-27", "color": mypal[1]},
-    {"name": "ChatGPT Release", "date": "2022-11-30", "color": mypal[2]}
-]
+    for mode in MODES:
+        ###################################
+        print(f"\nRunning ITS for AI Social Data ({mode})")
+        ###################################
 
-df = add_shocks(df, interventions)
+        # Load and prepare data
+        ###################################
+        df = pd.read_csv(
+            "../../data/clean/wide_2020-01-01_2024-11-29_34412234_ai_social.csv"
+        )
+        df["date"] = pd.to_datetime(df["date"])
+        df["trend"] = [i + 1 for i in range(len(df))]
+        df = df.set_index("date")
 
-# Create matrix
-###################################
-shock_cols = [c for c in df.columns if  "_level" in c]
-X = df[shock_cols + ['trend']]
-y = df['social_prop']
+        if mode == "weekly":
+            df["week"] = df.index.isocalendar().week
+            df["year"] = df.index.year
+            df = df.groupby([df.index.year, df.index.isocalendar().week])[
+                "social_prop"
+            ].mean()
+            df = df.reset_index()
+            df.columns = ["year", "week", "social_prop"]
+            df["date"] = pd.to_datetime(
+                df["year"].astype(str) + "-" + df["week"].astype(str) + "-1",
+                format="%Y-%W-%w",
+            )
+            df = df.set_index("date")
+            df["trend"] = range(1, len(df) + 1)
+        else:
+            pass
 
-# 1. Simple OLS
-###################################
-ols_model = sm.OLS(y, sm.add_constant(X)).fit()
+        # Define interventions
+        ###################################
+        interventions = [
+            {"name": "InstructGPT Paper", "date": "2022-01-27", "color": mypal[1]},
+            {"name": "ChatGPT Release", "date": "2022-11-30", "color": mypal[2]},
+        ]
 
-# 2. Auto ARIMA model
-###################################
-arima_model = pm.auto_arima(y,
-                            X=X,
-                            max_d=3,
-                            max_p=3,
-                            max_q=3,
-                            trace=True,
-                            error_action='ignore',
-                            random_state=42,
-                            suppress_warnings=True)
+        df = add_shocks(df, interventions)
 
-# Plot results
-###################################
-###################################
-plt.figure(figsize=(12, 6), facecolor='white')
-# Cool hack I found: Add "_nolegend_" to not plot actual dots but then plot empty arrays and make bigger
-# to control legend size w/o changing dot size for real
-plt.plot(df.index, y, '.', color='gray', alpha=0.7, markersize=1, label='_nolegend_')
-plt.plot([], [], '.', color='gray', alpha=0.7, markersize=10, label='Raw Data (Daily)')
+        # Create matrix
+        ###################################
+        shock_cols = [c for c in df.columns if "_level" in c]
+        X = df[shock_cols + ["trend"]]
+        y = df["social_prop"]
 
-plt.plot(df.index, ols_model.fittedvalues, color=mypal[0], label='OLS Predictions',
-         alpha=0.9, linewidth=2.5, linestyle='--')
-plt.plot(df.index, arima_model.predict(n_periods=len(df), X=X), color=mypal[0],
-         label='ARIMAX Predictions', alpha=0.9, linewidth=2.5, linestyle=':')
-for shock in interventions:
-    plt.axvline(x=pd.to_datetime(shock['date']),
-                color=shock['color'],
-                linestyle='--',
+        # 1. Simple OLS
+        ###################################
+        ols_model = sm.OLS(y, sm.add_constant(X)).fit()
+
+        # 2. Auto ARIMA model
+        ###################################
+        arima_model = pm.auto_arima(
+            y,
+            X=X,
+            max_d=3,
+            max_p=3,
+            max_q=3,
+            trace=True,
+            error_action="ignore",
+            random_state=42,
+            suppress_warnings=True,
+        )
+
+        # Stargazer
+        ###################################
+        stargazer = Stargazer([ols_model, arima_model])
+        stargazer.title("Regression Results")
+        stargazer.show_model_numbers(False)
+        stargazer.custom_columns(["OLS", "ARIMA"])
+        print(stargazer)
+
+        # Plot results
+        ###################################
+        ###################################
+        plt.figure(figsize=(12, 6), facecolor="white")
+        # Cool hack I found: Add "_nolegend_" to not plot actual dots but then plot empty arrays and make bigger
+        # to control legend size w/o changing dot size for real
+        plt.plot(
+            df.index,
+            y,
+            ".",
+            color="gray",
+            alpha=0.7,
+            markersize=1 if mode != "weekly" else 5,
+            label="_nolegend_",
+        )
+        plt.plot(
+            [],
+            [],
+            ".",
+            color="gray",
+            alpha=0.7 if mode == "weekly" else 0.5,
+            markersize=10,
+            label=f'Raw Data {"(Weekly Mean)" if mode == "weekly" else "(Daily)"}',
+        )
+
+        plt.plot(
+            df.index,
+            ols_model.fittedvalues,
+            color=mypal[0],
+            label="OLS Predictions",
+            alpha=0.9,
+            linewidth=2.5,
+            linestyle=":",
+        )
+        plt.plot(
+            df.index,
+            arima_model.predict(n_periods=len(df), X=X),
+            color=mypal[0],
+            label="ARIMAX Predictions",
+            alpha=0.9,
+            linewidth=2.5,
+            linestyle="--",
+        )
+        for shock in interventions:
+            plt.axvline(
+                x=pd.to_datetime(shock["date"]),
+                color=shock["color"],
+                linestyle="--",
                 alpha=0.4,
                 linewidth=2,
-                label=shock['name'])
-plt.title('ITS Analysis: Proportion of AI News Stories Containing\nSocial Role or Social Function Phrases',
-          fontweight='bold')
-plt.xlabel('Date')
-plt.ylabel('Proportion')
-plt.legend(facecolor='white',
-           edgecolor='none', loc='upper left')
-plt.tight_layout()
-plt.savefig("../../plots/its_ai_social.png", dpi=300)
-###################################
-###################################
+                label=shock["name"],
+            )
 
-# Print results
-###################################
-###################################
-print("\nOLS Results:")
-print(ols_model.summary())
-print("R2:", ols_model.rsquared)
+        # mode_str = "(Weekly)" if mode == "weekly" else "(Daily)"
+        plt.title(
+            f"ITS Analysis: Proportion of AI News Stories Containing\nSocial Role or Social Function Phrases",
+            fontweight="bold",
+        )
+        plt.xlabel("Date")
+        plt.ylabel("Proportion")
+        plt.legend(facecolor="white", edgecolor="none", loc="upper left")
+        plt.tight_layout()
+        plt.savefig(f"../../plots/its_{mode}_ai_social.png", dpi=300)
+        ###################################
+        ###################################
 
-print("\nARIMA Results:")
-print("Model order:", arima_model.order)
-print("\nCoefficients:")
-print(arima_model.arima_res_.params.round(4))
-print(arima_model.summary())
-print("R2:", r2_score(y, arima_model.fittedvalues()))
-###################################
-###################################
+        # Print results
+        ###################################
+        ###################################
+        print("\nOLS Results:")
+        print(ols_model.summary())
+        print("R2:", ols_model.rsquared)
 
+        print("\nARIMA Results:")
+        print("Model order:", arima_model.order)
+        print("\nCoefficients:")
+        print(arima_model.arima_res_.params.round(4))
+        print(arima_model.summary())
+        print("R2:", r2_score(y, arima_model.fittedvalues()))
+        ###################################
+        ###################################
 
-# Summarize fits
-###################################
-###################################
-summarize_ts_fit(df.index, ols_model.fittedvalues, y)
-summarize_ts_fit(df.index, arima_model.fittedvalues(), y)
-###################################
-###################################
-
+        # Summarize fits
+        ###################################
+        summarize_ts_fit(df.index, ols_model.fittedvalues, y)
+        summarize_ts_fit(df.index, arima_model.fittedvalues(), y)
+        ###################################
