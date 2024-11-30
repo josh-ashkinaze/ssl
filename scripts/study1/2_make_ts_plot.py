@@ -97,9 +97,11 @@ def smooth_df(df, dv, events, ndays, method="ewm", frac=0.1):
 
 if __name__ == "__main__":
     mypal = make_aesthetic(font_scale=font_scale)
-    df = pd.read_csv(
-        "../../data/clean/wide_2014-11-30_2024-11-27_34412234_ai_social.csv"
-    )
+    fn = "../../data/clean/wide_2020-01-01_2024-11-29_34412234_ai_social.csv"
+    dates = fn.split("_")[1:3]
+    dates = "_".join(dates)
+
+    df = pd.read_csv(fn)
     df["date"] = pd.to_datetime(df["date"])
     df = df.query("plain + ai_social>0")
 
@@ -108,15 +110,15 @@ if __name__ == "__main__":
     dvs = {
         "social_prop": {
             "ylabel": "Proportion",
-            "title": "Prop. of AI News Stories Containing AI Social Support or Social Role Phrases\n(e.g.: 'AI therapist', 'Chatbot coach') Across 249 U.S Newspapers",
+            "title": "Prop. of AI News Stories Containing AI Social Support or Social Role Phrases\n(e.g.: 'AI therapist', 'Chatbot coach') Across 249 U.S. Newspapers",
         },
         "plain": {
             "ylabel": "Daily Count",
-            "title": "Daily Count of AI News Stories Across 249 U.S Newspapers",
+            "title": "Daily Count of AI News Stories Across 249 U.S. Newspapers",
         },
         "ai_social": {
             "ylabel": "Daily Count",
-            "title": "Daily Count of AI News Stories Containing AI Social Support or Social Role Phrases\n(e.g.: 'AI therapist', 'Chatbot coach') Across 249 U.S Newspapers",
+            "title": "Daily Count of AI News Stories Containing AI Social Support or Social Role Phrases\n(e.g.: 'AI therapist', 'Chatbot coach') Across 249 U.S. Newspapers",
         },
     }
 
@@ -166,4 +168,4 @@ if __name__ == "__main__":
                 plt.legend(frameon=True, loc="upper left")
                 plt.tight_layout()
                 # plt.savefig(f"../../plots/ai_social_{n_days}_{method}_days.pdf", dpi=300)
-                plt.savefig(f"../../plots/s1_{dv}_{n_days}_{method}_days.png", dpi=300)
+                plt.savefig(f"../../plots/s1_{dv}_{n_days}_{method}_{dates}_days.png", dpi=300)

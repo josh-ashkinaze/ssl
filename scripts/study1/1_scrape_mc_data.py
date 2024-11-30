@@ -7,7 +7,7 @@ Input:
     - None
 
 Output:
-    - ai_social.csv: Daily level AI newspaper data from MediaCloud
+    - Daily counts of AI stories
 
 Date: 2024-11-27 17:35:05
 """
@@ -38,8 +38,8 @@ logging.basicConfig(
 MC_API_KEY = os.getenv("MEDIACLOUD_API_KEY")
 print("API key loaded", MC_API_KEY)
 
-START_DATE = "2014-11-30"
-END_DATE = "2024-11-27"
+START_DATE = "2020-01-01"
+END_DATE = "2024-11-29"
 COLLECTION = 34412234
 
 logging.info("Parameters loaded")
@@ -110,9 +110,6 @@ if __name__ == "__main__":
 
         for action in TOPICS["social_actions"]:
             TOPICS["ai_social"].append(f"'{action} from {ai}'")
-            TOPICS["ai_social"].append(
-                f"('{ai} provides {action}') OR ('{ai}-provided {action}')"
-            )
             TOPICS["ai_social"].append(f"'{ai}-powered {action}'")
             TOPICS["ai_social"].append(f"'{ai}-based {action}'")
             TOPICS["ai_social"].append(f"'{ai}-generated {action}'")
