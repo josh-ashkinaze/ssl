@@ -162,12 +162,13 @@ if __name__ == "__main__":
             max_d=3,
             max_p=3,
             max_q=3,
-            sesonal=True,
-            m=7 if mode == "weekly" else 1,
+            start_p = 0,
+            start_q = 0,
             trace=True,
             error_action="ignore",
             random_state=42,
             suppress_warnings=True,
+
         )
 
 
@@ -200,7 +201,7 @@ if __name__ == "__main__":
             df.index,
             ols_model.fittedvalues,
             color=mypal[0],
-            label="OLS Predictions",
+            label=f"OLS Predictions",
             alpha=0.9,
             linewidth=2.5,
             linestyle=":",
@@ -209,7 +210,7 @@ if __name__ == "__main__":
             df.index,
             arima_model.predict(n_periods=len(df), X=X),
             color=mypal[0],
-            label="ARIMAX Predictions",
+            label=f"ARIMAX Predictions",
             alpha=0.9,
             linewidth=2.5,
             linestyle="--",

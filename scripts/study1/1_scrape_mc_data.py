@@ -97,14 +97,8 @@ if __name__ == "__main__":
             "scout",
             "teacher",
         ],
-        "social_actions": ["explanations",
-                           "advice",
-                           "decision aid",
-                           "guidance",
-                           "empathy",
-                           "relationship help",
-                           "emotional support",
-                           "personal development"],
+        "social_actions": ["advice",
+                           "emotional support"],
         "ai_social": [],
     }
 
