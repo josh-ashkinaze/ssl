@@ -98,9 +98,7 @@ if __name__ == "__main__":
             "teacher",
         ],
         "social_actions": ["advice",
-                           "coaching",
                            "emotional support",
-                           "social support",
                            ],
         "ai_social": [],
     }
