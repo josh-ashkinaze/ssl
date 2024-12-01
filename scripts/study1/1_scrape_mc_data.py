@@ -98,7 +98,10 @@ if __name__ == "__main__":
             "teacher",
         ],
         "social_actions": ["advice",
-                           "emotional support"],
+                           "coaching",
+                           "emotional support",
+                           "social support",
+                           ],
         "ai_social": [],
     }
 
@@ -118,7 +121,7 @@ if __name__ == "__main__":
 
 
 
-    logging.info(TOPICS)
+    logging.info(str(TOPICS))
 
     for key, value in TOPICS.items():
         logging.info(f"Lists and lengths...{key}: {len(value)}")
