@@ -113,7 +113,7 @@ def plot_multi_freq_trends():
 
     frequencies = [("Daily", "D"), ("Weekly", "W"), ("Monthly", "M"), ("Yearly", "Y")]
 
-    fig, axes = plt.subplots(len(frequencies), 1, figsize=(24, 12))
+    fig, axes = plt.subplots(len(frequencies), 1, figsize=(24, 24))
 
     for idx, (title_prefix, freq) in enumerate(frequencies):
         grouped = (
@@ -137,7 +137,8 @@ def plot_multi_freq_trends():
             "plain_count",
         ]
 
-        # Calculate confidence intervals
+        # Calc CIs
+        ##############################
         z = 1.96
         for var in ["ai_social", "plain"]:
             grouped[f"{var}_ci_upper"] = grouped[f"{var}_mean"] + z * grouped[
@@ -149,7 +150,10 @@ def plot_multi_freq_trends():
 
         ax = axes[idx]
 
-        # change to ax.scatter for scatterplot
+
+        # Plot stuff
+        # Note: change plot_func to ax.scatter for scatterplots
+        ##############################
         plot_func = ax.plot
 
         plot_func(
