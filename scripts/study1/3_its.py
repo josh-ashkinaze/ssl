@@ -162,19 +162,14 @@ if __name__ == "__main__":
             max_d=3,
             max_p=3,
             max_q=3,
+            sesonal=True,
+            m=7 if mode == "weekly" else 1,
             trace=True,
             error_action="ignore",
             random_state=42,
             suppress_warnings=True,
         )
 
-        # Stargazer
-        ###################################
-        stargazer = Stargazer([ols_model, arima_model])
-        stargazer.title("Regression Results")
-        stargazer.show_model_numbers(False)
-        stargazer.custom_columns(["OLS", "ARIMA"])
-        print(stargazer)
 
         # Plot results
         ###################################
