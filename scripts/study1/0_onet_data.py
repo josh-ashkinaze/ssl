@@ -209,8 +209,7 @@ if __name__ == "__main__":
         occs = topn_by_occ(df, target_skill, topn)
         top_occs.extend(occs)
 
-    logging.info("Top occupations for skills")
-    logging.info(str(top_occs))
+    logging.info(f"Top occupations for skills {str(top_occs)}")
 
     list2text_file(top_occs, "../../data/raw/list_occs.txt")
 
@@ -230,11 +229,15 @@ if __name__ == "__main__":
     df = pd.read_excel("../../data/raw/Work Activities.xlsx")
     df['rel'] = df['Title'].apply(lambda x: 1 if x in top_occs else 0)
     df['data_value'] = df['Data Value']
-    df = df.query("rel==1")
+
+
+    # df_relevant
+    df_relevant = df.query("rel==1")
     n = 15
-    top = df.groupby(by=['Element Name'])['data_value'].sum().sort_values(ascending=False).head(n).reset_index()[
+    top = df_relevant.groupby(by=['Element Name'])['data_value'].sum().sort_values(ascending=False).head(n).reset_index()[
         'Element Name'].to_list()
-    list2text_file(top, "../../data/raw/list_activities.txt")
+    logging.info(f"Top activities: {top}")
+    list2text_file(top, "../../data/raw/list_activities_tp.txt")
     clusterer = SBERTClusterer()
     best_k = clusterer.find_k(top, k_min=1, k_max=5)
     clusterer.apply_clustering(top)
