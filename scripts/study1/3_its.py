@@ -18,6 +18,7 @@ from src.helpers import make_aesthetic
 mypal = make_aesthetic()
 
 
+HOLIDAYS = [False, True]
 MODES = ["daily", "weekly"]
 
 
@@ -57,40 +58,66 @@ def add_shocks(df, shock_list, pulse_window=0, types=None):
     return df
 
 
-def add_holiday_windows(df):
-    """Add binary indicators for holiday windows."""
+def handle_dates(df, mode="daily", add_holidays=False):
+    """Add holiday indicators and aggregate to weekly if specified."""
+
+    def get_thanksgiving_range(year):
+        """Get Wednesday-Sunday range around Thanksgiving."""
+        nov_first = pd.Timestamp(f"{year}-11-01")
+        thurs = nov_first + pd.Timedelta(days=(24 - nov_first.weekday()))
+        return (thurs - pd.Timedelta(days=1), thurs + pd.Timedelta(days=2))
+
     df = df.copy()
 
-    # Dict of holidays with days relative to key dates
+    # Dict of holidays with date ranges
     holidays = {
-        'Christmas': lambda y: (f'{y}-12-24', f'{y}-12-26'),
-        'NewYears': lambda y: (f'{y}-12-31', f'{y + 1}-01-02'),
-        'Thanksgiving': lambda y: get_thanksgiving_range(y)
+        "Christmas": lambda y: (f"{y}-12-24", f"{y}-12-26"),
+        "NewYears": lambda y: (f"{y}-12-31", f"{y + 1}-01-02"),
+        "Thanksgiving": lambda y: get_thanksgiving_range(y),
     }
 
-    # Get start/end dates for each holiday in each year
-    ranges = {}
-    years = df['date'].dt.year.unique()
-    for year in years:
-        for holiday, date_func in holidays.items():
-            start, end = date_func(year)
-            ranges[f'{holiday}_{year}'] = (start, end)
+    if mode == "daily":
+        if add_holidays:
+            years = df.index.year.unique()
+            for holiday in holidays:
+                df[f"Holiday{holiday}"] = 0
+                for year in years:
+                    start, end = holidays[holiday](year)
+                    df.loc[
+                        (df.index >= start) & (df.index <= end), f"Holiday{holiday}"
+                    ] = 1
+        else:
+            pass
 
-    # Create holiday columns
-    for holiday in ['Christmas', 'NewYears', 'Thanksgiving']:
-        df[f'Holiday{holiday}'] = 0
-        for year in years:
-            start, end = ranges[f'{holiday}_{year}']
-            df.loc[(df['date'] >= start) & (df['date'] <= end), f'Holiday{holiday}'] = 1
+    if mode == "weekly":
+        # Reset index to access date
+        df = df.reset_index()
+        df["week"] = df["date"].dt.isocalendar().week
+        df["year"] = df["date"].dt.year
+
+        if add_holidays:
+            # When you group by week its not obvious what to do
+            # with holiday indicators so I just take the max, meaning
+            # if any day in the week is a holiday, the week is a holiday
+            agg_dict = {
+                "social_prop": "mean",
+                "HolidayChristmas": "max",
+                "HolidayNewYears": "max",
+                "HolidayThanksgiving": "max",
+            }
+        else:
+            agg_dict = {"social_prop": "mean"}
+        df = df.groupby(["year", "week"]).agg(agg_dict)
+        df = df.reset_index()
+        df["date"] = pd.to_datetime(
+            df["year"].astype(str) + "-" + df["week"].astype(str) + "-1",
+            format="%Y-%W-%w",
+        )
+        df = df.set_index("date")
+        df["trend"] = range(1, len(df) + 1)
 
     return df
 
-
-def get_thanksgiving_range(year):
-    """Get Wednesday-Sunday range around Thanksgiving."""
-    nov_first = pd.Timestamp(f'{year}-11-01')
-    thurs = nov_first + pd.Timedelta(days=(24 - nov_first.weekday()))
-    return (thurs - pd.Timedelta(days=1), thurs + pd.Timedelta(days=2))
 
 def summarize_ts_fit(dates, y, yhat):
     """
@@ -139,165 +166,149 @@ def summarize_ts_fit(dates, y, yhat):
 
 if __name__ == "__main__":
 
-    for mode in MODES:
-        ###################################
-        print(f"\nRunning ITS for AI Social Data ({mode})")
-        ###################################
+    for holiday in HOLIDAYS:
 
-        # Load and prepare data
-        ###################################
-        df = pd.read_csv(
-            "../../data/clean/wide_2020-01-01_2024-11-29_34412234_ai_social.csv"
-        )
-        df["date"] = pd.to_datetime(df["date"])
-        df["trend"] = [i + 1 for i in range(len(df))]
-        df['month'] = df['date'].dt.month
-        df['day'] = df['date'].dt.day
+        for mode in MODES:
 
-        # add holidays
-        df = add_holiday_windows(df)
+            ###################################
+            print(f"\nRunning ITS for AI Social Data ({mode}) and Holiday={holiday}")
+            ###################################
 
-        df = df.set_index("date")
-
-        if mode == "weekly":
-            df["week"] = df.index.isocalendar().week
-            df["year"] = df.index.year
-            df = df.groupby([df.index.year, df.index.isocalendar().week])[
-                "social_prop"
-            ].mean()
-            df = df.reset_index()
-            df.columns = ["year", "week", "social_prop"]
-            df["date"] = pd.to_datetime(
-                df["year"].astype(str) + "-" + df["week"].astype(str) + "-1",
-                format="%Y-%W-%w",
+            # Load and prepare data
+            ###################################
+            ###################################
+            df = pd.read_csv(
+                "../../data/clean/wide_2020-01-01_2024-11-29_34412234_ai_social.csv"
             )
+            df["date"] = pd.to_datetime(df["date"])
+            df["trend"] = [i + 1 for i in range(len(df))]
+            df["month"] = df["date"].dt.month
+            df["day"] = df["date"].dt.day
+
+            # add holidays
             df = df.set_index("date")
-            df["trend"] = range(1, len(df) + 1)
-        else:
-            pass
+            df = handle_dates(df, mode=mode, add_holidays=holiday)
 
-        # Define interventions
-        ###################################
-        interventions = [
-            {"name": "InstructGPT Paper", "date": "2022-01-27", "color": mypal[1]},
-            {"name": "ChatGPT Release", "date": "2022-11-30", "color": mypal[2]},
-        ]
+            # Define interventions
+            ###################################
+            interventions = [
+                {"name": "InstructGPT Paper", "date": "2022-01-27", "color": mypal[1]},
+                {"name": "ChatGPT Release", "date": "2022-11-30", "color": mypal[2]},
+            ]
 
-        df = add_shocks(df, interventions)
+            df = add_shocks(df, interventions)
 
-        # Create matrix
-        ###################################
-        shock_cols = [c for c in df.columns if "_level" in c]
-        holidays = [c for c in df.columns if "Holiday" in c]
-        X = df[shock_cols + ["trend"] + holidays]
-        y = df["social_prop"]
+            # Create matrix
+            ###################################
+            shock_cols = [c for c in df.columns if "_level" in c]
+            holidays = [c for c in df.columns if "Holiday" in c]
+            X = df[shock_cols + ["trend"] + holidays]
+            y = df["social_prop"]
 
-        # 1. Simple OLS
-        ###################################
-        ols_model = sm.OLS(y, sm.add_constant(X)).fit()
+            # 1. Simple OLS
+            ###################################
+            ols_model = sm.OLS(y, sm.add_constant(X)).fit()
 
-        # 2. Auto ARIMA model
-        ###################################
-        arima_model = pm.auto_arima(
-            y,
-            X=X,
-            max_d=3,
-            max_p=3,
-            max_q=3,
-            start_p = 0,
-            start_q = 0,
-            trace=True,
-            error_action="ignore",
-            random_state=42,
-            suppress_warnings=True,
-
-        )
-
-
-        # Plot results
-        ###################################
-        ###################################
-        plt.figure(figsize=(12, 6), facecolor="white")
-        # Cool hack I found: Add "_nolegend_" to not plot actual dots but then plot empty arrays and make bigger
-        # to control legend size w/o changing dot size for real
-        plt.plot(
-            df.index,
-            y,
-            ".",
-            color="gray",
-            alpha=0.7,
-            markersize=1 if mode != "weekly" else 5,
-            label="_nolegend_",
-        )
-        plt.plot(
-            [],
-            [],
-            ".",
-            color="gray",
-            alpha=0.7 if mode == "weekly" else 0.5,
-            markersize=10,
-            label=f'Raw Data {"(Weekly Mean)" if mode == "weekly" else "(Daily)"}',
-        )
-
-        plt.plot(
-            df.index,
-            ols_model.fittedvalues,
-            color=mypal[0],
-            label=f"OLS Predictions",
-            alpha=0.9,
-            linewidth=2.5,
-            linestyle=":",
-        )
-        plt.plot(
-            df.index,
-            arima_model.predict(n_periods=len(df), X=X),
-            color=mypal[0],
-            label=f"ARIMAX Predictions",
-            alpha=0.9,
-            linewidth=2.5,
-            linestyle="--",
-        )
-        for shock in interventions:
-            plt.axvline(
-                x=pd.to_datetime(shock["date"]),
-                color=shock["color"],
-                linestyle="--",
-                alpha=0.4,
-                linewidth=2,
-                label=shock["name"],
+            # 2. Auto ARIMA model
+            ###################################
+            arima_model = pm.auto_arima(
+                y,
+                X=X,
+                max_d=3,
+                max_p=3,
+                max_q=3,
+                start_p=0,
+                start_q=0,
+                trace=True,
+                error_action="ignore",
+                random_state=42,
+                suppress_warnings=True,
             )
 
-        # mode_str = "(Weekly)" if mode == "weekly" else "(Daily)"
-        plt.title(
-            f"ITS Analysis: Proportion of AI News Stories Containing\nSocial Role or Social Function Phrases",
-            fontweight="bold",
-        )
-        plt.xlabel("Date")
-        plt.ylabel("Proportion")
-        plt.legend(facecolor="white", edgecolor="none", loc="upper left")
-        plt.tight_layout()
-        plt.savefig(f"../../plots/its_{mode}_ai_social.png", dpi=300)
-        ###################################
-        ###################################
+            # Plot results
+            ###################################
+            ###################################
+            plt.figure(figsize=(12, 6), facecolor="white")
+            # Cool hack I found: Add "_nolegend_" to not plot actual dots but then plot empty arrays and make bigger
+            # to control legend size w/o changing dot size for real
+            plt.plot(
+                df.index,
+                y,
+                ".",
+                color="gray",
+                alpha=0.7,
+                markersize=1 if mode != "weekly" else 5,
+                label="_nolegend_",
+            )
+            plt.plot(
+                [],
+                [],
+                ".",
+                color="gray",
+                alpha=0.7 if mode == "weekly" else 0.5,
+                markersize=10,
+                label=f'Raw Data {"(Weekly Mean)" if mode == "weekly" else "(Daily)"}',
+            )
 
-        # Print results
-        ###################################
-        ###################################
-        print("\nOLS Results:")
-        print(ols_model.summary())
-        print("R2:", ols_model.rsquared)
+            plt.plot(
+                df.index,
+                ols_model.fittedvalues,
+                color=mypal[0],
+                label=f"OLS Predictions",
+                alpha=0.9,
+                linewidth=2.5,
+                linestyle=":",
+            )
+            plt.plot(
+                df.index,
+                arima_model.predict(n_periods=len(df), X=X),
+                color=mypal[0],
+                label=f"ARIMAX Predictions",
+                alpha=0.9,
+                linewidth=2.5,
+                linestyle="--",
+            )
+            for shock in interventions:
+                plt.axvline(
+                    x=pd.to_datetime(shock["date"]),
+                    color=shock["color"],
+                    linestyle="--",
+                    alpha=0.4,
+                    linewidth=2,
+                    label=shock["name"],
+                )
 
-        print("\nARIMA Results:")
-        print("Model order:", arima_model.order)
-        print("\nCoefficients:")
-        print(arima_model.arima_res_.params.round(4))
-        print(arima_model.summary())
-        print("R2:", r2_score(y, arima_model.fittedvalues()))
-        ###################################
-        ###################################
+            # mode_str = "(Weekly)" if mode == "weekly" else "(Daily)"
+            plt.title(
+                f"ITS Analysis: Proportion of AI News Stories Containing\nSocial Role or Social Function Phrases",
+                fontweight="bold",
+            )
+            plt.xlabel("Date")
+            plt.ylabel("Proportion")
+            plt.legend(facecolor="white", edgecolor="none", loc="upper left")
+            plt.tight_layout()
+            plt.savefig(f"../../plots/its_{mode}_Holiday{str(holiday)}ai_social.png", dpi=300)
+            ###################################
+            ###################################
 
-        # Summarize fits
-        ###################################
-        summarize_ts_fit(df.index, ols_model.fittedvalues, y)
-        summarize_ts_fit(df.index, arima_model.fittedvalues(), y)
-        ###################################
+            # Print results
+            ###################################
+            ###################################
+            print("\nOLS Results:")
+            print(ols_model.summary())
+            print("R2:", ols_model.rsquared)
+
+            print("\nARIMA Results:")
+            print("Model order:", arima_model.order)
+            print("\nCoefficients:")
+            print(arima_model.arima_res_.params.round(4))
+            print(arima_model.summary())
+            print("R2:", r2_score(y, arima_model.fittedvalues()))
+            ###################################
+            ###################################
+
+            # Summarize fits
+            ###################################
+            summarize_ts_fit(df.index, ols_model.fittedvalues, y)
+            summarize_ts_fit(df.index, arima_model.fittedvalues(), y)
+            ###################################
