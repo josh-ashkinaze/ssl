@@ -57,6 +57,41 @@ def add_shocks(df, shock_list, pulse_window=0, types=None):
     return df
 
 
+def add_holiday_windows(df):
+    """Add binary indicators for holiday windows."""
+    df = df.copy()
+
+    # Dict of holidays with days relative to key dates
+    holidays = {
+        'Christmas': lambda y: (f'{y}-12-24', f'{y}-12-26'),
+        'NewYears': lambda y: (f'{y}-12-31', f'{y + 1}-01-02'),
+        'Thanksgiving': lambda y: get_thanksgiving_range(y)
+    }
+
+    # Get start/end dates for each holiday in each year
+    ranges = {}
+    years = df['date'].dt.year.unique()
+    for year in years:
+        for holiday, date_func in holidays.items():
+            start, end = date_func(year)
+            ranges[f'{holiday}_{year}'] = (start, end)
+
+    # Create holiday columns
+    for holiday in ['Christmas', 'NewYears', 'Thanksgiving']:
+        df[f'Holiday{holiday}'] = 0
+        for year in years:
+            start, end = ranges[f'{holiday}_{year}']
+            df.loc[(df['date'] >= start) & (df['date'] <= end), f'Holiday{holiday}'] = 1
+
+    return df
+
+
+def get_thanksgiving_range(year):
+    """Get Wednesday-Sunday range around Thanksgiving."""
+    nov_first = pd.Timestamp(f'{year}-11-01')
+    thurs = nov_first + pd.Timedelta(days=(24 - nov_first.weekday()))
+    return (thurs - pd.Timedelta(days=1), thurs + pd.Timedelta(days=2))
+
 def summarize_ts_fit(dates, y, yhat):
     """
     Summarize time series fit with common metrics and plots
@@ -116,6 +151,12 @@ if __name__ == "__main__":
         )
         df["date"] = pd.to_datetime(df["date"])
         df["trend"] = [i + 1 for i in range(len(df))]
+        df['month'] = df['date'].dt.month
+        df['day'] = df['date'].dt.day
+
+        # add holidays
+        df = add_holiday_windows(df)
+
         df = df.set_index("date")
 
         if mode == "weekly":
@@ -147,7 +188,8 @@ if __name__ == "__main__":
         # Create matrix
         ###################################
         shock_cols = [c for c in df.columns if "_level" in c]
-        X = df[shock_cols + ["trend"]]
+        holidays = [c for c in df.columns if "Holiday" in c]
+        X = df[shock_cols + ["trend"] + holidays]
         y = df["social_prop"]
 
         # 1. Simple OLS
