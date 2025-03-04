@@ -97,9 +97,10 @@ if __name__ == "__main__":
             "scout",
             "teacher",
         ],
-        "social_actions": ["advice",
-                           "emotional support",
-                           ],
+        "social_actions": [
+            "advice",
+            "emotional support",
+        ],
         "ai_social": [],
     }
 
@@ -110,14 +111,11 @@ if __name__ == "__main__":
             TOPICS["ai_social"].append(f"'{ai}-based {social}'")
             TOPICS["ai_social"].append(f"'{ai}-generated {social}'")
 
-
         for action in TOPICS["social_actions"]:
             TOPICS["ai_social"].append(f"'{action} from {ai}'")
             TOPICS["ai_social"].append(f"'{ai}-powered {action}'")
             TOPICS["ai_social"].append(f"'{ai}-based {action}'")
             TOPICS["ai_social"].append(f"'{ai}-generated {action}'")
-
-
 
     logging.info(str(TOPICS))
 
