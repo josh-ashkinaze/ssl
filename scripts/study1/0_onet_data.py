@@ -54,7 +54,7 @@ class SBERTClusterer:
         df = clusterer.apply_clustering(texts, k=2)
     """
 
-    def __init__(self, sbert_model='all-MiniLM-L6-v2'):
+    def __init__(self, sbert_model="all-MiniLM-L6-v2"):
         """Initialize with specified SBERT model."""
         self.model = SentenceTransformer(sbert_model)
         self.embeddings = None
@@ -95,10 +95,10 @@ class SBERTClusterer:
 
         if plot:
             plt.figure(figsize=(10, 6))
-            plt.plot(k_values, scores, 'bo-')
-            plt.xlabel('K (Number of Clusters)')
-            plt.ylabel('Silhouette Score')
-            plt.title('Silhouette Scores by Number of Clusters')
+            plt.plot(k_values, scores, "bo-")
+            plt.xlabel("K (Number of Clusters)")
+            plt.ylabel("Silhouette Score")
+            plt.title("Silhouette Scores by Number of Clusters")
             plt.grid(True)
             plt.show()
 
@@ -132,20 +132,16 @@ class SBERTClusterer:
         kmeans = KMeans(n_clusters=k, random_state=42)
         self.labels = kmeans.fit_predict(self.embeddings)
 
-        df = pd.DataFrame({
-            'text': texts,
-            'cluster': self.labels
-        })
+        df = pd.DataFrame({"text": texts, "cluster": self.labels})
 
-        for cluster in sorted(df['cluster'].unique()):
+        for cluster in sorted(df["cluster"].unique()):
             print(f"\nCluster {cluster}:")
-            print(df[df['cluster'] == cluster]['text'].tolist())
+            print(df[df["cluster"] == cluster]["text"].tolist())
 
             logging.info(f"\nCluster {cluster}:")
-            logging.info(str(df[df['cluster'] == cluster]['text'].tolist()))
+            logging.info(str(df[df["cluster"] == cluster]["text"].tolist()))
 
         return df
-
 
 
 def topn_by_occ(df, skill, topn):
@@ -180,10 +176,10 @@ def list2text_file(lst, filename):
     Returns:
         Nothing but it does write the file
     """
-    if not filename.endswith('.txt'):
+    if not filename.endswith(".txt"):
         filename = f"{filename}.txt"
-    content = '\n'.join(str(item) for item in lst)
-    with open(filename, 'w') as f:
+    content = "\n".join(str(item) for item in lst)
+    with open(filename, "w") as f:
         f.write(content)
 
 
@@ -223,22 +219,25 @@ if __name__ == "__main__":
     ]
     list2text_file(condensed_list, "../../data/clean/condensed_list_occs.txt")
 
-
     # 2. Get activities
     #############################
     df = pd.read_excel("../../data/raw/Work Activities.xlsx")
-    df['rel'] = df['Title'].apply(lambda x: 1 if x in top_occs else 0)
-    df['data_value'] = df['Data Value']
-
+    df["rel"] = df["Title"].apply(lambda x: 1 if x in top_occs else 0)
+    df["data_value"] = df["Data Value"]
 
     # df_relevant
     df_relevant = df.query("rel==1")
     n = 15
-    top = df_relevant.groupby(by=['Element Name'])['data_value'].sum().sort_values(ascending=False).head(n).reset_index()[
-        'Element Name'].to_list()
+    top = (
+        df_relevant.groupby(by=["Element Name"])["data_value"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(n)
+        .reset_index()["Element Name"]
+        .to_list()
+    )
     logging.info(f"Top activities: {top}")
     list2text_file(top, "../../data/raw/list_activities_tp.txt")
     clusterer = SBERTClusterer()
     best_k = clusterer.find_k(top, k_min=1, k_max=5)
     clusterer.apply_clustering(top)
-
