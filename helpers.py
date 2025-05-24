@@ -5,6 +5,9 @@ import statsmodels.formula.api as smf
 import numpy as np
 import random
 import logging
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics import silhouette_score
+from sklearn.cluster import KMeans
 import re
 
 random.seed(42)
@@ -227,3 +230,9 @@ class SBERTClusterer():
             logging.info(str(df[df["cluster"] == cluster]["text"].tolist()))
 
         return df
+
+
+clusterer = SBERTClusterer()
+texts = ["text1", "text2", "text3"]
+clusterer.find_k(texts, k_min=2, k_max=3)
+df = clusterer.apply_clustering(texts, k=2)

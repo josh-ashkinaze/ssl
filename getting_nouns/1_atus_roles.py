@@ -166,3 +166,6 @@ logging.info(f"Clean roles: {clean_roles}")
 with open("../data/clean/atus_roles.txt", "w") as f:
     for role in clean_roles:
         f.write(role + "\n")
+
+
+# counselor, therapist, psychiatrist, teacher, coach, scout,

@@ -92,6 +92,7 @@ social_df2_bottom = social_df2.sort_values(by=['z_data_value'], ascending=True).
 print(f"\nTop 10 occupations with lowest z-scores:\n{social_df2_bottom}")
 
 
+
 # ['Mental Health Counselors',
 # 'Marriage and Family Therapists',
 # 'Psychiatrists',
@@ -109,6 +110,17 @@ print(f"\nTop 10 occupations with lowest z-scores:\n{social_df2_bottom}")
 # 'Art Therapists',
 # 'Architecture Teachers, Postsecondary',
 # 'Substance Abuse and Behavioral Disorder Counselors',
-# 'Clergy', 'Computer Science Teachers, Postsecondary', 'Geography Teachers, Postsecondary', 'Midwives', 'Clinical Neuropsychologists', 'Neuropsychologists', 'Educational, Guidance, and Career Counselors and Advisors', 'Hospitalists', 'School Psychologists', 'Communications Teachers, Postsecondary', 'Engineering Teachers, Postsecondary', 'Business Teachers, Postsecondary', 'Training and Development Managers']
+# 'Clergy', 'Computer Science Teachers, Postsecondary',
+# 'Geography Teachers, Postsecondary',
+# 'Midwives',
+# 'Clinical Neuropsychologists',
+# 'Neuropsychologists',
+# 'Educational, Guidance, and Career Counselors and Advisors',
+# 'Hospitalists'
+# 'School Psychologists',
+# 'Communications Teachers, Postsecondary',
+# 'Engineering Teachers, Postsecondary',
+# 'Business Teachers, Postsecondary',
+# 'Training and Development Managers']
 
 
