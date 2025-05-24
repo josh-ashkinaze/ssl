@@ -36,7 +36,7 @@ logging.basicConfig(
 )
 
 
-class SBERTClusterer:
+class SBERTClusterer():
     """
     A class for clustering texts using SBERT embeddings and KMeans.
 

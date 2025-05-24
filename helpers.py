@@ -1,3 +1,15 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.formula.api as smf
+import numpy as np
+import random
+import logging
+import re
+
+random.seed(42)
+np.random.seed(42)
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -107,3 +119,111 @@ def make_aesthetic(
     )
 
     return hex_color_list
+
+
+class SBERTClusterer():
+    """
+    A class for clustering texts using SBERT embeddings and KMeans.
+
+    Args:
+        model: SBERT model for text embeddings
+        embeddings: Generated embeddings for input texts
+        best_k: Best number of clusters found
+        labels: Cluster assignments for texts
+        scores: Silhouette scores for different k values
+
+    Example:
+        clusterer = SBERTClusterer()
+        texts = ["text1", "text2", "text3"]
+        clusterer.find_k(texts, k_min=2, k_max=3)
+        df = clusterer.apply_clustering(texts, k=2)
+    """
+
+    def __init__(self, sbert_model="all-MiniLM-L6-v2"):
+        """Initialize with specified SBERT model."""
+        self.model = SentenceTransformer(sbert_model)
+        self.embeddings = None
+        self.best_k = None
+        self.labels = None
+        self.scores = None
+
+    def _embed_texts(self, texts):
+        """Generate embeddings for input texts."""
+        self.embeddings = self.model.encode(texts)
+        return self.embeddings
+
+    def find_k(self, texts, k_min=2, k_max=10, plot=True):
+        """
+        Find optimal k using silhouette scores.
+
+        Args:
+            texts: List of strings to cluster
+            k_min: Minimum number of clusters to try
+            k_max: Maximum number of clusters to try
+            plot: Whether to plot silhouette scores
+
+        Returns:
+            Best k value found
+        """
+        self._embed_texts(texts)
+        scores = []
+        k_values = range(k_min, min(len(texts), k_max + 1))
+
+        for k in k_values:
+            kmeans = KMeans(n_clusters=k, random_state=42)
+            labels = kmeans.fit_predict(self.embeddings)
+            if len(np.unique(labels)) > 1:
+                score = silhouette_score(self.embeddings, labels)
+                scores.append(score)
+            else:
+                scores.append(-1)
+
+        if plot:
+            plt.figure(figsize=(10, 6))
+            plt.plot(k_values, scores, "bo-")
+            plt.xlabel("K (Number of Clusters)")
+            plt.ylabel("Silhouette Score")
+            plt.title("Silhouette Scores by Number of Clusters")
+            plt.grid(True)
+            plt.show()
+
+        self.best_k = k_values[np.argmax(scores)]
+        self.scores = scores
+        print(f"Best k: {self.best_k} with silhouette score: {max(scores):.3f}")
+        logging.info(f"Best k: {self.best_k} with silhouette score: {max(scores):.3f}")
+
+        return self.best_k
+
+    def apply_clustering(self, texts, k=None):
+        """
+        Apply KMeans clustering with specified k.
+
+        Args:
+            texts: List of strings to cluster
+            k: Number of clusters (uses best_k if None)
+
+        Returns:
+            DataFrame with columns [text, cluster]
+        """
+
+        if self.embeddings is None:
+            self._embed_texts(texts)
+
+        if k is None:
+            if self.best_k is None:
+                raise ValueError("Must either specify k or run find_k first")
+            k = self.best_k
+
+        kmeans = KMeans(n_clusters=k, random_state=42)
+        self.labels = kmeans.fit_predict(self.embeddings)
+
+        df = pd.DataFrame({"text": texts, "cluster": self.labels})
+
+        for cluster in sorted(df["cluster"].unique()):
+            print(f"\nCluster {cluster}:")
+            print(df[df["cluster"] == cluster]["text"].tolist())
+
+            logging.info(f"\nCluster {cluster}:")
+            logging.info(str(df[df["cluster"] == cluster]["text"].tolist()))
+
+        return df
