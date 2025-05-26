@@ -1,22 +1,15 @@
 import pandas as pd
+import os
+import logging
+import numpy as np
 
 
-# 2025-05-24 13:50:15
-# o*net-soc_code         object
-# element_id             object
-# element_name           object
-# scale_id               object
-# data_value            float64
-# n                       int64
-# standard_error        float64
-# lower_ci_bound        float64
-# upper_ci_bound        float64
-# recommend_suppress     object
-# not_relevant           object
-# date                   object
-# domain_source          object
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 
-import pandas as pd
+
+logging.basicConfig(filename=f"{os.path.splitext(os.path.basename(__file__))[0]}.log", level=logging.INFO, format='%(asctime)s: %(message)s', filemode='w', datefmt='%Y-%m-%d %H:%M:%S', force=True)
 
 # Load and clean skills data
 skills_df = pd.read_csv("https://www.onetcenter.org/dl_files/database/db_29_3_text/Skills.txt", sep="\t")
@@ -37,7 +30,8 @@ merged = skills_df.merge(
     how="inner",
 )
 
-# Social skills dictionary
+
+
 social_skills = {
    "Coordination": "Adjusting actions in relation to others' actions.",
    "Instructing": "Teaching others how to do something.",
@@ -46,7 +40,6 @@ social_skills = {
    "Service Orientation": "Actively looking for ways to help people.",
    "Social Perceptiveness": "Being aware of others' reactions and understanding why they react as they do."
 }
-
 
 social_skills = {
    # "Coordination": "Adjusting actions in relation to others' actions.",
@@ -62,6 +55,7 @@ social_skills = {
 social_df = merged[merged["element_name"].isin(social_skills.keys())].copy()
 social_df['data_value'] = social_df['data_value'].astype(float)
 
+
 # Check what scale types we have
 print(f"Scale types: {social_df['scale_id'].unique()}")
 print(f"Scale type counts:\n{social_df['scale_id'].value_counts()}")
@@ -75,52 +69,130 @@ print(f"\nSocial skills data shape: {social_df.shape}")
 print(f"Unique skills found: {social_df['element_name'].unique()}")
 print(f"Unique occupations: {social_df['o_net-soc_code'].nunique()}")
 
-social_df2 = social_df.groupby(by=['title', 'o_net-soc_code', 'element_name']).agg(
+social_df2 = social_df.groupby(by=['title', 'o_net-soc_code']).agg(
     z_data_value=('z_data_value', 'mean'),
     data_value=('data_value', 'mean')
 ).reset_index()
 
-def return_top_names(df,how='top', topn=10):
-    """
-    Return the top n names from the DataFrame.
-    """
-
-social_df2_top = social_df2.sort_values(by=['z_data_value'], ascending=False).head(30)['title'].to_list()
-print(f"\nTop 10 occupations with highest z-scores:\n{social_df2_top}")
-
-social_df2_bottom = social_df2.sort_values(by=['z_data_value'], ascending=True).head(10)['title'].to_list()
-print(f"\nTop 10 occupations with lowest z-scores:\n{social_df2_bottom}")
 
 
+N = 40
+social_df2_top = sorted(social_df2.sort_values(by=['z_data_value'], ascending=False).head(N)['title'].to_list())
+print(f"\nTop {N} occupations with highest z-scores:\n{social_df2_top}")
+logging.info(f"Top {N} occupations with highest z-scores:\n{social_df2_top}")
 
-# ['Mental Health Counselors',
-# 'Marriage and Family Therapists',
-# 'Psychiatrists',
-# 'Social Work Teachers, Postsecondary',
-# 'Coaches and Scouts',
-# 'Clinical and Counseling Psychologists',
-# 'Mental Health and Substance Abuse Social Workers',
-# 'Healthcare Social Workers',
-# 'Nursing Instructors and Teachers, Postsecondary',
-# 'Agricultural Sciences Teachers, Postsecondary',
-# 'Art, Drama, and Music Teachers, Postsecondary',
-# 'Forestry and Conservation Science Teachers, Postsecondary',
-# 'English Language and Literature Teachers, Postsecondary',
-# 'Advanced Practice Psychiatric Nurses',
-# 'Art Therapists',
-# 'Architecture Teachers, Postsecondary',
-# 'Substance Abuse and Behavioral Disorder Counselors',
-# 'Clergy', 'Computer Science Teachers, Postsecondary',
-# 'Geography Teachers, Postsecondary',
-# 'Midwives',
-# 'Clinical Neuropsychologists',
-# 'Neuropsychologists',
-# 'Educational, Guidance, and Career Counselors and Advisors',
-# 'Hospitalists'
-# 'School Psychologists',
-# 'Communications Teachers, Postsecondary',
-# 'Engineering Teachers, Postsecondary',
-# 'Business Teachers, Postsecondary',
-# 'Training and Development Managers']
+social_df2_bottom = sorted(social_df2.sort_values(by=['z_data_value'], ascending=True).head(N)['title'].to_list())
+print(f"\nTop {N} occupations with lowest z-scores:\n{social_df2_bottom}")
+logging.info(f"Top {N} occupations with lowest z-scores:\n{social_df2_bottom}")
 
 
+from sklearn.feature_extraction.text import CountVectorizer
+#
+# # CLUSTERING
+# ##########################
+# ##########################
+# # Convert texts to TF-IDF features
+# vectorizer = CountVectorizer(
+#     stop_words="english",
+#     lowercase=True,
+#     ngram_range=(1, 2),  # Only single words, not bigrams
+#     max_df=0.8,
+#     min_df=1
+# )
+# X = vectorizer.fit_transform(social_df2_top)
+#
+# best_k = 2
+# best_score = -1
+# for k in range(2, 11):
+#     kmeans = KMeans(n_clusters=k, random_state=42)
+#     labels = kmeans.fit_predict(X)
+#     score = silhouette_score(X, labels)
+#     if score > best_score:
+#         best_k = k
+#         best_score = score
+#
+# print(f"Best number of clusters (k): {best_k} with silhouette score: {best_score:.4f}")
+#
+# # Perform clustering with the best k
+# kmeans = KMeans(n_clusters=best_k, random_state=42)
+# kmeans.fit(X)
+# clusters = kmeans.labels_
+#
+# # Print cluster assignments grouped by cluster
+# clustered_texts = {i: [] for i in range(best_k)}
+# for i, text in enumerate(social_df2_top):
+#     clustered_texts[clusters[i]].append(text)
+#
+# for cluster, texts in clustered_texts.items():
+#     print(f"\nCluster {cluster}:")
+#     for text in texts:
+#         print(f"  - {text}")
+
+
+
+# CLUSTERING - spaCy word vectors
+##########################
+##########################
+import spacy
+import numpy as np
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.metrics import silhouette_score
+
+# Load spaCy model (install with: python -m spacy download en_core_web_sm)
+nlp = spacy.load("en_core_web_sm")
+
+def get_title_vector(title):
+    """Get average word vector for a job title"""
+    doc = nlp(title)
+    vectors = [token.vector for token in doc if token.has_vector and not token.is_stop]
+    if vectors:
+        return np.mean(vectors, axis=0)
+    else:
+        return np.zeros(nlp.vocab.vectors_length)
+
+# Get embeddings
+embeddings = np.array([get_title_vector(title) for title in social_df2_top])
+print(f"Embeddings shape: {embeddings.shape}")
+
+# Rest of clustering code same as before...
+best_k = 2
+best_score = -1
+for k in range(2, 8):
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    labels = kmeans.fit_predict(embeddings)
+    score = silhouette_score(embeddings, labels)
+    if score > best_score:
+        best_k = k
+        best_score = score
+        best_labels = labels
+
+print(f"Best k: {best_k}, silhouette: {best_score:.4f}")
+
+# Print results
+clustered_texts = {i: [] for i in range(best_k)}
+for i, text in enumerate(social_df2_top):
+    clustered_texts[best_labels[i]].append(text)
+
+for cluster, texts in clustered_texts.items():
+    print(f"\nCluster {cluster}:")
+    for text in texts:
+        print(f"  - {text}")
+
+##########################
+##########################
+
+# condense these^
+short_list = ["director", "nurse", "executive", "supervisor", "coach", "scout", "counselor", "advisor", "manager", "therapist", "social worker", "administrator", "clergy", "psychiatrist"]
+print(f"Short list of occupations: {short_list}")
+
+logging.info(f"Short list of occupations: {short_list}")
+
+# Save the short list to a file
+with open("../data/clean/onet_roles.txt", "w") as f:
+    for item in short_list:
+        f.write(f"{item}\n")
+
+
+with open("../data/raw/onet_roles_raw.txt", "w") as f:
+    for item in social_df2_top:
+        f.write(f"{item}\n")

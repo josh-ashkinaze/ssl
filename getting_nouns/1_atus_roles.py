@@ -168,4 +168,4 @@ with open("../data/clean/atus_roles.txt", "w") as f:
         f.write(role + "\n")
 
 
-# counselor, therapist, psychiatrist, teacher, coach, scout,
+# counselor, therapist, psychiatrist, teacher, coach, scout, advisor, counselor

@@ -230,9 +230,3 @@ class SBERTClusterer():
             logging.info(str(df[df["cluster"] == cluster]["text"].tolist()))
 
         return df
-
-
-clusterer = SBERTClusterer()
-texts = ["text1", "text2", "text3"]
-clusterer.find_k(texts, k_min=2, k_max=3)
-df = clusterer.apply_clustering(texts, k=2)
