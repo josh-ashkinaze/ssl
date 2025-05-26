@@ -347,6 +347,7 @@ if __name__ == "__main__":
         logging.info(f"\nSummary for {start_date_str} to {end_date_str}:")
         logging.info(f"Retrieved {result['count']} posts of {result['total_count']} total")
 
+
         # Save results to files
         save_posts_to_json(result, f"../../data/clean/producthunt_posts_{start_date_str}_to_{end_date_str}.json")
 
