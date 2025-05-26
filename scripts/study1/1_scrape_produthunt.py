@@ -348,7 +348,7 @@ if __name__ == "__main__":
         logging.info(f"Retrieved {result['count']} posts of {result['total_count']} total")
 
         # Save results to files
-        save_posts_to_json(result, f"../../data/cleanproducthunt_posts_{start_date_str}_to_{end_date_str}.json")
+        save_posts_to_json(result, f"../../data/clean/producthunt_posts_{start_date_str}_to_{end_date_str}.json")
 
         # Print the first 5 posts as a sample
         logging.info("\nSample posts (with descriptions):")
