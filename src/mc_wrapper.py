@@ -1,13 +1,14 @@
-import pandas as pd
 from datetime import datetime
-from typing import List, Optional
-from tqdm import tqdm
-from joblib import Parallel, delayed
+from typing import List
+
 import mediacloud.api
+import pandas as pd
+from joblib import Parallel, delayed
+from tqdm import tqdm
 
 
 def query_count_over_time(
-    query, collection, start_date, end_date, api_key
+        query, collection, start_date, end_date, api_key
 ) -> pd.DataFrame:
     """
     Get story counts from MediaCloud collection based on query and date range.
@@ -72,7 +73,7 @@ def query_count_over_time(
 
 
 def multiple_query_count_over_time(
-    queries, collection, start_date, end_date, api_key, n_jobs
+        queries, collection, start_date, end_date, api_key, n_jobs
 ) -> pd.DataFrame:
     """
     Get story counts for multiple queries, optionally in parallel.
@@ -203,11 +204,11 @@ def flatten_list(list_of_lists: List[List]) -> List:
 
 
 def long2wide(
-    tdf: pd.DataFrame,
-    date_col: str = "date",
-    cat_col: str = "cat",
-    count_col: str = "count",
-    how="sum",
+        tdf: pd.DataFrame,
+        date_col: str = "date",
+        cat_col: str = "cat",
+        count_col: str = "count",
+        how="sum",
 ) -> pd.DataFrame:
     """Convert long format DataFrame to wide format using pivot.
 
