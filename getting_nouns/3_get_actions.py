@@ -43,6 +43,7 @@ def get_common_nouns(roles, model="gpt-4o-2024-08-06"):
             {"role": "system", "content": "You are a helpful assistant designed to output JSON."},
             {"role": "user", "content": f"""INSTRUCTIONS
 Below are a list of roles engaged in social learning. List 20 nouns that these roles do. Each noun should be incredibly common, common to these roles, and uniquely associated with social learning, not other kinds of learning.
+Optimize for precision and not recall.
 
 Roles: {roles_text}
 

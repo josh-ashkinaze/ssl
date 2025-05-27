@@ -11,7 +11,7 @@ import tenacity
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from dotenv import load_dotenv
 
-load_dotenv("../../src/.env")  # Load environment variables from .env file
+load_dotenv("../src/.env")  # Load environment variables from .env file
 
 # Set up logging
 logging.basicConfig(filename=f"{os.path.splitext(os.path.basename(__file__))[0]}.log", level=logging.INFO, format='%(asctime)s: %(message)s', filemode='w', datefmt='%Y-%m-%d %H:%M:%S', force=True)

@@ -1,14 +1,14 @@
-import seaborn as sns
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def make_aesthetic(
-    hex_color_list=None,
-    with_gridlines=False,
-    bold_title=False,
-    save_transparent=False,
-    font_scale=2,
-    custom_font="Arial",
+        hex_color_list=None,
+        with_gridlines=False,
+        bold_title=False,
+        save_transparent=False,
+        font_scale=2,
+        custom_font="Arial",
 ):
     """
     Make Seaborn look clean and add space between title and plot
