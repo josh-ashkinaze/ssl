@@ -161,16 +161,20 @@ if __name__ == "__main__":
     jsons = jutils.read_and_filter_json_file(filename=fn,
                                              validator_function=validation_criteria)
 
+    counter = 0
     with open(output_fn, 'w') as f, open(pre_transform_output_fn, 'w') as f_pre:
         for entry in jsons:
             # Write original entry to pre-transform file
+            entry.update({"unique_idx": counter})  # Add unique index
             json.dump(entry, f_pre)
             f_pre.write('\n')
 
             # Transform and write to main output file
             transformed_entry = transform(entry)
+            transformed_entry.update({"unique_idx": counter})  # Add unique index
             json.dump(transformed_entry, f)
             f.write('\n')
+            counter +=1
 
     print(f"Filtered entries saved to {output_fn}")
     logging.info(f"Filtered entries saved to {output_fn}")

@@ -220,6 +220,7 @@ if __name__ == "__main__":
     # Filter CSV using DuckDB
     logging.info("Starting CSV filtering...")
     df_filtered = fast_filter_csv_duckdb(fn, start_date, end_date)
+    df_filtered['unique_idx'] = [i for i in range(len(df_filtered))]
 
     if df_filtered.empty:
         print("No data found in date range. Exiting.")
@@ -248,7 +249,8 @@ if __name__ == "__main__":
         "pub_date": "pub_date",
         "analysis_date": "analysis_date",
         "section_name": "section_name",
-        "news_desk": "news_desk"
+        "news_desk": "news_desk",
+        "unique_idx": "unique_idx",
     }
 
     clean_df = (

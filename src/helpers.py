@@ -11,6 +11,18 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
+def list2text(filename, lst):
+    """
+    Write a list to a text file, each element on a new line.
+
+    Args:
+        filename (str): Path to the text file.
+        lst (list): List of strings to write to the file.
+    """
+    with open(filename, "w") as f:
+        for item in lst:
+            f.write(f"{item}\n")
+
 def text2list(filename):
     """
     Read a text file and return its contents as a list of lines.
@@ -141,36 +153,43 @@ def path2correct_loc(source_path, destination_path, copy_instead_of_move=False):
     Kaggle downloader installs things to a very weird location, the user's cache. The problem is that
     these files are very big and I want to keep track of them.
 
-    NOTE: Edge-casey behavior I noticed 2025-05-26 11:44:35:
-
-    Let's say we are downloading `Cornell-University/arxiv` and newest version is 234.
-
-        source_path = kagglehub.dataset_download("Cornell-University/arxiv" )
-
-    Here's what source_path actually is by default in kagglehub:
-
-        users/<user>/.cache/kaggle/datasets/cornell/arxiv/versions/234/arxiv-metadata-oai-snapshot.json
-
-    So then when you run `new_loc = path2correct_loc(source_path, "")`, this will move the file to wd.
-
-    But what this does is ONLY moves `arxiv-metadata-oai-snapshot.json` to wd. However, it keeps the
-    rest of the folders. This can matter because now let's say you run
-
-        source_path = kagglehub.dataset_download("Cornell-University/arxiv/versions/234" )
-
-    Kaggle is going to skip because there are some metadata files that exist in cache. This is mostly desired behavior, but consider
-    the edge case where you downloaded it, moved it to another folder, deleted from that folder --> it wont download again
-    unless you delete all the stuff Kaggle created in cache.
-
-
-
     Args:
-        source_path (str): Path to the source files
+        source_path (str): Path to the source files, get this from Kaggle dataset download
         destination_path (str): Relative path from current working directory where to move the files
         copy_instead_of_move (bool): If True, copy files instead of moving them
 
     Returns:
         str: Absolute path to the destination directory
+
+    ###
+
+    NOTE: Edge-casey behavior I noticed 2025-05-26 11:44:35:
+
+    Let's say we are downloading `Cornell-University/arxiv` and newest version is 234. I'd use the function like this:
+
+        >>> source_path = kagglehub.dataset_download("Cornell-University/arxiv" ) # dls to cache
+        >>> new_loc = path2correct_loc(source_path, "") # moves main file to wd
+
+    Here's what source_path actually is by default in kagglehub:
+
+        users/<user>/.cache/kaggle/datasets/cornell/arxiv/versions/234/arxiv-metadata-oai-snapshot.json
+
+    So then when you run `new_loc = path2correct_loc(source_path, "")`, this will move `arxiv-metadata-oai-snapshot.json`
+    file to wd. However, `path2correct_loc` keeps the rest of the cache metadata.
+
+    This can matter because now let's say you run this after the initial download and move:
+
+        >>> source_path = kagglehub.dataset_download("Cornell-University/arxiv/versions/234" )
+
+    Kaggle is going to skip because there are some metadata files that exist in cache. This is mostly desired behavior, but consider
+    the edge case where you downloaded the file (to cache), moved it to destination folder (like wd), deleted from that destination folder
+     --> it won't download again unless you delete all the stuff Kaggle created in cache.
+
+    But one way to get around this edge case is to make it so kaggle does not use cache to check if downloaded
+    by writing `force_download=True`, so then this will always re-download the dataset, even if it exists in cache.
+
+        >>> source_path = kagglehub.dataset_download("Cornell-University/arxiv/versions/234" , force_download=True)
+
     """
 
     source = Path(source_path)
@@ -221,6 +240,57 @@ def path2correct_loc(source_path, destination_path, copy_instead_of_move=False):
     return str(dest.absolute())
 
 
+def statsmodels2latex(model, beta_digits=2, se_digits=2, p_digits=3, ci_digits=2, print_sci_not=False):
+    """
+    This function summarizes the results from a fitted statistical model,
+    printing a LaTeX formatted string for each parameter in the model that includes the beta coefficient,
+    standard error, p-value, and 95% CI.
+
+    Parameters:
+    - model: A fitted statistical model with methods to extract parameters, standard errors,
+             p-values, and confidence intervals.
+    - beta_digits (default = 2): Number of decimal places for beta coefficients.
+    - se_digits (default = 2): Number of decimal places for standard errors.
+    - p_digits (default = 3): Number of decimal places for p-values.
+    - ci_digits (default = 2): Number of decimal places for confidence intervals.
+    - print_sci_not: Boolean to print very small p-values (p<0.001) in scientific notation or just write 'p<0.001'
+
+    """
+
+    summary_strs = []
+    # Check if the necessary methods are available in the model
+    if not all(hasattr(model, attr) for attr in ['params', 'bse', 'pvalues', 'conf_int']):
+        raise ValueError("Model does not have the required methods (params, bse, pvalues, conf_int).")
+
+    # Retrieve parameter estimates, standard errors, p-values, and confidence intervals
+    params = model.params
+    errors = model.bse
+    pvalues = model.pvalues
+    conf_int = model.conf_int()
+
+    # Iterate through each parameter
+    for param_name, beta in params.items():
+        # Escape LaTeX special characters in parameter names
+        safe_param_name = param_name.replace('_', '\\_')
+
+        se = errors[param_name]
+        p = pvalues[param_name]
+        ci_lower, ci_upper = conf_int.loc[param_name]
+
+        # Determine p-value format
+        if p < 0.001:
+            if print_sci_not:
+                p_formatted = f"= {p:.2e}"
+            else:
+                p_formatted = f"<0.001"
+        else:
+            p_formatted = f"= {p:.{p_digits}f}"
+
+        # Format the summary string for the current parameter with LaTeX formatting
+        summary = (f"{safe_param_name}: $\\beta = {beta:.{beta_digits}f}$, "
+                   f"$SE = {se:.{se_digits}f}$, $p {p_formatted}$, "
+                   f"$95\\% CI = [{ci_lower:.{ci_digits}f}, {ci_upper:.{ci_digits}f}]$")
+        print(summary)
 
 
 

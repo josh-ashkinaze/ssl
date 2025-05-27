@@ -40,10 +40,10 @@ def get_common_nouns(roles, model="gpt-4o-2024-08-06"):
         model=model,
         response_format={"type": "json_object"},
         messages=[
-            {"role": "system", "content": "You are a helpful assistant designed to output JSON."},
+            {"role": "system", "content": "You are a helpful assistant, assisting with an analysis on social learning."},
             {"role": "user", "content": f"""INSTRUCTIONS
-Below are a list of roles engaged in social learning. List 20 nouns that these roles do. Each noun should be incredibly common, common to these roles, and uniquely associated with social learning, not other kinds of learning.
-Optimize for precision and not recall.
+Below are a list of roles engaged in social learning. List 20 nouns that this group of roles tends to produce. Each noun should be incredibly common, common to these roles, and uniquely associated with social learning, not other kinds of learning.
+Each noun should be such that it is grammatically and descriptively common to say [noun] from AI. Optimize for precision and not recall.
 
 Roles: {roles_text}
 
@@ -51,7 +51,7 @@ RETURN
 Return as JSON: {{"nouns": ["noun1", "noun2", ...]}}"""}
         ],
         temperature=0,
-        seed=42
+        seed=123
     )
 
     return json.loads(response.choices[0].message.content)
