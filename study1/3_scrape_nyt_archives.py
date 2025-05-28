@@ -1,3 +1,26 @@
+"""
+Date: 2025-05-28 09:34:12
+
+Description: Uses NYT Archive API to pull metadata en masse
+
+Input files:
+- None
+
+Output files:
+- ../data/clean/nyt_pull_<start_date>_<end_date>.jsonl
+- ../data/raw/nyt_pull_<start_date>_<end_date>_pre_transform.jsonl
+
+Both are jsonl files after we apply the filtering criteria. The transformed one (ie not the pre_transform) has these
+differences:
+
+- It has an 'analysis_date' field extracted from 'pub_date' --> yyyy-mm-dd
+- It has a 'main_headline' field extracted from 'headline' --> main
+- It removes 'multimedia', 'document_type', 'byline', and 'keywords' fields
+
+"""
+
+
+
 import json
 import time
 import os
@@ -107,6 +130,14 @@ def main():
     # Create output files
     output_file = f"../data/clean/nyt_pull_{start_date}_{end_date}.jsonl"
     pre_transform_file = f"../data/raw/nyt_pull_{start_date}_{end_date}_pre_transform.jsonl"
+
+    if os.path.exists(output_file):
+        logging.info(f"Output file {output_file} already exists. Exiting to avoid overwriting.")
+        print(f"Output file {output_file} already exists. Exiting to avoid overwriting.")
+        return
+
+    else:
+        pass
 
     # Clear existing files
     Path(output_file).unlink(missing_ok=True)
