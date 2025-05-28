@@ -1,14 +1,15 @@
-director
-nurse
-executive
-supervisor
-coach
-scout
-counselor
-advisor
-manager
+doctor
 therapist
-social worker
-administrator
+psychologist
+counselor
 clergy
 psychiatrist
+teacher
+administrator
+counselor
+advisor
+coach
+scout
+social worker
+HR manager
+HR specialist

@@ -34,7 +34,7 @@ logging.basicConfig(filename=f"{os.path.splitext(os.path.basename(__file__))[0]}
 start_date = '2018-01-01'
 end_date = '2025-05-20'
 allowed_categories = ["cs"]
-allowed_categories_str = "".join(f"{cat}__" for cat in allowed_categories).strip()
+allowed_categories_str = "-".join(f"{cat}" for cat in allowed_categories).strip()
 
 
 

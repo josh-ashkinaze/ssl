@@ -1,5 +1,19 @@
+"""
+Date: 2025-05-28 12:55:54
+
+Description: Fetches ProductHunt posts within a specified timeframe using the ProductHunt API. The script retrieves posts with their descriptions and text content, handling pagination and rate limiting
+
+Input files:
+- None
+Output files:
+- ../data/clean/producthunt_posts_{start}_to_{end}.json: Product Hunt posts data in JSON format
+"""
+
+
 import argparse
 import logging
+
+import pandas as pd
 import requests
 import datetime
 import time
@@ -132,7 +146,6 @@ def fetch_posts_in_timeframe(start_date_str, end_date_str, token, first=20, afte
             error_message = data["errors"][0]["message"] if data["errors"] else "Unknown error"
             logging.info(f"Full error: {data['errors']}")
 
-            # Check for rate limit type error in GraphQL errors
             if "rate limit" in error_message.lower():
                 raise RateLimitException(f"GraphQL Rate Limit Error: {error_message}")
             else:
@@ -142,14 +155,12 @@ def fetch_posts_in_timeframe(start_date_str, end_date_str, token, first=20, afte
             posts_data = data["data"]["posts"]
             total_count = posts_data["totalCount"]
 
-            # Extract posts from edges
             posts = []
             if "edges" in posts_data and posts_data["edges"]:
                 for edge in posts_data["edges"]:
                     if "node" in edge:
                         posts.append(edge["node"])
 
-            # Extract pagination info
             page_info = posts_data["pageInfo"]
 
             return {
@@ -246,6 +257,7 @@ def fetch_posts_by_single_day(start_date_str, end_date_str, token):
     Returns:
         Combined list of all posts
     """
+    counter = 0
     start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d")
     end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d")
 
@@ -265,7 +277,12 @@ def fetch_posts_by_single_day(start_date_str, end_date_str, token):
             if isinstance(result, str):  # Error occurred
                 logging.info(result)
             else:
-                all_posts.extend(result["posts"])
+                post_results = result.get("posts", [])
+                for post in post_results:
+                    post["analysis_date"] = pd.to_datetime(post["createdAt"]).strftime("%Y-%m-%d")
+                    post["unique_idx"] = counter
+                    counter+=1
+                all_posts.extend(post_results)
                 total_count += result["total_count"]
                 logging.info(f"Added {result['count']} posts from {current_date_str}")
 
@@ -293,89 +310,46 @@ def fetch_posts_by_single_day(start_date_str, end_date_str, token):
         }
     }
 
-def save_posts_to_json(posts_data, output_file):
+def save_posts_to_jsonl(posts_data, output_file):
     """
-    Save posts data to a JSON file
+    Save posts data to a JSONL file
 
     Args:
         posts_data: Dictionary with posts data
         output_file: Output file path
     """
     with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(posts_data, f, indent=2, ensure_ascii=False)
+        for post in posts_data['posts']:
+            f.write(json.dumps(post, ensure_ascii=False) + '\n')
 
     logging.info(f"Saved {posts_data['count']} posts to {output_file}")
 
-def save_posts_to_csv(posts_data, output_file):
-    """
-    Save posts data to a CSV file
 
-    Args:
-        posts_data: Dictionary with posts data
-        output_file: Output file path
-    """
-    if not posts_data.get("posts"):
-        logging.info("No posts to save")
-        return
-
-    posts = posts_data["posts"]
-
-    # Define CSV fields (including description)
-    fieldnames = [
-        "id", "name", "slug", "tagline", "description", "url", "website",
-        "votesCount", "commentsCount", "createdAt", "featuredAt"
-    ]
-
-    with open(output_file, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-
-        for post in posts:
-            # Create row with available fields
-            row = {field: post.get(field, "") for field in fieldnames}
-            writer.writerow(row)
-
-    logging.info(f"Saved {posts_data['count']} posts to {output_file}")
 
 # Example usage
 def main():
     developer_token = os.environ["PRODUCT_HUNT_API_KEY"]
 
-    output_fn = f"../data/clean/producthunt_posts_{start_date_str}_to_{end_date_str}.json"
+    output_fn = f"../data/clean/producthunt_posts_{start_date_str}_to_{end_date_str}.jsonl"
 
-    if os.path.exists(output_fn):
-        logging.info(f"Output file {output_fn} already exists. Exiting to avoid overwriting.")
-        return None
-
-    else:
-        pass
+    # if os.path.exists(output_fn):
+    #     logging.info(f"Output file {output_fn} already exists. Exiting to avoid overwriting.")
+    #     return None
+    #
+    # else:
+    #     pass
 
     result = fetch_posts_by_single_day(start_date_str, end_date_str, developer_token)
-
+    print(result)
     if isinstance(result, str):  # Error occurred
         logging.info(f"Error: {result}")
     else:
         # Print summary
-        logging.info(f"\nSummary for {start_date_str} to {end_date_str}:")
         logging.info(f"Retrieved {result['count']} posts of {result['total_count']} total")
 
 
         # Save results to files
-        save_posts_to_json(result, output_fn)
-
-        # Print the first 5 posts as a sample
-        logging.info("\nSample posts (with descriptions):")
-        for i, post in enumerate(result["posts"][:5]):
-            logging.info(f"{i+1}. {post['name']} (slug: {post['slug']})")
-            logging.info(f"   URL: {post['url']}")
-            logging.info(f"   Tagline: {post.get('tagline', 'N/A')}")
-
-            # Print partial description if available
-            description = post.get('description', 'No description available')
-            if description:
-                # Truncate long descriptions for display
-                preview = description[:150] + "..." if len(description) > 150 else description
-                logging.info(f"   Description preview: {preview}")
+        save_posts_to_jsonl(result, output_fn)
 
 
 if __name__ == "__main__":

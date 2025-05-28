@@ -48,25 +48,25 @@ mkdir -p ../data/raw
 
 echo "Running Study 1..."
 
-echo "1. Scraping ProductHunt..."
+echo "Scraping ProductHunt..."
 python3 1_scrape_product_hunt.py
 
-echo "2. Scraping ArXiv..."
+echo "Scraping ArXiv..."
 python3 2_scrape_arxiv_papers.py
 
-echo "3. Scraping NYT..."
+echo "Scraping NYT..."
 python3 3_scrape_nyt_archives.py
 
-echo "4. Getting ATUS roles..."
+echo "Getting ATUS roles..."
 python3 4_get_atus_roles.py
 
-echo "5. Getting ONET roles..."
+echo "Getting ONET roles..."
 python3 5_get_onet_roles.py
 
-echo "6. Getting SSL actions..."
+echo "Getting SSL actions..."
 python3 6_get_ssl_actions.py
 
-echo "7. Getting AI terms..."
+echo "Getting AI terms..."
 python3 7_get_more_ai_terms.py
 
 echo "S1 finished"
