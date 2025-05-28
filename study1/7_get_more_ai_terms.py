@@ -26,6 +26,10 @@ logging.basicConfig(filename=f"{os.path.splitext(os.path.basename(__file__))[0]}
 kws = {}
 
 
+
+
+
+
 # Base AI terms
 ###################################################
 ###################################################
@@ -158,6 +162,7 @@ logging.info(f"Number of all terms (after plurals/singular): {len(all_new)}")
 ####################################
 ####################################
 
+
 atus_roles = text2list("../data/clean/atus_roles.txt")
 logging.info(f"ATUS roles: {atus_roles}")
 logging.info(f"Number of ATUS roles: {len(atus_roles)}")
@@ -166,7 +171,7 @@ onet_roles = text2list("../data/clean/onet_roles.txt")
 logging.info(f"ONET roles: {onet_roles}")
 logging.info(f"Number of ONET roles: {len(onet_roles)}")
 
-nouns = ['advice', 'feedback', 'support', 'guidance', 'encouragement', 'trust', 'communication', 'interaction', 'collaboration', 'relationship', 'connection', 'understanding', 'empathy', 'mentorship', 'network', 'rapport', 'bond', 'influence', 'cooperation', 'engagement']
+nouns = pd.read_json("../data/clean/common_nouns.json")['nouns'].tolist()
 logging.info(f"Nouns: {nouns}")
 logging.info(f"Number of nouns: {len(nouns)}")
 
