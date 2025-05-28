@@ -338,6 +338,15 @@ def save_posts_to_csv(posts_data, output_file):
 if __name__ == "__main__":
     developer_token = os.environ["PRODUCT_HUNT_API_KEY"]
 
+    output_fn = f"../../data/clean/producthunt_posts_{start_date_str}_to_{end_date_str}.json"
+
+    if os.path.exists(output_fn):
+        logging.info(f"Output file {output_fn} already exists. Exiting to avoid overwriting.")
+        exit(0)
+
+    else:
+        pass
+
     result = fetch_posts_by_single_day(start_date_str, end_date_str, developer_token)
 
     if isinstance(result, str):  # Error occurred
@@ -349,7 +358,7 @@ if __name__ == "__main__":
 
 
         # Save results to files
-        save_posts_to_json(result, f"../../data/clean/producthunt_posts_{start_date_str}_to_{end_date_str}.json")
+        save_posts_to_json(result, output_fn)
 
         # Print the first 5 posts as a sample
         logging.info("\nSample posts (with descriptions):")
