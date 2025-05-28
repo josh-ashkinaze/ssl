@@ -1,0 +1,24 @@
+acquaintance
+boss
+boyfriend
+brother
+child
+co-worker
+colleague
+dad
+employee
+friend
+girlfriend
+grandchild
+housemate
+husband
+manager
+mom
+neighbor
+parent
+relationship partner
+roommate
+sibling
+sister
+spouse
+wife

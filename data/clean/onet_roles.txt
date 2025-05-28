@@ -1,0 +1,14 @@
+director
+nurse
+executive
+supervisor
+coach
+scout
+counselor
+advisor
+manager
+therapist
+social worker
+administrator
+clergy
+psychiatrist
