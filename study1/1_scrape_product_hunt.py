@@ -10,6 +10,9 @@ import csv
 import tenacity
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from dotenv import load_dotenv
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 load_dotenv("../src/.env")  # Load environment variables from .env file
 
@@ -335,14 +338,14 @@ def save_posts_to_csv(posts_data, output_file):
     logging.info(f"Saved {posts_data['count']} posts to {output_file}")
 
 # Example usage
-if __name__ == "__main__":
+def main():
     developer_token = os.environ["PRODUCT_HUNT_API_KEY"]
 
-    output_fn = f"../../data/clean/producthunt_posts_{start_date_str}_to_{end_date_str}.json"
+    output_fn = f"../data/clean/producthunt_posts_{start_date_str}_to_{end_date_str}.json"
 
     if os.path.exists(output_fn):
         logging.info(f"Output file {output_fn} already exists. Exiting to avoid overwriting.")
-        exit(0)
+        return None
 
     else:
         pass
@@ -374,3 +377,8 @@ if __name__ == "__main__":
                 preview = description[:150] + "..." if len(description) > 150 else description
                 logging.info(f"   Description preview: {preview}")
 
+
+if __name__ == "__main__":
+    main()
+    logging.info("Script completed successfully.")
+    print("Script completed successfully.")

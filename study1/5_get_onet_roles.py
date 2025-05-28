@@ -130,56 +130,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 
 
-# CLUSTERING - spaCy word vectors
-##########################
-##########################
-import spacy
-import numpy as np
-from sklearn.cluster import KMeans, AgglomerativeClustering
-from sklearn.metrics import silhouette_score
-
-# Load spaCy model (install with: python -m spacy download en_core_web_sm)
-nlp = spacy.load("en_core_web_sm")
-
-def get_title_vector(title):
-    """Get average word vector for a job title"""
-    doc = nlp(title)
-    vectors = [token.vector for token in doc if token.has_vector and not token.is_stop]
-    if vectors:
-        return np.mean(vectors, axis=0)
-    else:
-        return np.zeros(nlp.vocab.vectors_length)
-
-# Get embeddings
-embeddings = np.array([get_title_vector(title) for title in social_df2_top])
-print(f"Embeddings shape: {embeddings.shape}")
-
-# Rest of clustering code same as before...
-best_k = 2
-best_score = -1
-for k in range(2, 8):
-    kmeans = KMeans(n_clusters=k, random_state=42)
-    labels = kmeans.fit_predict(embeddings)
-    score = silhouette_score(embeddings, labels)
-    if score > best_score:
-        best_k = k
-        best_score = score
-        best_labels = labels
-
-print(f"Best k: {best_k}, silhouette: {best_score:.4f}")
-
-# Print results
-clustered_texts = {i: [] for i in range(best_k)}
-for i, text in enumerate(social_df2_top):
-    clustered_texts[best_labels[i]].append(text)
-
-for cluster, texts in clustered_texts.items():
-    print(f"\nCluster {cluster}:")
-    for text in texts:
-        print(f"  - {text}")
-
-##########################
-##########################
 
 # condense these^
 short_list = ["director", "nurse", "executive", "supervisor", "coach", "scout", "counselor", "advisor", "manager", "therapist", "social worker", "administrator", "clergy", "psychiatrist"]

@@ -14,6 +14,9 @@ Output files:
 import pandas as pd
 import os
 import re
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from src.helpers import text2list, list2text
 import logging
 import os

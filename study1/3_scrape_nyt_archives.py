@@ -31,6 +31,8 @@ import requests
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from tqdm import tqdm
 from dotenv import load_dotenv
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 load_dotenv("../src/.env")
 
@@ -134,7 +136,7 @@ def main():
     if os.path.exists(output_file):
         logging.info(f"Output file {output_file} already exists. Exiting to avoid overwriting.")
         print(f"Output file {output_file} already exists. Exiting to avoid overwriting.")
-        return
+        return None
 
     else:
         pass

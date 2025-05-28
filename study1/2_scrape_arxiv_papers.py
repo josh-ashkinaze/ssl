@@ -17,18 +17,18 @@ Both are jsonl files after we apply the filtering criteria. But heres the differ
 
 """
 import json
-
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.json_utils import JsonUtils
 from src.helpers import path2correct_loc
 from datetime import datetime
 from functools import partial
 import kagglehub
-import os
-import shutil
+
 from pathlib import Path
 import logging
 import os
-
 logging.basicConfig(filename=f"{os.path.splitext(os.path.basename(__file__))[0]}.log", level=logging.INFO, format='%(asctime)s: %(message)s', filemode='w', datefmt='%Y-%m-%d %H:%M:%S', force=True)
 
 start_date = '2018-01-01'
@@ -127,7 +127,7 @@ def transform(x):
     return {k: v for k, v in x.items() if k not in fields_to_remove}
 
 
-if __name__ == "__main__":
+def main():
 
     output_fn = f"../data/clean/arxiv_{start_date}_{end_date}_{allowed_categories_str}.jsonl"
 
@@ -139,10 +139,9 @@ if __name__ == "__main__":
     if os.path.exists(output_fn):
         print(f"Output file {output_fn} already exists. Exiting to avoid overwriting.")
         logging.info(f"Output file {output_fn} already exists. Exiting to avoid overwriting.")
-        exit(0)
+        return None
 
-    else:
-        pass
+
 
     validation_criteria = partial(is_valid,
                                   allowed_major_categories=allowed_categories,
@@ -190,4 +189,5 @@ if __name__ == "__main__":
         logging.info(f"Deleted raw file: {to_delete}")
 
 
-
+if __name__ == "__main__":
+    main()
