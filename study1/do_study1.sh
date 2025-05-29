@@ -69,4 +69,7 @@ python3 6_get_ssl_actions.py
 echo "Getting AI terms..."
 python3 7_get_more_ai_terms.py
 
+echo "Getting word counts"
+python3 8_get_word_counts.py
+
 echo "S1 finished"

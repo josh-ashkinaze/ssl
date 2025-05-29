@@ -16,12 +16,14 @@ conversational AI
 conversational agent
 conversational agents
 conversational bot
-conversational botsconversational system
+conversational bots
+conversational system
 conversational systems
 digital assistant
 digital assistants
 foundation model
-foundation modelsgpt
+foundation models
+gpt
 gpt-2
 gpt-3
 gpt-4
@@ -36,15 +38,17 @@ llm
 llms
 lm
 lms
-palm
 plm
 plms
 pretrained language model
 pretrained language models
+smart assistant
 smart assistants
 transformers
 virtual agent
-virtual agentsvirtual assistant
+virtual agents
+virtual assistant
 virtual assistants
 voice assistant
-voice assistantsxlnet
+voice assistants
+xlnet

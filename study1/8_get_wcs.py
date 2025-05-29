@@ -94,13 +94,13 @@ def main():
     nyt_wc_fn = f"../data/clean/nyt_word_counts{sample_str}.json"
     prod_hunt_wc_fn = f"../data/clean/prod_hunt_word_counts{sample_str}.json"
     #
-    if os.path.exists(arxiv_wc_fn) and os.path.exists(nyt_wc_fn) and os.path.exists(prod_hunt_wc_fn) and TO_SAMPLE == -1:
-        print("Word counts files already exist. Exiting to avoid overwriting.")
-        logging.info("Word counts files already exist. Exiting to avoid overwriting.")
-        return None
-
-    else:
-        pass
+    # if os.path.exists(arxiv_wc_fn) and os.path.exists(nyt_wc_fn) and os.path.exists(prod_hunt_wc_fn) and TO_SAMPLE == -1:
+    #     print("Word counts files already exist. Exiting to avoid overwriting.")
+    #     logging.info("Word counts files already exist. Exiting to avoid overwriting.")
+    #     return None
+    #
+    # else:
+    #     pass
 
     arxiv_fn = "../data/clean/arxiv_2018-01-01_2025-05-20_cs.jsonl"
     nyt_fn = "../data/clean/nyt_pull_2018-01-01_2025-06-01.jsonl"
@@ -119,7 +119,7 @@ def main():
 
     # read in data
     arxiv_df = pd.read_json(arxiv_fn, lines=True)
-    arxiv_df['text'] = (arxiv_df['title'].fillna('') + " " + arxiv_df['abstract'].fillna(''))
+    arxiv_df['text'] = (arxiv_df['title'].fillna('') + " " + arxiv_df['abstract'].fillna('')).str.lower()
     arxiv_df['wc'] = arxiv_df['text'].swifter.apply(lambda x: len(str(x).split()) if pd.notna(x) else 0)
 
     nyt_df = pd.read_json(nyt_fn, lines=True)
@@ -127,7 +127,7 @@ def main():
             nyt_df['main_headline'].fillna('') + " " +
             nyt_df['abstract'].fillna('') + " " +
             nyt_df['snippet'].fillna('')
-    )
+    ).str.lower()
     nyt_df['wc'] = nyt_df['text'].swifter.apply(lambda x: len(str(x).split()) if pd.notna(x) else 0)
 
     prod_df = pd.read_json(prod_hunt_fn, lines=True)

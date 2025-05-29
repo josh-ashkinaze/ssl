@@ -44,10 +44,13 @@ logging.info(f"Number of base AI terms: {len(kws['base'])}")
 ###################################################
 # Words from
 # https://aclanthology.org/2024.eacl-long.49.pdf, Appendix B.2, page 16
+# However, we removed "palm" because this flagged a lot of false psoitives (e.g: palm beach)
 anthro_score = ["palm", "lms", "llama", "transformers", "language models", "language model", "gpt", "plms",
                 "pretrained language models", "gpt-2", "xlnet", "large language models", "llms", "gpt-3",
                 "foundation model",
                 "gptneo", "gpt-j", "chatgpt", "gpt-4"]
+
+anthro_score.remove("palm")  # Remove palm due to false positives
 
 kws["anthro_score"] = anthro_score
 logging.info(f"Anthro Score terms: {anthro_score}")
@@ -131,24 +134,24 @@ all_new = ['A.I', 'AI',
            'chatgpt',
            'conversational AI',
            'conversational agent', 'conversational agents',
-           'conversational bot', 'conversational bots'
+           'conversational bot', 'conversational bots',
            'conversational system', 'conversational systems',
            'digital assistant', 'digital assistants',
-           'foundation model', 'foundation models'
+           'foundation model', 'foundation models',
            'gpt', 'gpt-2', 'gpt-3', 'gpt-4', 'gpt-j', 'gptneo',
            'language model', 'language models',
            'large language model', 'large language models',
            'llama',
            'llm', 'llms',
            'lm', 'lms',
-           'palm',
            'plm', 'plms',
            'pretrained language model', 'pretrained language models',
+           'smart assistant',
            'smart assistants',
            'transformers',
-           'virtual agent', 'virtual agents'
+           'virtual agent', 'virtual agents',
            'virtual assistant', 'virtual assistants',
-           'voice assistant', 'voice assistants'
+           'voice assistant', 'voice assistants',
            'xlnet']
 
 
