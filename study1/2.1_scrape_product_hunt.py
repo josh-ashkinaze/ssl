@@ -34,8 +34,8 @@ load_dotenv("../src/.env")  # Load environment variables from .env file
 logging.basicConfig(filename=f"{os.path.splitext(os.path.basename(__file__))[0]}.log", level=logging.INFO, format='%(asctime)s: %(message)s', filemode='w', datefmt='%Y-%m-%d %H:%M:%S', force=True)
 
 
-start_date_str = "2025-05-01"
-end_date_str = "2025-05-01"
+start_date_str = "2018-01-01"
+end_date_str = "2025-05-20"
 
 logging.info(f"Start date: {start_date_str}, End date: {end_date_str}")
 
@@ -340,7 +340,6 @@ def main():
     #     pass
 
     result = fetch_posts_by_single_day(start_date_str, end_date_str, developer_token)
-    print(result)
     if isinstance(result, str):  # Error occurred
         logging.info(f"Error: {result}")
     else:
