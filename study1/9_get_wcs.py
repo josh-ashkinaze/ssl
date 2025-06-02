@@ -86,7 +86,6 @@ class FastFlashTextCounter:
         return dict(Counter(keywords_found))
 
 
-
 def main():
 
     sample_str = "" if TO_SAMPLE == -1 else f"_sample_{TO_SAMPLE}_"
