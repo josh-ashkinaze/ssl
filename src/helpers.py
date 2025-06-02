@@ -293,6 +293,84 @@ def statsmodels2latex(model, beta_digits=2, se_digits=2, p_digits=3, ci_digits=2
         print(summary)
 
 
+def array_stats(data, digits=2, include_ci=False):
+    import scipy.stats as stats
+    from scipy.stats import bootstrap
+    import statistics as st
+
+    """Calculate and print summary statistics for an array.
+
+    This function computes basic descriptive statistics (mean, median, standard
+    deviation, and mode) for a given array of data. It also provides an option
+    to calculate and include a 95% confidence interval for the mean using
+    bootstrap resampling.
+
+    Args:
+        data (array-like): The input data array for which statistics will be
+            calculated. Can be a list, numpy array, or any array-like structure.
+        digits (int, optional): Number of decimal places for rounding the
+            calculated statistics. Defaults to 2.
+        include_ci (bool, optional): Whether to include a 95% confidence
+            interval for the mean using bootstrap resampling. Defaults to False.
+
+    Returns:
+        dict: A dictionary containing the calculated statistics with the
+            following keys:
+            - 'mean': The arithmetic mean of the data
+            - 'median': The median (middle value) of the data
+            - 'sd': The sample standard deviation (using ddof=1)
+            - 'mode': The most frequently occurring value
+            - 'ci': (optional) A tuple containing the lower and upper bounds
+              of the 95% confidence interval, only present if include_ci=True
 
 
+    Note:
+        The function prints formatted statistics to the console like this--
+        "M = 2.83, SD = 1.47, Mdn = 2.50" \n "Mode = 2.00" in addition to
+        returning them as a dictionary. If include_ci=True, it also prints the
+        confidence interval as "95% CI [1.83, 3.83]". When multiple modes exist,
+        the function will print a warning message and use the first occurrence.
+
+        The bootstrap uses Scipy 10K iterations and is bootstrapping the mean.
+    """
+    data = np.array(data)
+    mean_val = np.mean(data)
+    median_val = np.median(data)
+    sd_val = np.std(data, ddof=1)
+
+    # Calculate mode - handling cases with multiple modes
+    try:
+        mode_val = st.mode(data)
+    except st.StatisticsError:
+        # If multiple modes, use scipy's mode which returns the first occurrence
+        print("Multiple modes found, using the first one.")
+        mode_val = stats.mode(data, keepdims=True)[0][0]
+        print(mode_val)
+
+    result = {
+        'mean': round(mean_val, digits),
+        'median': round(median_val, digits),
+        'sd': round(sd_val, digits),
+        'mode': round(mode_val, digits)
+    }
+
+    # Add confidence interval if requested
+    if include_ci:
+        def mean_func(x, axis):
+            return np.mean(x, axis=axis)
+
+        data_reshaped = np.array(data).reshape(-1, 1)
+        bootstrap_result = bootstrap((data_reshaped,), mean_func,
+                                     confidence_level=0.95,
+                                     random_state=42,
+                                     n_resamples=10 * 1000)
+        ci_lower, ci_upper = bootstrap_result.confidence_interval
+        result['ci'] = (round(float(ci_lower), digits), round(float(ci_upper), digits))
+
+    print(f"M = {result['mean']:.{digits}f}, SD = {result['sd']:.{digits}f}, Mdn = {result['median']:.{digits}f}")
+    print(f"Mode = {result['mode']:.{digits}f}")
+    if include_ci and 'ci' in result:
+        print(f"95% CI [{result['ci'][0]:.{digits}f}, {result['ci'][1]:.{digits}f}]")
+
+    return result
 

@@ -58,18 +58,18 @@ echo "Scraping NYT..."
 python3 3_scrape_nyt_archives.py
 
 echo "Getting ATUS roles..."
-python3 4_get_atus_roles.py
+python3 5_get_atus_roles.py
 
 echo "Getting ONET roles..."
-python3 5_get_onet_roles.py
+python3 6_get_onet_roles.py
 
 echo "Getting SSL actions..."
-python3 6_get_ssl_actions.py
+python3 7_get_ssl_actions.py
 
 echo "Getting AI terms..."
-python3 7_get_more_ai_terms.py
+python3 8_get_more_ai_terms.py
 
 echo "Getting word counts"
-python3 8_get_word_counts.py
+python3 9_get_word_counts.py
 
 echo "S1 finished"
