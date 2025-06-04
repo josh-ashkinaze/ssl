@@ -35,7 +35,7 @@ logging.basicConfig(filename=f"{os.path.splitext(os.path.basename(__file__))[0]}
 
 
 start_date_str = "2018-01-01"
-end_date_str = "2025-05-20"
+end_date_str = "2025-06-01"
 
 logging.info(f"Start date: {start_date_str}, End date: {end_date_str}")
 

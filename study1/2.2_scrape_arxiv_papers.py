@@ -149,7 +149,7 @@ def main():
                                   end_date=end_date)
 
     # dls to cache
-    path = kagglehub.dataset_download("Cornell-University/arxiv/versions/234", force_download=True)
+    path = kagglehub.dataset_download("Cornell-University/arxiv/versions/236", force_download=True)
     new_location = path2correct_loc(path, "")
     print(f"New location: {new_location}")
 

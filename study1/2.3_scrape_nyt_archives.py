@@ -19,19 +19,19 @@ differences:
 
 """
 
-
-
 import json
-import time
-import os
 import logging
+import os
+import sys
+import time
 from datetime import datetime
 from pathlib import Path
+
 import requests
+from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from tqdm import tqdm
-from dotenv import load_dotenv
-import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 load_dotenv("../src/.env")
@@ -89,7 +89,8 @@ def fetch_archive_data(year, month, api_key):
         # minor todo: handle rate limiting
         # It does not give an actual retry-after header, so we have to handle it manually
         # "fault":{"faultstring":"Rate limit quota violation. Quota limit  exceeded. Identifier : b0c90cbd-06bb-489e-8a4e-a8fa2c087196","detail":{"errorcode":"policies.ratelimit.QuotaViolation"
-        retry_after = response.headers.get('Retry-After', 60) # can't find the actual retry-after so i am just doing 60s for now
+        retry_after = response.headers.get('Retry-After',
+                                           60)  # can't find the actual retry-after so i am just doing 60s for now
         print("headers", response.headers)
         logging.warning(f"Rate limited. Waiting {retry_after} seconds...")
         time.sleep(int(retry_after))
