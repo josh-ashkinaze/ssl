@@ -8,6 +8,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from collections import Counter
 from scipy import stats
+from pingouin import compute_effsize
 
 # Set random seed for reproducibility
 random.seed(42)
@@ -139,16 +140,10 @@ def run_t_test(df):
     my_vals = my_words['similarity'].values
     control_vals = control_words['similarity'].values
 
-    # T-test
     t_stat, p_val = stats.ttest_ind(my_vals, control_vals)
 
-    # Cohen's d
-    pooled_std = np.sqrt(((len(my_vals) - 1) * np.var(my_vals, ddof=1) +
-                          (len(control_vals) - 1) * np.var(control_vals, ddof=1)) /
-                         (len(my_vals) + len(control_vals) - 2))
-    cohens_d = (np.mean(my_vals) - np.mean(control_vals)) / pooled_std
+    d = compute_effsize(my_vals, control_vals, eftype='cohen')
 
-    # Degrees of freedom
     df_val = len(my_vals) + len(control_vals) - 2
 
     return {
@@ -159,7 +154,7 @@ def run_t_test(df):
         'my_std': np.std(my_vals, ddof=1),
         'control_mean': np.mean(control_vals),
         'control_std': np.std(control_vals, ddof=1),
-        'cohens_d': cohens_d
+        'cohens_d': d
     }
 
 
