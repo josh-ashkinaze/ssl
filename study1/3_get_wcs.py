@@ -101,9 +101,9 @@ def main():
     # else:
     #     pass
 
-    arxiv_fn = "../data/clean/arxiv_2018-01-01_2025-05-20_cs.jsonl"
+    arxiv_fn = "../data/clean/arxiv_2018-01-01_2025-06-01_cs.jsonl"
     nyt_fn = "../data/clean/nyt_pull_2018-01-01_2025-06-01.jsonl"
-    prod_hunt_fn = "../data/clean/producthunt_posts_2025-05-01_to_2025-05-01.jsonl"
+    prod_hunt_fn = "../data/clean/producthunt_posts_2018-01-01_to_2025-06-01.jsonl"
 
 
     # Lists of terms
@@ -147,10 +147,12 @@ def main():
 
     # define word lists for the fast wc class
     word_lists = {
+        'base-ai': list2lower(["chatbot", "artificial intelligence", "A.I", "ai"]),
         'ai': ai_terms,
         'social': atus_roles + onet_roles + nouns,
         'ai_compound_roles': ai_compound_roles,
-        'ai_compound_nouns': ai_compound_nouns
+        'ai_compound_nouns': ai_compound_nouns,
+        'ai_compound': ai_compound_roles + ai_compound_nouns
     }
     counter = FastFlashTextCounter(word_lists)
 
