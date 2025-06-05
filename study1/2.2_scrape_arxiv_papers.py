@@ -32,7 +32,7 @@ import os
 logging.basicConfig(filename=f"{os.path.splitext(os.path.basename(__file__))[0]}.log", level=logging.INFO, format='%(asctime)s: %(message)s', filemode='w', datefmt='%Y-%m-%d %H:%M:%S', force=True)
 
 start_date = '2018-01-01'
-end_date = '2025-05-31'
+end_date = '2025-06-01'
 allowed_categories = ["cs"]
 allowed_categories_str = "-".join(f"{cat}" for cat in allowed_categories).strip()
 
