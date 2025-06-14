@@ -101,9 +101,9 @@ def main():
     # else:
     #     pass
 
-    arxiv_fn = "../data/clean/arxiv_2018-01-01_2025-06-01_cs.jsonl"
+    arxiv_fn = "../data/clean/arxiv_2018-01-01_2025-05-20_cs.jsonl"
     nyt_fn = "../data/clean/nyt_pull_2018-01-01_2025-06-01.jsonl"
-    prod_hunt_fn = "../data/clean/producthunt_posts_2018-01-01_to_2025-06-01.jsonl"
+    prod_hunt_fn = "../data/clean/producthunt_posts_2019-01-01_to_2025-05-01.json"
 
 
     # Lists of terms
@@ -130,9 +130,7 @@ def main():
     nyt_df['wc'] = nyt_df['text'].swifter.apply(lambda x: len(str(x).split()) if pd.notna(x) else 0)
 
     prod_df = pd.read_json(prod_hunt_fn, lines=True)
-    prod_df['text'] = (
-                prod_df['name'].fillna('') + " " + prod_df['tagline'].fillna('') + " " + prod_df['description'].fillna(
-            '')).str.lower()
+    prod_df['text'] = prod_df['text'].fillna('').str.lower()
     prod_df['wc'] = prod_df['text'].swifter.apply(lambda x: len(str(x).split()) if pd.notna(x) else 0)
 
     if TO_SAMPLE != -1:
