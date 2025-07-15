@@ -3,6 +3,9 @@ import random
 import numpy as np
 import shutil
 from pathlib import Path
+import logging
+import os
+import sys
 
 random.seed(42)
 np.random.seed(42)
@@ -458,3 +461,10 @@ def cat_stats(data, include_n=True, digits=1, sort_by='frequency', reverse=True)
 
     # Return both the formatted string and the full dictionary for programmatic use
     return result_string, {k: v for k, v in sorted_items}
+
+
+def log_and_print(message):
+    """Log a message using the current logger and print it to console."""
+    logger = logging.getLogger()
+    logger.info(message)
+    print(message)
