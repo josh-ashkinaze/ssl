@@ -1,0 +1,697 @@
+StartDate,EndDate,Status,IPAddress,Progress,Duration (in seconds),Finished,RecordedDate,ResponseId,RecipientLastName,RecipientFirstName,RecipientEmail,ExternalReference,LocationLatitude,LocationLongitude,DistributionChannel,UserLanguage,1_initial,1_post,1_qual,2_initial,2_post,2_qual,3_initial,3_post,3_qual,4_initial,4_post,4_qual,5_initial,5_post,5_qual,6_initial,6_post,6_qual,7_initial,7_post,7_qual,8_initial,8_post,8_qual,9_initial,9_post,9_qual,10_initial,10_post,10_qual,11_initial,11_post,11_qual,12_initial,12_post,12_qual,13_initial,13_post,13_qual,14_initial,14_post,14_qual,15_initial,15_post,15_qual,16_initial,16_post,16_qual,17_initial,17_post,17_qual,18_initial,18_post,18_qual,19_initial,19_post,19_qual,20_initial,20_post,20_qual,21_initial,21_post,21_qual,22_initial,22_post,22_qual,23_initial,23_post,23_qual,24_initial,24_post,24_qual,25_initial,25_post,25_qual,26_initial,26_post,26_qual,27_initial,27_post,27_qual,28_initial,28_post,28_qual,29_initial,29_post,29_qual,30_initial,30_post,30_qual
+Start Date,End Date,Response Type,IP Address,Progress,Duration (in seconds),Finished,Recorded Date,Response ID,Recipient Last Name,Recipient First Name,Recipient Email,External Data Reference,Location Latitude,Location Longitude,Distribution Channel,User Language,"run - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","run - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",run - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"run - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","run - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",run - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"run - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","run - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",run - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"run - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","run - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",run - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"run - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","run - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",run - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"talk - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","talk - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",talk - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"talk - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","talk - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",talk - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"talk - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","talk - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",talk - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"talk - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","talk - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",talk - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"talk - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","talk - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",talk - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"write - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","write - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",write - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"write - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","write - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",write - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"write - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","write - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",write - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"write - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","write - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",write - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"write - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","write - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",write - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"eat - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","eat - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",eat - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"eat - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","eat - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",eat - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"eat - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","eat - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",eat - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"eat - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","eat - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",eat - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"eat - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","eat - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",eat - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"read - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","read - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",read - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"read - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","read - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",read - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"read - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","read - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",read - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"read - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","read - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",read - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"read - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","read - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",read - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"jump - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","jump - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",jump - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"jump - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","jump - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",jump - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"jump - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","jump - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",jump - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"jump - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","jump - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",jump - [OPTIONAL] Give your thoughts on the chatbot's reasoning.,"jump - Trial [CurrentLoopNumber] of [TotalLoops] 
+
+
+Please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+Situation: [Field-2]","jump - Trial [CurrentLoopNumber] of [TotalLoops]
+
+
+Now consider a chatbot's explanation:
+
+Chatbot Appropriateness Score: [Field-4]
+
+Chatbot Explanation: [Field-6]
+
+***
+
+After reading this explanation---where a chatbot rated the appropriateness as a  [Field-4]---please answer how appropriate it is to perform the following action in the following situation. 
+
+Action: [Field-1]
+
+Situation: [Field-2]",jump - [OPTIONAL] Give your thoughts on the chatbot's reasoning.
+"{""ImportId"":""startDate"",""timeZone"":""America/New_York""}","{""ImportId"":""endDate"",""timeZone"":""America/New_York""}","{""ImportId"":""status""}","{""ImportId"":""ipAddress""}","{""ImportId"":""progress""}","{""ImportId"":""duration""}","{""ImportId"":""finished""}","{""ImportId"":""recordedDate"",""timeZone"":""America/New_York""}","{""ImportId"":""_recordId""}","{""ImportId"":""recipientLastName""}","{""ImportId"":""recipientFirstName""}","{""ImportId"":""recipientEmail""}","{""ImportId"":""externalDataReference""}","{""ImportId"":""locationLatitude""}","{""ImportId"":""locationLongitude""}","{""ImportId"":""distributionChannel""}","{""ImportId"":""userLanguage""}","{""ImportId"":""1_QID3""}","{""ImportId"":""1_QID4""}","{""ImportId"":""1_QID5_TEXT""}","{""ImportId"":""2_QID3""}","{""ImportId"":""2_QID4""}","{""ImportId"":""2_QID5_TEXT""}","{""ImportId"":""3_QID3""}","{""ImportId"":""3_QID4""}","{""ImportId"":""3_QID5_TEXT""}","{""ImportId"":""4_QID3""}","{""ImportId"":""4_QID4""}","{""ImportId"":""4_QID5_TEXT""}","{""ImportId"":""5_QID3""}","{""ImportId"":""5_QID4""}","{""ImportId"":""5_QID5_TEXT""}","{""ImportId"":""6_QID3""}","{""ImportId"":""6_QID4""}","{""ImportId"":""6_QID5_TEXT""}","{""ImportId"":""7_QID3""}","{""ImportId"":""7_QID4""}","{""ImportId"":""7_QID5_TEXT""}","{""ImportId"":""8_QID3""}","{""ImportId"":""8_QID4""}","{""ImportId"":""8_QID5_TEXT""}","{""ImportId"":""9_QID3""}","{""ImportId"":""9_QID4""}","{""ImportId"":""9_QID5_TEXT""}","{""ImportId"":""10_QID3""}","{""ImportId"":""10_QID4""}","{""ImportId"":""10_QID5_TEXT""}","{""ImportId"":""11_QID3""}","{""ImportId"":""11_QID4""}","{""ImportId"":""11_QID5_TEXT""}","{""ImportId"":""12_QID3""}","{""ImportId"":""12_QID4""}","{""ImportId"":""12_QID5_TEXT""}","{""ImportId"":""13_QID3""}","{""ImportId"":""13_QID4""}","{""ImportId"":""13_QID5_TEXT""}","{""ImportId"":""14_QID3""}","{""ImportId"":""14_QID4""}","{""ImportId"":""14_QID5_TEXT""}","{""ImportId"":""15_QID3""}","{""ImportId"":""15_QID4""}","{""ImportId"":""15_QID5_TEXT""}","{""ImportId"":""16_QID3""}","{""ImportId"":""16_QID4""}","{""ImportId"":""16_QID5_TEXT""}","{""ImportId"":""17_QID3""}","{""ImportId"":""17_QID4""}","{""ImportId"":""17_QID5_TEXT""}","{""ImportId"":""18_QID3""}","{""ImportId"":""18_QID4""}","{""ImportId"":""18_QID5_TEXT""}","{""ImportId"":""19_QID3""}","{""ImportId"":""19_QID4""}","{""ImportId"":""19_QID5_TEXT""}","{""ImportId"":""20_QID3""}","{""ImportId"":""20_QID4""}","{""ImportId"":""20_QID5_TEXT""}","{""ImportId"":""21_QID3""}","{""ImportId"":""21_QID4""}","{""ImportId"":""21_QID5_TEXT""}","{""ImportId"":""22_QID3""}","{""ImportId"":""22_QID4""}","{""ImportId"":""22_QID5_TEXT""}","{""ImportId"":""23_QID3""}","{""ImportId"":""23_QID4""}","{""ImportId"":""23_QID5_TEXT""}","{""ImportId"":""24_QID3""}","{""ImportId"":""24_QID4""}","{""ImportId"":""24_QID5_TEXT""}","{""ImportId"":""25_QID3""}","{""ImportId"":""25_QID4""}","{""ImportId"":""25_QID5_TEXT""}","{""ImportId"":""26_QID3""}","{""ImportId"":""26_QID4""}","{""ImportId"":""26_QID5_TEXT""}","{""ImportId"":""27_QID3""}","{""ImportId"":""27_QID4""}","{""ImportId"":""27_QID5_TEXT""}","{""ImportId"":""28_QID3""}","{""ImportId"":""28_QID4""}","{""ImportId"":""28_QID5_TEXT""}","{""ImportId"":""29_QID3""}","{""ImportId"":""29_QID4""}","{""ImportId"":""29_QID5_TEXT""}","{""ImportId"":""30_QID3""}","{""ImportId"":""30_QID4""}","{""ImportId"":""30_QID5_TEXT""}"
+2024-08-22 19:46:49,2024-08-22 19:59:28,IP Address,99.34.2.146,100,759,True,2024-08-22 19:59:29,R_6foCoPczzg930MO,,,,,39.7168,-84.1575,anonymous,EN,1 (highly inappropriate),1 (highly inappropriate),Why not just call it highly inappropriate then?,4,4,,1 (highly inappropriate),1 (highly inappropriate),"Considering the reasons given, why would this not be considered highly inappropriate?",1 (highly inappropriate),1 (highly inappropriate),We agree for the 2nd time,1 (highly inappropriate),1 (highly inappropriate),,10 (highly appropriate),10 (highly appropriate),Now you're being ridiculous!,10 (highly appropriate),10 (highly appropriate),"Given the explanation, why is the activity only rated a 7. No downside was presented at all.",3,3,"Talking at the movies is rude, Chatbot!",,,,,,,,,,,,,,,,,,,,,,9,9,"Lighten up, Chatbot!",,,,,,,10 (highly appropriate),10 (highly appropriate),Chatbot's getting dumber and dumber- bars  serve food as well as drinks,7,7,Chatbot needs to lighten up again,,,,,,,,,,4,4,We finally agree!,7,7,Don't call me peculiar!,1 (highly inappropriate),1 (highly inappropriate),"If it should be strictly avoided, then it rates a 1.",3,3,Close enough to count as agreement,,,,,,,,,
+2024-08-22 20:18:15,2024-08-22 20:38:26,IP Address,23.122.142.96,100,1210,True,2024-08-22 20:38:26,R_5J2cL3MdMoBwJxN,,,,,32.7449,-117.165,anonymous,EN,1 (highly inappropriate),1 (highly inappropriate),I agree.,3,5,I agree that running in the house sometimes is normal for a child but many households have rules against it and it is a bit hazardous (especially in the kitchen or if there's a lot of people).,,,,2,2,I agree.,,,,,,,,,,1 (highly inappropriate),2,It ignores that talking in the movies can be very disruptive and is looked upon very unfavorably by most people (and even the cinemas will tell you to silence your phone and be quiet before the film).,10 (highly appropriate),10 (highly appropriate),"While I agree that the bar is not the best place for a conversation due to noise, it is a social space where many people try to make connections, so talking is very appropriate and normal.",8,8,"While I agree that there is often this awkward silence that gets maintained in elevators, it is pretty common for people who know each other to say good morning in the elevator and even many strangers will strike up conversation. Not everyone likes it but it's pretty normal.",,,,,,,5,5,I think it overestimates the extent to which writing in the cinema would inconvenience others since a pen is much quieter than a film soundtrack.,,,,,,,7,7,"I think most of the drawbacks it mentions are valid but that doesn't mean it's actually socially unacceptable, and it does not consider that eating snacks in public or on the go is normal and sometimes necessary.",10 (highly appropriate),10 (highly appropriate),I agree.,,,,10 (highly appropriate),10 (highly appropriate),"It doesn't make any sense since as the bot itself mentioned, bars serve food—they want you to eat there. It is making inferences that the person is eating a ""three-course meal"" which is not really implied in the problem statement.",5,5,I agree that it is uncommon but the concern about odors feels misplaced (you're only in the elevator a few seconds) and I think it is more nuanced.,10 (highly appropriate),10 (highly appropriate),"It is listing reasons why reading on the bus might not be the most optimal or pleasant experience for the reader, but that has no bearing on whether it is appropriate. Reading on the bus is socially appropriate because it is common and does not impact the people around you in any way.",,,,,,,4,4,,4,4,"Although I agree that reading in an elevator is silly due to the short duration, I disagree with the reasoning that reading a book somehow interrupts the unspoken agreement of silence in the elevator. In fact reading allows you to avoid eye contact altogether so it's very unimposing.",,,,,,,,,,3,8,I agree and I was thinking before more of athletic jumping than jumping to music which is obviously normal.,,,
+2024-08-22 20:55:27,2024-08-22 21:03:05,IP Address,73.242.85.48,100,457,True,2024-08-22 21:03:05,R_3lpkoP16NjNM2NX,,,,,44.8962,-93.1036,anonymous,EN,,,,1 (highly inappropriate),3,,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,6,6,,,,,1 (highly inappropriate),1 (highly inappropriate),Lol,10 (highly appropriate),10 (highly appropriate),The chatbot directly contradicts itself by saying “boisterous laughter” is appropriate.,6,5,,7,7,,,,,1 (highly inappropriate),1 (highly inappropriate),,7,7,,,,,3,2,,,,,,,,,,,5,2,,,,,2,3,,,,,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,4,4,,5,5,,,,,,,
+2024-08-23 09:21:35,2024-08-23 09:33:56,IP Address,188.146.110.39,100,740,True,2024-08-23 09:33:57,R_2ITgmlkGesT9YIt,,,,,52.2405,21.0214,anonymous,EN,,,,4,4,,1 (highly inappropriate),1 (highly inappropriate),,4,4,,3,3,,6,6,,,,,2,2,,10 (highly appropriate),10 (highly appropriate),,5,5,what experts,,,,,,,6,6,,9,9,,8,8,,,,,,,,,,,9,9,,,,,,,,,,,,,,,,,8,8,,,,,,,,3,3,,,,,3,3,
+2024-08-23 09:21:58,2024-08-23 09:39:31,IP Address,169.255.216.229,100,1052,True,2024-08-23 09:39:32,R_2r8FQxDhHPqR80L,,,,,-28.2338,28.3003,anonymous,EN,2,2,Agree with reasoning,,,,1 (highly inappropriate),1 (highly inappropriate),"According to the reasoning chatbot's score should be 1 or 2, not 4",,,,8,7,Chatbot is being a ridiculous killjoy. Doesn't take into account that people who run on elevators probably have the mental capacity and ability not to be a danger to others.,7,7,"Chatbot is being ridiculous. Chatting with friends or even strangers is fine. The situation states talking, not yelling. Talking is fine anywhere any time.",,,,1 (highly inappropriate),1 (highly inappropriate),"Once again, I don't understand chatbot - chatting on a bus is not okay, but it's fine at the movies? Doesn't make sense",,,,,,,9,8,"Chatbot is trying to impose a restriction on someone. Not it's place. It's the writer's business whether they want to write in those circumstances. ",3,4,"Okay, so according to chatbot reading is fine at the dinner table, but not writing? ",5,5,"Disrespecting the filmmakers by writing, but it's not disrespectful to chat? Sanctity of the cinema. Don't make me laugh. ",,,,,,,5,5,"ChChatbot doesn't take into account the type of snack. Unless it is messy or smelly, it is totally fine. ",10 (highly appropriate),9,Reasoning is fine,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),Stupid. See previous response.,2,1 (highly inappropriate),"Chatbot is promoting a selfish action. Reading is great, yes, but not at the expense of being with other people. ",,,,8,7,"Once again chatbot is not being consistent. Fine to read at a table with family and loved ones, but not fine to read at a bar with strangers? And it's your business whether your surroundings such as noise are conducive to reading.",,,,,,,2,2,"The reasoning is fine, but I don't understand why chatbot doesn't make this even more inappropriate than it does due to the reasoning. ",,,,5,6,"Reasoning is okay I guess. But at a bar you can jump, knock over a glass and hurt someone. ",,,
+2024-08-23 09:53:32,2024-08-23 10:09:52,IP Address,72.13.132.65,100,980,True,2024-08-23 10:09:53,R_7OvF3IjOhJ04rvz,,,,,39.9597,-75.1995,anonymous,EN,2,2,,,,,,,,,,,,,,6,6,"Even though I personally get annoyed when people talk loudly on the bus, talking on the bus in itself is neither appropriate or inappropriate; it just is. People may need to communicate with someone they're with; it may be the only time they have to make a call.",,,,9,8,,,,,,,,,,,4,4,,1 (highly inappropriate),1 (highly inappropriate),,,,,4,4,"As long as somebody isn't bothering me, I don't personally care what they do on an elevator. Maybe they thought of something and need to write it down before they forget. In addition, ""writing"" could refer to a variety of things, such as making a note for yourself, texting someone, or composing fiction. Someone typing on their phone is still ""writing,"" and isn't seen as strange.",,,,10 (highly appropriate),10 (highly appropriate),,10 (highly appropriate),10 (highly appropriate),"I agree with the chatbot, but don't understand why it rated the activity a 7 when its reasoning is entirely positive. The reasoning reads more like it would correspond with a rating of 10.",,,,6,6,"While I agree that eating in an elevator could be inappropriate due to both the food's aroma and potential messiness, I feel the reasoning doesn't take into account what kind of food is being eaten. Someone eating a granola bar or apple, for example, wouldn't be inappropriate.",,,,2,2,"""A family dinner"" feels like it could refer to either the dinner itself or the general meeting of family for an afternoon or evening. If it refers to the gathering itself, then I think reading is fine and the points the bot makes (such as setting a positive example or reading together) could be compelling. However, reading during the dinner itself would be inapproriate. Doing so wouldn't, as the chatbot says, promote a positive example; it would show kids that they don't need to pay attention to their family.",,,,3,4,,9,9,"It really depends on how long the elevator ride is: going from floor 1 to floor 2, maybe the reasoning sticks. Going from floor 1 to floor 7, then you've got some time. In addition, reading material - especially short reading material such as that found on social media, or texts - can easily be pulled up within seconds on a phone, meaning you don't need a lot of time to be able to read.",1 (highly inappropriate),1 (highly inappropriate),,,,,,,,2,2,"While jumping can be done on the bar's dancefloor (if it exists), the majority of bars are tight quarters where jumping would be both annoying and dangerous to the other patrons.",2,2,
+2024-08-23 10:23:52,2024-08-23 10:33:04,IP Address,129.21.255.85,100,551,True,2024-08-23 10:33:05,R_70dcQwNFL16AG9i,,,,,43.0801,-77.6342,anonymous,EN,1 (highly inappropriate),2,,2,3,Who plays tag at dinner,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,7,8,,10 (highly appropriate),10 (highly appropriate),7 is so low,3,4,,9,9,The explanation and rating dont even match. The bot outright describes a bar as having a LIVELY atmosphere. How is this possible without talking?,,,,,,,4,6,"Sometimes you just need to write something. If your family likes you, then they will be ok with you taking some time to write if necessary.",,,,,,,,,,4,3,,,,,8,8,,9,7,,5,4,,9,8,,,,,,,,3,3,,,,,,,,,,,,,,,,,2,2,
+2024-08-23 10:47:05,2024-08-23 10:53:24,IP Address,71.168.238.238,100,379,True,2024-08-23 10:53:25,R_5fydVPjk89R5CgH,,,,,40.3699,-74.6381,anonymous,EN,1 (highly inappropriate),1 (highly inappropriate),,1 (highly inappropriate),1 (highly inappropriate),THIS MAKES NO SENSE,,,,,,,,,,6,3,,10 (highly appropriate),10 (highly appropriate),"Lmao imagine having a family dinner and everyone’s just sitting there in silence ",1 (highly inappropriate),1 (highly inappropriate),Lmao whispering into an ear is not talking,10 (highly appropriate),10 (highly appropriate),Lmao what everyone talks at bars that’s WHY it is loud,10 (highly appropriate),10 (highly appropriate),lmao what I have conversations with ppl in elevators all the time,10 (highly appropriate),10 (highly appropriate),there is literally nothing wrong with writing on a bus,,,,,,,,,,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),Bruh what it is super normal to eat bar food,2,2,,,,,1 (highly inappropriate),1 (highly inappropriate),Talking about books is not reading!!,1 (highly inappropriate),1 (highly inappropriate),"THE PROJECTOR MALFUNCTIONING IS NOT A NORMAL PART OF GOING TO THE MOVIES. ",4,4,,,,,,,,,,,1 (highly inappropriate),1 (highly inappropriate),Excuse me no sit your ass down at the movies please,,,,1 (highly inappropriate),1 (highly inappropriate),
+2024-08-23 10:55:14,2024-08-23 11:06:28,IP Address,74.109.221.6,100,674,True,2024-08-23 11:06:29,R_35NKA6dY8lhwg0c,,,,,40.4064,-79.9856,anonymous,EN,,,,3,4,,1 (highly inappropriate),1 (highly inappropriate),,,,,1 (highly inappropriate),1 (highly inappropriate),,7,7,,,,,,,,,,,,,,7,7,,,,,,,,,,,8,8,,6,6,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,10 (highly appropriate),10 (highly appropriate),,4,4,,,,,,,,8,8,How is that any more disruptive than just being on your phone??,3,3,,,,,1 (highly inappropriate),1 (highly inappropriate),What???,2,2,,4,4,
+2024-08-23 11:07:51,2024-08-23 11:27:52,IP Address,128.227.1.11,100,1200,True,2024-08-23 11:27:52,R_7rJlwah1dlmegyv,,,,,29.6138,-82.386,anonymous,EN,1 (highly inappropriate),1 (highly inappropriate),"I agree the risk of injury is too high so just don’t do it. ",1 (highly inappropriate),1 (highly inappropriate),Lol sit down and eat,,,,,,,,,,8,8,"I think it’s generally fine depending on the situation. Again, gotta read the room. ",,,,1 (highly inappropriate),1 (highly inappropriate),"Don’t take in movies. ",,,,5,6,"This is situational. There is not a blanket social rule for elevators. If you wanna talk then talk. If you don’t, then don’t. I think elevators can be a low risk environment if you want to chat but there needs to be a social awareness that can only be felt in that specific social situation. ",7,7,If you’re able to write on a moving vehicle more power to you,3,3,"I agree with the reasoning. Engaging with your family during dinner is better. ",,,,10 (highly appropriate),10 (highly appropriate),"Too many assumptions. This is perfectly fine to do. ",5,5,"This is not necessarily wrong but also it’s a type of action that wouldn’t warrant anything really. I’m neutral on this. ",,,,,,,,,,7,7,"Bars are meant for socializing but there is nothing inherently wrong with eating there. If they serve food then you can eat there. Eating there should not be restricted as sometimes you just wanna be there for the vibes. In a similar sense, would you restrict or frown upon having drinks at a table? No, bc that’s ridiculous. Chat GPT gets it wrong this time. ",,,,10 (highly appropriate),10 (highly appropriate),"Too many assumptions about the situation. I think it’s perfectly fine to read a book. ",,,,,,,10 (highly appropriate),10 (highly appropriate),"Again, too many assumptions. I don’t think it’s out of the ordinary to want to read and have a drink at a bar. ",3,3,"I agree but not with the reasoning rather it’s just not a place you are able to do it with people coming in and out. ",1 (highly inappropriate),1 (highly inappropriate),High risk for injury,,,,,,,,,,3,3,"Same answer. I also thought of how it could potentially pose a risk to the weight limit depending on how many people are on it as well. "
+2024-08-23 11:25:40,2024-08-23 11:28:48,IP Address,83.60.10.31,100,188,True,2024-08-23 11:28:49,R_2wFZppCvIwvIERc,,,,,37.1906,-3.5994,anonymous,EN,,,,,,,,,,3,3,,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,10 (highly appropriate),10 (highly appropriate),,10 (highly appropriate),10 (highly appropriate),,5,5,,,,,8,8,,9,9,,,,,10 (highly appropriate),10 (highly appropriate),,,,,10 (highly appropriate),9,,4,4,,,,,5,5,,,,,,,,,,,,,,,,,3,2,,4,4,,1 (highly inappropriate),1 (highly inappropriate),
+2024-08-23 11:36:53,2024-08-23 11:44:32,IP Address,213.221.204.250,100,458,True,2024-08-23 11:44:32,R_8aQQQcXdQEWLnfC,,,,,46.891,7.4978,anonymous,EN,,,,,,,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,,,,,,,4,4,,,,,1 (highly inappropriate),1 (highly inappropriate),,3,3,,6,6,,,,,7,6,,,,,10 (highly appropriate),10 (highly appropriate),,10 (highly appropriate),10 (highly appropriate),,3,3,,10 (highly appropriate),10 (highly appropriate),,1 (highly inappropriate),1 (highly inappropriate),,2,2,,,,,8,8,,3,3,,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,,,
+2024-08-23 11:35:02,2024-08-23 11:53:18,IP Address,1.145.73.1,100,1096,True,2024-08-23 11:53:19,R_4S6Itzo5AfsOUN3,,,,,-33.8864,151.011,anonymous,EN,,,,,,,3,3,"Again with the ""respect the space"" etc etc. Very little consideration to what actually happens in reality if you run in a movie theatre.",5,5,It's almost purely that running should not be done because it is abnormal. The only part that's substantial at all is the point that it could be dangerous in a small space.,,,,,,,10 (highly appropriate),10 (highly appropriate),Again I think the bot's reasoning and its score have no alignment. There's nothing particularly wrong with this reasoning though.,4,4,i can no longer make sense of these at all. it feels like they're just nonsense,,,,6,7,oh my god,8,8,this ai is a hater,,,,,,,,,,7,7,what! i can't even write in an elevator now!!! i feel like this chatbot is the kind of person to give you a dirty look for wearing a brightly coloured jacket.,4,4,"Most of it is nonsense and the repeated ""respect for shared spaces"" is still giving me big ""this ai is homophobic"" vibes.",10 (highly appropriate),10 (highly appropriate),,,,,9,8,I've never actually been to a bar. Don't they serve food? Am I thinking of pubs?,4,4,"This chatbot hates fun ngl. ""You can't eat in an elevator!!! That's weird!!!""",,,,5,5,Oprah Winfrey and Bill Gates?,,,,,,,,,,4,4,"It makes it sound so extreme for a 4! ""distress and panic"" seems like a bit much",,,,3,3,okay i see how it is. you prompted the ai to give it a 10. i'm being pranked,4,4,"Wait, do bars have music? Isn't that clubs? What's with the ethos logos pathos thing? Wait what was that about veins???",,,
+2024-08-23 11:35:42,2024-08-23 11:56:32,IP Address,76.190.219.19,100,1249,True,2024-08-23 11:56:32,R_6L5ClUvBEe5Mdr2,,,,,41.1413,-81.3445,anonymous,EN,2,2,"I agree with the bot, it is dangerous to run while inside a bus, especially if it is moving",1 (highly inappropriate),1 (highly inappropriate),"The bot took it as a fun thing to do, but it is not appropriate to run inside the house, especially in a room like a dining room that is potentially crowded with furniture and people. Also not the safest to be running around hot food and sharp utensils",2,2,"The boy is right, movie theatres are not a place for running",2,2,"Reasoning was good, running in a bar is indeed disruptive and potentially dangerous ",,,,10 (highly appropriate),9,"Every bus I’ve ever been on was full of people chatting, nobody sat silently. I see what the bot is saying about being mindful of others and not be too loud, but I feel talking on a bus is perfectly acceptable ",10 (highly appropriate),10 (highly appropriate),"Not sure why the bot only rated it a 7, but I agree with its explanation. Family dinners are exactly made for talking with your family ",,,,10 (highly appropriate),10 (highly appropriate),"The bot says a bar is for a lively and social atmosphere, then goes on to say talking disrupts people who are there for solitude. And yet in the previous trial about reading in a bar, the bot said that it was wrong because it shows a lack of sociability. So boy needs to make up its mind there. But anyway, talking in a bar is absolutely, perfectly appropriate and expected!!",,,,,,,4,4,"The bot was a little dramatic in its explanation, but I agree whipping out a notebook and focusing on writing during dinner with other people is a bit inappropriate ",4,4,"As long as the writing person is not being disruptive to other patrons, I don’t see that it’s a big deal. Though the bot’s example of the writer using a light in a dark theatre definitely makes it more inappropriate ",,,,,,,,,,10 (highly appropriate),10 (highly appropriate),"Boy was spot on with this one ",10 (highly appropriate),10 (highly appropriate),"Yep, perfectly normal and acceptable to eat at the movies. ",,,,,,,,,,,,,,,,8,8,"Not everyone goes to a bar for socialising. Some people go just to relax and enjoy a drink. If they want to sit and read while they drink, there is absolutely nothing wrong or weird about it ",5,5,"I don’t think it’s either appropriate or inappropriate to read in an elevator, though it might be a little odd.",,,,1 (highly inappropriate),1 (highly inappropriate),"I agree, family dinner is not the place to be jumping around",1 (highly inappropriate),1 (highly inappropriate),Not at all appropriate to be jumping around in a movie theatre!! Bot is way off here,,,,,,
+2024-08-23 12:02:00,2024-08-23 12:09:29,IP Address,89.45.4.6,100,448,True,2024-08-23 12:09:30,R_1kLNT3klvODSTOs,,,,,34.0726,-118.261,anonymous,EN,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,1 (highly inappropriate),1 (highly inappropriate),,,,,10 (highly appropriate),10 (highly appropriate),,1 (highly inappropriate),1 (highly inappropriate),,9,9,,,,,,,,3,3,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,10 (highly appropriate),10 (highly appropriate),,8,8,,10 (highly appropriate),10 (highly appropriate),"It says that bars are designed for drinking and socializing, despite saying talking in a bar is highly inapropriate a few questions back",10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,5,6,,1 (highly inappropriate),1 (highly inappropriate),What.,,,,,,
+2024-08-23 11:59:10,2024-08-23 12:12:57,IP Address,173.77.204.59,100,827,True,2024-08-23 12:12:58,R_3f3XDdL0ufiUx1i,,,,,40.7429,-73.9392,anonymous,EN,,,,,,,,,,3,2,Depends how we are defining run - running a bar or running in a bar,2,2,It's impossible to run in an elevator more than like 2 steps so whatever logic is provided is unnecessary.,6,5,Depends on the level of talking - do t talk loudly and in Japan try not to do it at all but for small conversations that are kept to a low volume it's fine,8,8,"Depends on the conversation ",,,,5,5,Makes sense - but the question was about appropriateness and the analysis goes beyond just appropriateness but into different situations. If the answer was supposed to be generic this chatbot went too far. If the answer is to try and consider everything that happens in a bar and a subjective judgement of conversations lacking substance or purpose then it didn't do a great job.,,,,6,5,"True it's hard to write on a bus, but it's not that far from reading",5,5,Depends on the family - I don't agree,,,,,,,4,5,"Jot a quick note, but don't write a book - logic is a little flawed here",,,,,,,,,,8,8,"There's a difference between eating and downing a full course meal at a bar. If the bar serves food, eat the food and support the business ",,,,9,8,People read all the time on the bus. I think the chatbot is fucking with us to give purposefully flawed logic now.,6,6,"Depends on the family ",2,3,"If you're reading subtitles sure, but this is obviously a fucked answer purposefully thrown into the mix to be illogical to human logic. Good luck reading in the dark if it's not on screen. ",,,,6,5,"An elevator is a transitional place - what people do before when walking to the elevator will continue until they exit the elevator. ",,,,,,,,,,3,7,Chatbot was loose with the word jump and the interpretation of a bar. I think there's specificity needed on the type of bar or club as to whether the chatbot is correct. Many bars - dive bars and such - are for talking and connecting after a long day.,2,2,The chatbots reasoning is flawed in that ita logic seems to say a 2 or a 1 but it's giving a 3
+2024-08-23 12:19:04,2024-08-23 12:22:14,IP Address,86.188.28.211,100,190,True,2024-08-23 12:22:15,R_2rSxJolCi7ysixG,,,,,51.6327,-3.9449,anonymous,EN,,,,5,6,,2,3,,,,,2,2,,9,9,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,8,8,,,,,10 (highly appropriate),10 (highly appropriate),,,,,8,8,,,,,4,4,,7,7,,2,2,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,9,9,,3,2,
+2024-08-23 12:08:09,2024-08-23 12:25:04,IP Address,185.232.22.207,100,1014,True,2024-08-23 12:25:05,R_6JhpgkkTtnSHNpq,,,,,40.7157,-74,anonymous,EN,,,,,,,,,,,,,,,,4,4,you know what i respect the disdain. share it even. objectively tho it aint a massive deal,10 (highly appropriate),10 (highly appropriate),"bot's reasoning is solid albeit drawn out and overdramatic as is seemingly its norm, idk why its number isn't a 10",2,2,girl shut up im tryna watch,10 (highly appropriate),10 (highly appropriate),"""you shouldnt be allowed to talk at a bar, it distracts people from talking"" anyway party time loser letsgooo shots shots shots shots",7,7,chill fam it's a brief moment of annoyance at worse and a short friendly interaction at best,,,,,,,2,2,"yeah nah bot's right/ not about those last 2 sentences shut Up about sAnCtiTy you fucking loser lmao but it's pretty rude to use your phone during a movie, and near impossible to use a notepad. if it's something brief it's not a huge deal but just. generally don't.",,,,3,3,"it's not like it's some weird taboo or anything, no one normal would have any issues seeing someone write in a notepad or on their phone in an elevator. it's just uncommon/not the most convenient place. ideally you'd do it anywhere else that you can get more confortable is all",4,4,"once again overly dramatic and explantory but still not wrong. better way to say it is simply that it's not really an issue but it's a little unclean and could be a bit gross to some people, so like MAYBE don't but who really cares",10 (highly appropriate),10 (highly appropriate),"i aint reading all that it ain't that deep. it's dinner, the point is to eat a meal.",10 (highly appropriate),10 (highly appropriate),mmm snac,,,,4,4,"again, for how brief it is it doesn't matter much. weird, i wouldn't like it, but i'd shrug my shoulders and move on",,,,3,3,"if anyone tries to ""spark a conversation"" with me while i'm reading i'm kicking their ass lmao. so, related, i wouldn't try to read something in the middle of a family dinner where the point is spending time with people. i don't think it's a horrible sin or whatever, people hop on their phones at the table all the time for brief bits or when conversation dies down, but it's a little more blatently rude",2,2,this is why generative ai won't replace human writers,,,,,,,,,,2,2,sAnCtiTy shut up you can just say it's annoying and unsafe,1 (highly inappropriate),2,"honestly my rating DID change bcus it made me realize like - i was thinking like ""jump up and down for funsies and whimsy"" instead of just ""physically react to a cool scene"" but. even then it kinda depends. there are some showings where the whole theater can get pretty animated, but for the most part? be fucking normal, don't disrupt other people trying to watch. getting *that* into it is fun, but best saved for something like a rerun of an old cult classic where everyone there has probably already seen it and is super into just celebrating it",,,,,,
+2024-08-23 12:32:58,2024-08-23 12:38:07,IP Address,99.45.126.13,100,309,True,2024-08-23 12:38:08,R_62sqBj5jV6qiv9q,,,,,41.9928,-87.8054,anonymous,EN,,,,2,2,,2,2,,,,,,,,7,7,,10 (highly appropriate),10 (highly appropriate),,1 (highly inappropriate),1 (highly inappropriate),,10 (highly appropriate),10 (highly appropriate),,5,5,,1 (highly inappropriate),7,,,,,3,4,,,,,5,5,,,,,,,,8,8,,,,,,,,,,,,,,,,,6,6,,,,,2,2,,,,,,,,5,6,,3,3,
+2024-08-23 12:43:44,2024-08-23 12:55:03,IP Address,172.58.116.55,100,679,True,2024-08-23 12:55:03,R_6QJCyFBhI9dzrHw,,,,,33.7697,-117.8906,anonymous,EN,1 (highly inappropriate),1 (highly inappropriate),This is extremely dangerous and chatbot should rate lower,,,,1 (highly inappropriate),1 (highly inappropriate),Agree and would add that it is dangerous (darkness).  Again surprised it gave a 4 and not lower,,,,1 (highly inappropriate),1 (highly inappropriate),Agree and surprised it didn't go lower than 3,,,,8,8,,1 (highly inappropriate),1 (highly inappropriate),"Talking and whispering is extremely rude to the other people ",10 (highly appropriate),10 (highly appropriate),"The chatbot is assuming talking means an in-depth conversation but it then describes other people having less meaningful conversation in the same scenario ",,,,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,8,8,The quality of the food doesn't make it less acceptable.  Drinking on an empty stomach isn't a good idea,3,3,,9,9,It would not be appropriate for a person affected by reading-induced motion sickness as the chatbot described (I am this way) but generally it is fine,,,,1 (highly inappropriate),1 (highly inappropriate),"In the very unusual situation it describes, yes it's acceptable.  That never happens though",,,,5,5,Depending on the form of reading (e.g. cell phone vs. book) it can be ok,,,,1 (highly inappropriate),1 (highly inappropriate),I agree with the reasoning but I'm surprised it scored a 4,,,,,,,2,2,"Children think this is fun and it is less dangerous if it is small children, but not acceptable for adults"
+2024-08-23 12:45:54,2024-08-23 12:57:00,IP Address,174.106.200.108,100,665,True,2024-08-23 12:57:00,R_1tKETOJMXyUKTQi,,,,,34.7002,-77.134,anonymous,EN,4,2,It is very good reasoning.,,,,2,2,,3,3,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,5,4,I think that talking is not always the worst thing in the world. It can actually ease tension.,,,,6,7,I feel like this reasoning is based on a very formal and strict family dinner concept. Family dinner isn't always a place for 100% attention.,,,,6,5,,6,4,,,,,10 (highly appropriate),10 (highly appropriate),,,,,10 (highly appropriate),10 (highly appropriate),"Bars commonly serve food. It can be good to sober up after drinking or to avoid a blackout before drinking. Eating is not that inappropriate ",,,,10 (highly appropriate),10 (highly appropriate),"Even though the reading may not be ideal for the reader, it is still fully appropriate and not frowned upon. I don't think twice about a person looking down at a book on a bus.",4,5,"I think the bots reasoning is inconsistent. In my opinion, reading at the table is more appropriate than writing at the table during dinner.",,,,6,5,,,,,2,2,,,,,,,,,,,1 (highly inappropriate),1 (highly inappropriate),
+2024-08-23 11:08:58,2024-08-23 13:01:13,IP Address,150.143.80.187,100,6735,True,2024-08-23 13:01:14,R_8sQMyZ8cXJERRAd,,,,,51.6422,-2.1721,anonymous,EN,,,,,,,,,,1 (highly inappropriate),2,Appropriate. Makes a lot of sense.,,,,,,,9,9,,,,,5,5,"Understandable approach, but it could swing slightly the other way in opinion too. It also assumed it was a 'lively bar' which I didnt and which wasnt specified.",5,5,,,,,,,,4,3,"It has a point. I dont think youd really hear the scratching of a pen in a cinema though. I dont think its really disrespectful to the film maker who you have no relationship with. What if someone is making notes about the movie? ",3,3,"I agree with it and think it sounds normal. However, if someone wants to do that there isnt anything wrong with it",2,2,"Quite good. Only explains situation and etiquette, not any practicalities this time...which I thought would have played a part ",5,5,Plausible,,,,,,,,,,4,4,Makes sense and correlates with a similar situation and the similar reasoning given earlier.,6,5,"I thought we were talking about appropriateness and social acceptability, not mostly practicality which the chatbot focuses more on. So I dont think it's as clever or intuitive/genuine as it might seem.",3,3,"I see it's point on sparking conversation, but if someone is actually reading, they wont want to be interrupted. Also, at a dinner, you would likely be eating and it hasn't taken that in to account. ",3,3,"It contradicts itself. It says it is not appropriate to write at the movies, but extremely appropriate to read. Here it assumes *before* the movie starts, which isnt what most people would assume. And it mentions reading as a conversation starter too, but that means you probably wouldn't read much. It has a somewhat interesting take and is plausible, but certainly not the most obvious answer and probably the least plausible so far",,,,,,,3,3,"Good and logical, though with that reasoning I would have thought the appropriateness would be lower",3,3,"Fine. Given the explanation, I'm surprised the given rating isnt lower",1 (highly inappropriate),1 (highly inappropriate),I feel it's done its best to justify something that is not at all appropriate!,,,,,,
+2024-08-23 13:13:14,2024-08-23 13:17:36,IP Address,64.251.40.239,100,261,True,2024-08-23 13:17:36,R_5KxUbGQ8UhM15Zi,,,,,40.6763,-73.9492,anonymous,EN,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,2,1 (highly inappropriate),,3,3,,4,4,,8,8,,2,2,,,,,5,5,,,,,,,,,,,5,4,,5,5,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,1 (highly inappropriate),1 (highly inappropriate),,10 (highly appropriate),10 (highly appropriate),,2,2,,6,7,,,,,,,,,,,,,,,,,1 (highly inappropriate),2,,,,
+2024-08-23 13:29:51,2024-08-23 13:34:29,IP Address,74.88.118.55,100,277,True,2024-08-23 13:34:30,R_711qgPBT0ubnJzE,,,,,40.9107,-74.5841,anonymous,EN,,,,10 (highly appropriate),9,,5,5,,,,,1 (highly inappropriate),1 (highly inappropriate),,9,9,,10 (highly appropriate),10 (highly appropriate),,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,9,9,,4,4,,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,5,5,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,5,5,,1 (highly inappropriate),1 (highly inappropriate),,5,6,,,,
+2024-08-23 14:04:13,2024-08-23 14:07:10,IP Address,71.105.71.245,100,177,True,2024-08-23 14:07:11,R_3FPXCRVxmYsaRvY,,,,,40.9484,-73.7324,anonymous,EN,,,,,,,3,3,,3,3,,2,2,,,,,7,7,,,,,,,,,,,5,5,,4,4,,4,4,,,,,3,3,,5,5,,,,,5,5,,,,,,,,,,,4,4,,3,3,,6,6,,,,,,,,4,4,,,,,2,2,,,,
+2024-08-23 12:44:03,2024-08-23 14:14:12,IP Address,91.16.153.47,100,5408,True,2024-08-23 14:14:12,R_8CWyKAPy0MmETy0,,,,,49.4962,10.7941,anonymous,EN,,,,,,,,,,,,,2,2,,9,9,"There is no social norm of being quiet on public transportations, not being too loud for sure but talking is the norm",10 (highly appropriate),10 (highly appropriate),,1 (highly inappropriate),1 (highly inappropriate),,,,,9,9,,,,,,,,3,2,,8,7,,4,4,,5,5,It does not take medical or health needs into account,10 (highly appropriate),10 (highly appropriate),,9,9,,10 (highly appropriate),10 (highly appropriate),,,,,10 (highly appropriate),10 (highly appropriate),,,,,3,2,"Noone waits an hour, stupid chatbot",,,,,,,,,,2,2,,,,,,,,,,
+2024-08-23 14:11:40,2024-08-23 14:19:14,IP Address,70.178.140.95,100,453,True,2024-08-23 14:19:14,R_684lEp1dWVNSiNH,,,,,36.3373,-94.0999,anonymous,EN,,,,1 (highly inappropriate),1 (highly inappropriate),,,,,1 (highly inappropriate),1 (highly inappropriate),,1 (highly inappropriate),1 (highly inappropriate),,7,7,,,,,,,,,,,9,8,,,,,9,9,,4,3,,5,5,,10 (highly appropriate),8,,4,3,,10 (highly appropriate),10 (highly appropriate),,,,,,,,4,4,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,2,3,,,,
+2024-08-23 14:10:05,2024-08-23 14:20:34,IP Address,24.21.9.126,100,629,True,2024-08-23 14:20:35,R_3oqiFugPEC4QxMe,,,,,45.5375,-122.5989,anonymous,EN,,,,1 (highly inappropriate),1 (highly inappropriate),Wtf,1 (highly inappropriate),1 (highly inappropriate),"With that explanation, why is it not rated a 1?",,,,,,,8,8,Dumb,10 (highly appropriate),10 (highly appropriate),"The bot had nothing but good things to say about talking at dinner but rated it a 7? Weird. ",1 (highly inappropriate),1 (highly inappropriate),"No it’s not natural and commonplace. Chatbot, you crazy. ",,,,6,7,An elevator is a sacred space?!?,10 (highly appropriate),10 (highly appropriate),Huh????,,,,5,5,"It’s neither appropriate nor inappropriate. I don’t see how writing in a movie theater is grossly more inappropriate than jumping on a bus or at dinner. ",,,,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),"What the hell? They serve food, why would it be inappropriate to eat it?",,,,,,,,,,4,4,"If you’re literally not watching anything because the projector is broken, then yeah it’s ok to read. But what a weird, niche situation to pick. ",,,,9,9,Who cares if you’re reading in an elevator? No one,2,2,So… why is it a 4?,1 (highly inappropriate),1 (highly inappropriate),No explanation as to why it’s a 4,1 (highly inappropriate),1 (highly inappropriate),Dude… that’s not the kind of jumping they were talking about,2,2,"Celebrities and influencers have been seen jumping in bars? You’re really stretching it. ",,,
+2024-08-23 14:15:12,2024-08-23 14:22:10,IP Address,174.207.39.193,100,417,True,2024-08-23 14:22:10,R_7d0tj9U67y4wk0U,,,,,41.1526,-81.63,anonymous,EN,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,5,5,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,7,7,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,10 (highly appropriate),10 (highly appropriate),,10 (highly appropriate),10 (highly appropriate),,10 (highly appropriate),10 (highly appropriate),The chatbot’s reasoning is ridiculous. Eat at a bar can be anything from peanuts on the bar to a full meal and I believe all are acceptable because who cares,,,,10 (highly appropriate),10 (highly appropriate),,3,3,,4,1 (highly inappropriate),,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,2,2,,10 (highly appropriate),10 (highly appropriate),"Yep, I don’t see a problem with this at all",,,
+2024-08-23 14:30:04,2024-08-23 14:33:43,IP Address,67.193.142.239,100,218,True,2024-08-23 14:33:44,R_7CEsf0j5RgaLU0B,,,,,44.2454,-76.5813,anonymous,EN,1 (highly inappropriate),1 (highly inappropriate),,,,,1 (highly inappropriate),1 (highly inappropriate),,1 (highly inappropriate),1 (highly inappropriate),,,,,10 (highly appropriate),10 (highly appropriate),,,,,1 (highly inappropriate),1 (highly inappropriate),,,,,4,3,,,,,,,,2,2,,,,,5,5,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,3,8,,9,9,,7,7,,,,,,,,2,2,,,,,3,3,
+2024-08-23 14:39:05,2024-08-23 14:46:26,IP Address,72.66.63.143,100,441,True,2024-08-23 14:46:27,R_6GHSDVcVgoy2Eql,,,,,38.9034,-76.9882,anonymous,EN,2,2,,5,5,"Insane explanation lol the behavior is weird, but fine. ",,,,3,3,,2,2,,,,,10 (highly appropriate),10 (highly appropriate),I don't see how less than a 10 makes sense,,,,,,,,,,8,8,,5,5,,3,3,"Sure. But there are ways to write without light, and the point about being rude to the people who made the movie is a bit silly.",,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,10 (highly appropriate),10 (highly appropriate),,,,,5,5,"He's not wrong but I imagine someone taking a bite of their lunch on the elevator, and I wouldn't bat an eye. Who cares",,,,,,,,,,,,,9,9,"Classic extreme reaction... chatbot is weird ",3,3,,5,5,I just don't think it matters. Weird that he's chill with running but not jumping.,,,,,,,4,4,"He's being a bit extreme "
+2024-08-23 13:59:02,2024-08-23 14:54:21,IP Address,82.14.32.53,100,3318,True,2024-08-23 14:54:21,R_8FaLhZAfxP816iK,,,,,51.3304,-0.268,anonymous,EN,1 (highly inappropriate),1 (highly inappropriate),I think its strange that the pub one previously was a 1 but this one is a 3 as i think this one is much more likely to result in harm,,,,,,,2,2,,1 (highly inappropriate),1 (highly inappropriate),,,,,9,9,,2,5,,,,,,,,9,9,"People still type on phones and computers while on public transport all the time. Often typing is considered a form of writting. As long as you don't do it while moving around or in a ppstion where you need to stay holding on to something it should not be harmful. In london where I use public transport it is fairly normal for someone to be texting and sometimes in more spacious seating arrangements, typing on a laptop. They are not usually invaiding anyones space. It would be hard to write by hand and depending on your situation might be intrusive to others. I agree with the chat bot that writting by hand is not usually appropriate on public transport but i have changed my mind about typing being appropriate.",,,,4,2,If it means physically writing with a pen then that would be more disruptive.,,,,,,,5,4,"I agree that it could be inappropriate depending on whether someone is allergic or sensative to the smell orf food or sounds of eating. It might depend on the situation like what are you eating, is it or does contain a common allergen, how quite can you be when eating this food, how likley are you to spill crumbs on the floor, how empty is the bus, how quick will you be eating.",,,,,,,,,,5,4,,9,9,"Diffculties focusing or immersing yourself in a book as well as likelihood to experience eye strain and headaches would vary extremely per person. You may need to read the information about where the bus is stopping or what it says on google maps. While there are small downsides you may or may not experience if you are reading something longer on a bus, as long as it does not interfere with you moving about the bus or standing securely on the bus it should not have any particularly serious repercussions at least for the average person. Plus there are things you are expected to read that people can't read might face difficulties for not being able to while on a bus even though you can use a bus without reading. The ai seemed to have mainly focused on reading books and i still think it is overall not that harmful to read and there are loads of scenarios both me and the ai have not considered that involve reading as well as different difficulties with reading that may vary for different individuals.",,,,5,5,,,,,5,5,When think of reading I think of any act of reading not necessarily reading a book but the ai is definitely thinking of reading a book. It might well have meant to read a book.,,,,5,5,It could vary depending on context. It could be harmful in the situation described but that is quite dramatic response from the family just because someone jumped.,,,,3,9,"I was thinking of pubs for some reason when i answered:( ",4,3,The saftey reasons make sense I did not realise this could be dangerous. I am slightly confused about if im rating things as harmful or abnormal.
+2024-08-23 14:56:59,2024-08-23 15:08:57,IP Address,24.34.139.98,100,718,True,2024-08-23 15:08:58,R_61GtnfGfa6gYMLg,,,,,41.5557,-72.6632,anonymous,EN,2,2,Yeah it's not cool to do that.,1 (highly inappropriate),1 (highly inappropriate),I mean I'm just against running indoors in general.,,,,2,2,Yea I pretty much agree. Only gave a 2 because there could be an emergency that requires being fast on your feet.,2,2,So impractical.,10 (highly appropriate),8,"I think the chatbot was a bit harsh. Assuming the bus is public transit, there are technically no actual rules against talking on a bus. Furthermore, the chatbot being against whispers is pretty ridiculous, as the only reason why I brought my score down from 10 to 8 was because I wasn't thinking about voice volume before.",10 (highly appropriate),10 (highly appropriate),The reasoning gave 10 but was for a 7.,1 (highly inappropriate),1 (highly inappropriate),One of my biggest pet peeves is movie talkers.,,,,,,,10 (highly appropriate),10 (highly appropriate),This chatbot is a bus cop.,,,,,,,6,6,I mean people write at cafes. As long as they're paying for at least a drink other people should just mind their business.,,,,,,,10 (highly appropriate),10 (highly appropriate),Real recognizes real.,,,,9,9,This chatbot is insane for that answer. You can order food at a bar bro.,,,,,,,4,4,Nope.,3,5,"I guess in that scenario it would be cool. Just seems impractical to bring a book to a movie theater, especially if you don't have a bag that can fit a book.",,,,,,,,,,,,,2,2,Absolutely not. Stay in your seat.,,,,5,4,I've done this before to get airtime but the chatbot is right. Not a great thing to do. 4 for fun though.
+2024-08-23 15:09:17,2024-08-23 15:15:14,IP Address,104.28.103.18,100,356,True,2024-08-23 15:15:15,R_5B3Heq6G0jpDbyN,,,,,41.8986,-87.738,anonymous,EN,2,2,"this one makes sense it’s only okay if it’s an emergency ",,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),talking on the bus is entirely normal idk what it’s yapping about lmfao,,,,2,2,"talking is not okay whispering is okay ",10 (highly appropriate),10 (highly appropriate),,8,8,,9,10 (highly appropriate),,,,,,,,5,4,"would be weird sorta but humans can do whatever i dont think anyone would care too much and its definitely not inappropriate ",,,,3,3,,,,,,,,10 (highly appropriate),10 (highly appropriate),"people literally eat in bars all the time, most bars have food, and i didn’t think it was necessarily referring to a whole feast, like the ai did",,,,10 (highly appropriate),10 (highly appropriate),"the ai js thinks in a direct manner it doesn’t take into account human feelings like being bored and wanting to read and improve yourself instead of wasting time sitting around on a bus ",,,,,,,4,4,,,,,2,3,,,,,1 (highly inappropriate),2,,4,10 (highly appropriate),,1 (highly inappropriate),1 (highly inappropriate),
+2024-08-23 15:23:29,2024-08-23 15:30:05,IP Address,174.239.121.108,100,395,True,2024-08-23 15:30:06,R_6xlBwQPlL5CQXu1,,,,,41.946,-87.7033,anonymous,EN,,,,1 (highly inappropriate),1 (highly inappropriate),Sit down and eat when the food is happening,,,,3,3,,,,,3,2,,10 (highly appropriate),10 (highly appropriate),,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,,,,,,,,,,8,7,,7,7,,5,5,,10 (highly appropriate),10 (highly appropriate),,,,,,,,7,6,"Most of the time I've been on an elevator was alone, is my reasoning.",,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,10 (highly appropriate),10 (highly appropriate),The hell kind of copy,,,,3,3,Does Emily Post even exist...?,1 (highly inappropriate),1 (highly inappropriate),,2,2,"I think it's rude to jump when you're sat AT the bar itself, but if there's a dancefloor or something go ahead",,,
+2024-08-23 15:03:23,2024-08-23 15:46:38,IP Address,35.147.22.81,100,2594,True,2024-08-23 15:46:39,R_6rqgVdqJ4ZjD78X,,,,,33.0287,-96.6826,anonymous,EN,2,2,,,,,1 (highly inappropriate),1 (highly inappropriate),,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,9,8,,,,,1 (highly inappropriate),1 (highly inappropriate),,2,2,,,,,4,4,,10 (highly appropriate),10 (highly appropriate),,,,,10 (highly appropriate),10 (highly appropriate),Don't all or most bars serve food?,,,,10 (highly appropriate),10 (highly appropriate),,,,,1 (highly inappropriate),1 (highly inappropriate),"What is the bot even talking about? The projector malfunctioning is already rare, and theaters are rarely well-lit enough to read. If you're reading on your phone you're not going to be focused and you likely won't even have much time, and there better not be anyone on Earth who actually brings a book to a theater.",,,,1 (highly inappropriate),1 (highly inappropriate),,1 (highly inappropriate),1 (highly inappropriate),,2,3,,,,,,,,,,
+2024-08-23 15:56:24,2024-08-23 16:00:49,IP Address,174.196.83.169,100,265,True,2024-08-23 16:00:50,R_1cBjmpKqb7WET1T,,,,,40.4339,-79.9996,anonymous,EN,,,,2,2,,,,,2,2,,,,,,,,,,,,,,,,,,,,,,,4,5,,,,,7,7,,,,,,,,,,,5,6,,9,8,,2,2,,8,8,,4,4,,5,5,,,,,5,5,,2,2,,3,3,,2,3,,,,,2,2,
+2024-08-22 20:11:27,2024-08-22 20:12:29,IP Address,68.56.105.62,50,62,False,2024-08-29 20:12:33,R_6MFNVZ81GARbB8i,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,4,,,,,
+2024-08-22 20:57:34,2024-08-22 20:58:44,IP Address,104.28.33.133,50,70,False,2024-08-29 20:58:50,R_7QFcn9lIVegXXxh,,,,,,,anonymous,EN,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,7,,,9,9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-22 20:09:11,2024-08-22 23:43:48,IP Address,81.97.20.127,50,12877,False,2024-08-29 23:43:49,R_8iHvUbF5raRlN8R,,,,,,,anonymous,EN,1 (highly inappropriate),1 (highly inappropriate),I agree,,,,,,,,,,,,,8,1 (highly inappropriate),Dont agree. Buses are social spaces where people frequently meet with freinds and chat,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,,,,,,,5,1 (highly inappropriate),"Not valid, writing disturbs nobody",9,1 (highly inappropriate),"Disagree. Bars can be used in various ways, including writing. Writing disturbs nobody",,,,,,,,,,,,,,,,,,,,,,3,,,,,,,,,,,,,,,,,,1 (highly inappropriate),10 (highly appropriate),Totally wrong. Jumping is disturbing and offensive to other movie goers,,,,,,
+2024-08-23 08:42:51,2024-08-23 08:48:34,IP Address,195.139.90.41,25,342,False,2024-08-30 08:48:35,R_8KUtjSOmZpr9Ixi,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,2,2,,,,,,,,,,,4,5,"Really weird reasoning, all the same arguments could be applied to actually eating the food as well.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 08:50:24,2024-08-23 08:51:01,IP Address,171.61.92.209,50,36,False,2024-08-30 08:51:03,R_4gGHGZbrBeoBWyl,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 08:54:09,2024-08-23 08:54:39,IP Address,184.175.28.12,50,29,False,2024-08-30 08:54:44,R_1MMymg1uzUSYa6O,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 09:16:39,2024-08-23 09:16:57,IP Address,69.251.62.37,25,18,False,2024-08-30 09:16:59,R_1ewzkiy3MH36HPX,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 10:03:37,2024-08-23 10:05:01,IP Address,138.88.233.247,25,84,False,2024-08-30 10:05:05,R_3Fb0nipzvxcoY9Y,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,10 (highly appropriate),5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,4,,,,,,,,3,3,
+2024-08-23 10:34:02,2024-08-23 10:34:12,IP Address,24.187.225.98,25,10,False,2024-08-30 10:34:15,R_6OEwl2N6h9IXiOB,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 10:36:21,2024-08-23 10:39:46,IP Address,84.215.57.23,25,205,False,2024-08-30 10:39:49,R_2cwoozYKz9Brjl8,,,,,,,anonymous,EN,4,4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,6,6,,,,,,,,,,,,,,,,,3,4,,,,,,,,8,5,,5,5,,,,,,,,,,,,,
+2024-08-23 10:58:11,2024-08-23 11:00:41,IP Address,37.19.199.146,25,149,False,2024-08-30 11:00:44,R_7DNYVYmUUU9IkvB,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 11:00:08,2024-08-23 11:02:45,IP Address,136.38.18.38,25,157,False,2024-08-30 11:02:49,R_5644icXJWPQWIjT,,,,,,,anonymous,EN,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,3,4,,7,7,,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,1 (highly inappropriate),1 (highly inappropriate),Ok,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 12:24:44,2024-08-23 12:32:06,IP Address,94.21.135.142,50,441,False,2024-08-30 12:32:09,R_2GeWtspxjnYV6Kn,,,,,,,anonymous,EN,,,,,,,,,,,,,6,6,"standing on the right, walking, running on the left.",,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,8,8,,,,,,,,,,,,,,7,6,,,,,9,9,,,,,,,,,,,,,,3,3,"wow, just wow",7,,,,,,,,,,,,4,4,"it's not sharing joy. i the movies you sit, shut up and watch the film. if you want to jump or be loud, watch at home",,,,,,
+2024-08-23 12:39:37,2024-08-23 12:40:02,IP Address,74.133.182.87,50,24,False,2024-08-30 12:40:06,R_1LXqmly1SDEnvlo,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,10 (highly appropriate),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 13:10:37,2024-08-23 13:11:45,IP Address,148.75.244.12,25,68,False,2024-08-30 13:11:48,R_1QDjcol6IqqSEFY,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,2,2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,4,4,,,,,,,,,,,,,,3,3,,,,,,,,,,
+2024-08-23 13:19:20,2024-08-23 13:21:13,IP Address,107.152.11.140,25,112,False,2024-08-30 13:21:13,R_3tJCvIaYxfQeZj6,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,7,7,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 13:24:41,2024-08-23 13:28:15,IP Address,94.191.137.138,25,213,False,2024-08-30 13:28:17,R_8hlonvdLeP3bpfc,,,,,,,anonymous,EN,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,,,,,,,8,8,,,,,,,,,,,,,,,,,,,,,,,2,2,,6,6,"I agree when there's a lot of people but not for example before the rush. then it would be totally fine. ",,,,2,2,,,,,,,,,,,2,2,
+2024-08-23 13:41:22,2024-08-23 13:42:53,IP Address,77.201.220.111,50,91,False,2024-08-30 13:42:54,R_8QJYvAwRteyir0H,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,10 (highly appropriate),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,8,3,I agree with it,,,,,,,,,,,,,,,
+2024-08-23 13:53:18,2024-08-23 13:54:08,IP Address,174.160.109.9,25,49,False,2024-08-30 13:54:10,R_6qPzTKLFcsRaMdo,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,3,2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 12:17:52,2024-08-23 14:14:06,IP Address,78.80.109.12,25,6974,False,2024-08-30 14:14:09,R_8gYtBQ12z2zLR76,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,4,4,,,,,,,,,,,,,,8,8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,2,,,,,,,
+2024-08-23 14:15:34,2024-08-23 14:16:43,IP Address,47.196.74.215,50,68,False,2024-08-30 14:16:52,R_1cuf4lYWxxLLwzp,,,,,,,anonymous,EN,,,,,,,,,,6,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 14:18:04,2024-08-23 14:28:21,IP Address,47.196.74.215,25,617,False,2024-08-30 14:28:25,R_5LcezTWMoiP7iiu,,,,,,,anonymous,EN,,,,,,,1 (highly inappropriate),1 (highly inappropriate),,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,10 (highly appropriate),10 (highly appropriate),"Talking at a bar is normal, even expected, as long as you aren't rude about it",10 (highly appropriate),10 (highly appropriate),It's not a social norm not to talk to people in an elevator unless they clearly don't want to be talked to,7,7,,3,3,,1 (highly inappropriate),1 (highly inappropriate),,8,8,,7,5,"Depends on how long someone is writing for and how full the elevator is. If they are just jotting down a note and the elevator is largely empty, it shouldn't be a problem, but if someone is trying to write out a full novel in there it's probably innappropriate",3,3,,,,,10 (highly appropriate),10 (highly appropriate),Theaters literally sell snacks so eating is not only expected but also encouraged,,,,1 (highly inappropriate),1 (highly inappropriate),,,,,,,,,,,,,,,,,,,,3,5,Depends on the family and venue. If it is an outdoor dinner like a family barbeque there is some degree of play that might be permitted or expected among children,,,,,,,,,
+2024-08-23 14:35:09,2024-08-23 14:37:02,IP Address,146.75.222.24,25,112,False,2024-08-30 14:37:07,R_3Deiwb6R0df5vkY,,,,,,,anonymous,EN,2,2,,,,,,,,,,,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,5,4,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,10 (highly appropriate),10 (highly appropriate),,,,,,,,6,6,,,,,,,,5,5,
+2024-08-23 15:14:51,2024-08-23 15:16:25,IP Address,2.222.135.132,50,94,False,2024-08-30 15:16:27,R_8ok3N9pvAhmknS1,,,,,,,anonymous,EN,5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-22 19:37:07,2024-08-23 16:41:12,IP Address,35.2.164.169,25,75844,False,2024-08-30 16:41:12,R_6HpiKhpJA2NrrS6,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-08-23 17:08:58,2024-08-23 17:15:19,IP Address,99.162.228.171,25,381,False,2024-08-30 17:15:20,R_7YFDMxYhVc6s8mc,,,,,,,anonymous,EN,,,,1 (highly inappropriate),1 (highly inappropriate),"Ridiculous ",,,,,,,1 (highly inappropriate),1 (highly inappropriate),,9,10 (highly appropriate),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,10 (highly appropriate),10 (highly appropriate),Lots of bats serve food,,,,,,,,,,4,6,"Ridiculous reasoning because it’s rare that the projector breaks. ",10 (highly appropriate),9,"Maybe someone just wants a cocktail while they read and they don’t want to socialize. ",,,,,,,,,,,,,,,,,,
+2024-08-23 21:22:46,2024-08-23 21:22:56,IP Address,89.163.216.65,25,9,False,2024-08-30 21:22:58,R_2Pr48Tje5Ddf3Al,,,,,,,anonymous,EN,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
