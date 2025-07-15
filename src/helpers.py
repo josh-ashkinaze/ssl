@@ -408,6 +408,7 @@ def cat_stats(data, include_n=True, digits=1, sort_by='frequency', reverse=True)
 
     """
     # Convert to numpy array for consistency
+    from collections import Counter
     data = np.array(data)
     # Count frequencies
     counter = Counter(data)
