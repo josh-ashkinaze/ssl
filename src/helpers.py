@@ -3,6 +3,9 @@ import random
 import numpy as np
 import shutil
 from pathlib import Path
+import logging
+import os
+import sys
 
 random.seed(42)
 np.random.seed(42)
@@ -374,3 +377,94 @@ def array_stats(data, digits=2, include_ci=False):
 
     return result
 
+
+def cat_stats(data, include_n=True, digits=1, sort_by='frequency', reverse=True):
+    """Calculate and format statistics for categorical data.
+
+    This function analyzes categorical data by computing frequencies and percentages
+    for each unique category. It returns both a formatted string for display and
+    a dict. You can choose how you want to order the categories.
+
+    Args:
+        data (array-like): The input categorical data array. Can be a list,
+            numpy array, or any iterable containing categorical values.
+        include_n (bool, optional): Whether to include raw counts (n=X) in the
+            formatted output string. Defaults to True.
+        digits (int, optional): Number of decimal places for percentage rounding
+            in the output. Defaults to 1.
+        sort_by (str, optional): How to sort the results. Options are:
+            - 'frequency': Sort by frequency/count (default)
+            - 'alphabetical': Sort alphabetically by category name
+            - 'original': Maintain order of first appearance in data
+        reverse (bool, optional): Whether to reverse the sort order. Defaults to
+            True for descending frequency (most common first).
+
+    Returns:
+        tuple: A tuple containing two elements:
+            - str: Formatted string showing categories with percentages and
+              optionally counts in the format "Category1 (45.2%; n=10),
+            - dict: Dictionary with categories as keys and dictionaries as values
+              containing:
+              - 'count': Raw frequency count
+              - 'percentage': Exact percentage (float)
+              - 'percentage_rounded': Rounded percentage for display
+
+    """
+    # Convert to numpy array for consistency
+    from collections import Counter
+    data = np.array(data)
+    # Count frequencies
+    counter = Counter(data)
+    total_count = len(data)
+
+    # Calculate percentages and build results dictionary
+    result_dict = {}
+    for category, count in counter.items():
+        percentage = (count / total_count) * 100
+        result_dict[category] = {
+            'count': count,
+            'percentage': percentage,
+            'percentage_rounded': round(percentage, digits)
+        }
+
+    # Sort results according to preference
+    if sort_by == 'frequency':
+        sorted_items = sorted(result_dict.items(),
+                              key=lambda x: x[1]['count'],
+                              reverse=reverse)
+    elif sort_by == 'alphabetical':
+        sorted_items = sorted(result_dict.items(),
+                              key=lambda x: str(x[0]),
+                              reverse=reverse)
+    elif sort_by == 'original':
+        # Maintain order of first appearance in the data
+        seen = set()
+        original_order = []
+        for item in data:
+            if item not in seen:
+                seen.add(item)
+                original_order.append(item)
+        sorted_items = [(item, result_dict[item]) for item in original_order]
+    else:
+        raise ValueError("sort_by must be 'frequency', 'alphabetical', or 'original'")
+
+    # Format output string
+    result_parts = []
+    for category, stats in sorted_items:
+        if include_n:
+            part = f"{category} ({stats['percentage_rounded']:.{digits}f}%; n={stats['count']})"
+        else:
+            part = f"{category} ({stats['percentage_rounded']:.{digits}f}%)"
+        result_parts.append(part)
+
+    result_string = ", ".join(result_parts)
+
+    # Return both the formatted string and the full dictionary for programmatic use
+    return result_string, {k: v for k, v in sorted_items}
+
+
+def log_and_print(message):
+    """Log a message using the current logger and print it to console."""
+    logger = logging.getLogger()
+    logger.info(message)
+    print(message)
