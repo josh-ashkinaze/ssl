@@ -341,6 +341,24 @@ def main():
     profane_words_url = "https://raw.githubusercontent.com/coffee-and-fun/google-profanity-words/604bad087123a4ed4425f05d13e119b98e270d30/data/en.txt"
     bad_words = requests.get(profane_words_url).text.split("\n")
     bad_words = [word.strip() for word in bad_words if word.strip()]
+
+    # added custom phrases
+    bad_words += [
+        "sleeping with",
+        "lingerie",
+        "make love",
+        "one night stand",
+        "sex tape",
+        "porn star",
+        "adult film",
+        "meth",
+        "heroin",
+        "phone sex",
+        "cam girl",
+        "thong",
+        "strip club",
+    ]
+
     wl = {'profanity': bad_words}
     counter = FastFlashTextCounter(wl)
 
