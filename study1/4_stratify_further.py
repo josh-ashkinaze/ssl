@@ -18,8 +18,8 @@ What it does
 import pandas as pd
 
 # ---- configuration ----
-IN_PATH = "data/clean/ssl_stimuli_unannot.csv"
-OUT_PATH = "data/clean/human_stimuli_stratified.csv"
+IN_PATH = "../data/clean/ssl_stimuli_unannot.csv"
+OUT_PATH = "../data/clean/human_stimuli_stratified.csv"
 
 BASE_PER_BUCKET = 3
 OVERSAMPLE_FACTOR = 3

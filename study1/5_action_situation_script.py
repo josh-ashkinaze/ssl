@@ -26,12 +26,13 @@ import pandas as pd
 from dotenv import load_dotenv
 from tqdm import tqdm
 from litellm import completion
+import os
 
 # ---- config ----
-IN_PATH = "data/clean/human_stimuli_stratified.csv"
-OUT_PATH = "data/clean/ai_action_context_stimuli.csv"
+IN_PATH = "../data/clean/human_stimuli_stratified.csv"
+OUT_PATH = "../data/clean/ai_action_context_stimuli.csv"
 
-MODEL = "gpt-4"
+MODEL = "gpt-4o"
 WORD_TARGET = 100
 
 MAX_RETRIES = 5
@@ -118,6 +119,13 @@ def main():
     load_environment()
 
     df = pd.read_csv(IN_PATH)
+
+    if os.path.exists(OUT_PATH):
+        logging.info(f"Output file {OUT_PATH} already exists. Exiting.")
+        print(f"Output file {OUT_PATH} already exists. Exiting.")
+        return
+    else:
+        pass
 
     # Map input 'situation' → runtime 'context'; keep original if already present
     if "context" in df.columns:

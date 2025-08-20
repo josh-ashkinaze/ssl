@@ -28,10 +28,10 @@ from tqdm import tqdm
 from litellm import completion
 
 # ---- config ----
-IN_PATH = "data/clean/human_stimuli_stratified.csv"
-OUT_PATH = "data/clean/ai_rot_stimuli.csv"
+IN_PATH = "../data/clean/human_stimuli_stratified.csv"
+OUT_PATH = "../data/clean/ai_rot_stimuli.csv"
 
-MODEL = "gpt-4"
+MODEL = "gpt-4o-2024-08-06"
 WORD_TARGET = 100
 
 MAX_RETRIES = 5
@@ -42,15 +42,13 @@ DRY_ROWS = 3
 RNG_SEED = 42
 random.seed(RNG_SEED)
 
+load_dotenv("../src/.env")
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY", "")
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 PROMPT_TYPES = ["Compelling Case", "Role-playing Expert", "Logical Reasoning"]
 
-# ---- helpers ----
-def load_environment():
-    load_dotenv()
-    os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY", "")
-    logging.info("Environment variables loaded")
 
 def clean_text(s: str) -> str:
     s = str(s).strip()
@@ -108,7 +106,6 @@ def build_prompt(style: str, rot: str, rating: int) -> str:
 
 # ---- main ----
 def main():
-    load_environment()
 
     df = pd.read_csv(IN_PATH)
 
