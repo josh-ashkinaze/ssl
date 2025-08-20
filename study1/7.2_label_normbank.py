@@ -3,6 +3,10 @@ Author: Joshua Ashkinaze
 
 Description: Labels NormBank examples using schema of Moral, Societal-Conventional, Personal-Psychological, Other.
 
+Note that we apply some filters to normbank:
+- Remove examples with "[AND]" in constraints (to avoid complexity). So there's just ONE constraint.
+- Remove examples with profane words (using a fast flashtext-based filter).
+
 Input:
 - data/raw/normbank.csv
 
@@ -23,10 +27,44 @@ import os
 from dotenv import load_dotenv
 import logging
 from tqdm import tqdm
+import requests
+from flashtext import KeywordProcessor
+from collections import Counter
+
+
+class FastFlashTextCounter:
+    def __init__(self, word_lists_dict):
+        self.processors = {}
+        for name, word_list in word_lists_dict.items():
+            processor = KeywordProcessor(case_sensitive=False)
+            for word in word_list:
+                processor.add_keyword(word.lower())
+            self.processors[name] = processor
+        log_and_print("FastFlashTextCounter initialized with word lists.")
+        logging.info("FastFlashTextCounter initialized with word lists.")
+
+    def count_keywords(self, text, processor_name):
+        if pd.isna(text) or not text:
+            return {}
+        keywords_found = self.processors[processor_name].extract_keywords(str(text).lower())
+        return dict(Counter(keywords_found))
+
+    def contains_keywords(self, text, processor_name):
+        """Check if text contains any keywords from the specified processor"""
+        if pd.isna(text) or not text:
+            return False
+        keywords_found = self.processors[processor_name].extract_keywords(str(text).lower())
+        return len(keywords_found) > 0
+
+
+def contains_bad_words(x, counter):
+    return counter.contains_keywords(x, 'profanity')
+
 
 load_dotenv("../src/.env")
 
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
 
 
 N = 3000 # n to label
@@ -40,6 +78,33 @@ def log_and_print(msg):
     print(msg)
     logging.info(msg)
 
+
+
+
+# Set up profanity filtering
+profane_words_url = "https://raw.githubusercontent.com/coffee-and-fun/google-profanity-words/604bad087123a4ed4425f05d13e119b98e270d30/data/en.txt"
+bad_words = requests.get(profane_words_url).text.split("\n")
+bad_words = [word.strip() for word in bad_words if word.strip()]
+
+# added custom phrases
+bad_words += [
+    "sleeping with",
+    "lingerie",
+    "make love",
+    "one night stand",
+    "sex tape",
+    "porn star",
+    "adult film",
+    "meth",
+    "heroin",
+    "phone sex",
+    "cam girl",
+    "thong",
+    "strip club",
+]
+
+wl = {'profanity': bad_words}
+counter = FastFlashTextCounter(wl)
 
 
 PROMPT_BASE = """
@@ -124,11 +189,14 @@ def main():
     df = pd.read_csv("../data/raw/normbank.csv")
     df['num_ands'] = df['constraints'].apply(count_ands)
     df = df.query("num_ands <= 0").copy()
-    df["norm"] = df.apply(turn_into_row, axis=1)
+    df["stimuli"] = df.apply(turn_into_row, axis=1)
+    df['has_bad_words'] = df['stimuli'].apply(lambda x: contains_bad_words(x, counter))
+    df = df[~df['has_bad_words']].copy()
     df = df.sample(N, random_state=42)
-    df["prompt"] = df["norm"].apply(make_prompt)
+    df["prompt"] = df["stimuli"].apply(make_prompt)
 
-    BATCH_SIZE = 100
+
+    BATCH_SIZE = 300
     prompts = df["prompt"].tolist()
     preds = []
 
