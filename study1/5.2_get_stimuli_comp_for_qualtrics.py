@@ -4,6 +4,15 @@ Author: Joshua Ashkinaze
 Description: For Qualtrics pilot, need to see if better to use Social Chemistry or Normbank stimuli.
 
 Date: 2025-08-23 09:23:35
+
+Input:
+- data/clean/ssl_stimuli_unannot.csv: Social Chemistry stimuli with agreement conditions and domains
+- data/clean/init_normbank_predictions_3000.csv: Normbank stimuli with predicted domains
+
+Output:
+- data/qualtrics_experiments/compare_stimuli_lm_raw.csv: Paired stimuli from both datasets for comparison
+- data/qualtrics_experiments/compare_stimuli_lm_clean.csv: This isn't created by this script but manually cleaned for grammar etc.
+
 """
 
 
@@ -12,8 +21,8 @@ import os
 
 random_state=42
 n_per_bucket = 5
-os.makedirs("../data/for_qualtrics", exist_ok=True)
-output_fn = "../data/for_qualtrics/compare_stimuli_lm_raw.csv"
+os.makedirs("../data/qualtrics_experiments", exist_ok=True)
+output_fn = "../data/qualtrics_experiments/compare_stimuli_lm_raw.csv"
 
 
 
