@@ -345,6 +345,7 @@ def main():
     # added custom phrases
     bad_words += [
         "sleeping with",
+        "sleep with"
         "lingerie",
         "make love",
         "one night stand",

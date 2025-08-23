@@ -11,7 +11,7 @@ Input:
 - data/raw/normbank.csv
 
 Output:
-- data/clean/normbank_predictions_{N}.csv: NormBank examples with model predictions.
+- data/clean/init_normbank_predictions_{N}.csv: NormBank examples with model predictions.
 -
 
 
@@ -70,7 +70,7 @@ os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 N = 3000 # n to label
 
 logging.basicConfig(filename=f"{os.path.splitext(os.path.basename(__file__))[0]}.log", level=logging.INFO, format='%(asctime)s: %(message)s', filemode='w', datefmt='%Y-%m-%d %H:%M:%S', force=True)
-output_fn = f"../data/clean/normbank_predictions_{N}.csv"
+output_fn = f"../data/clean/init_normbank_predictions_{N}.csv"
 
 
 
