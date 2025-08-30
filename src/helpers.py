@@ -72,7 +72,7 @@ def make_aesthetic(
     if not hex_color_list:
         # 2024-11-28: Reordered color list
         hex_color_list = [
-            "#2C3531",  # Dark charcoal gray with green undertone
+            "#989898",  # Lighter gray (instead of #2C3531)...let errors bars be dark
             "#D41876",  # Telemagenta
             "#00A896",  # Persian green
             "#826AED",  # Medium slate blue
@@ -83,6 +83,7 @@ def make_aesthetic(
             "#7DCD85",  # Emerald
             "#F7B2AD",  # Melon
             "#D4B2D8",  # Pink lavender
+            "#2C3531",  # Dark charcoal gray with green undertone
             "#020887",  # Phthalo blue
             "#E87461",  # Medium-bright orange
             "#7E6551",  # Coyote
@@ -97,7 +98,7 @@ def make_aesthetic(
             "font.family": custom_font,
             "font.weight": "regular",
             "axes.labelsize": 11 * font_scale,
-            "axes.titlesize": 14 * font_scale,
+            "axes.titlesize": 13 * font_scale,
             "xtick.labelsize": 10 * font_scale,
             "ytick.labelsize": 10 * font_scale,
             "legend.fontsize": 10 * font_scale,
