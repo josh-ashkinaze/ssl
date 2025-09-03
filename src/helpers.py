@@ -70,25 +70,27 @@ def make_aesthetic(
 
     sns.set(style="white", context="paper", font_scale=font_scale)
     if not hex_color_list:
-        # 2024-11-28: Reordered color list
+        # 2025-09-03: Reorder more colorblind friendly
         hex_color_list = [
-            "#989898",  # Lighter gray (instead of #2C3531)...let errors bars be dark
-            "#D41876",  # Telemagenta
-            "#00A896",  # Persian green
-            "#826AED",  # Medium slate blue
-            "#F45B69",  # Vibrant pinkish-red
-            "#E3B505",  # Saffron
-            "#89DAFF",  # Pale azure
-            "#342E37",  # Dark grayish-purple
-            "#7DCD85",  # Emerald
-            "#F7B2AD",  # Melon
-            "#D4B2D8",  # Pink lavender
-            "#2C3531",  # Dark charcoal gray with green undertone
-            "#020887",  # Phthalo blue
-            "#E87461",  # Medium-bright orange
-            "#7E6551",  # Coyote
-            "#F18805",  # Tangerine
+            "#A9A9A9",  # Light gray
+            "#D41876",  # Magenta-pink
+            "#020887",  # Dark blue
+            "#89DAFF",  # Light blue
+            "#F18805",  # Orange
+            "#826AED",  # Purple-blue
+            "#342E37",  # Dark purple-gray
+
+            "#D4B2D8",  # Light purple
+            "#00A896",  # Teal-green
+            "#7DCD85",  # Light green
+            "#E3B505",  # Yellow
+            "#F7B2AD",  # Light pink/salmon
+
+            "#F45B69",  # Coral-red
+            "#E87461",  # Orange-red
+            "#7E6551"  # Brown
         ]
+
 
     sns.set_palette(sns.color_palette(hex_color_list))
 
@@ -98,7 +100,7 @@ def make_aesthetic(
             "font.family": custom_font,
             "font.weight": "regular",
             "axes.labelsize": 11 * font_scale,
-            "axes.titlesize": 13 * font_scale,
+            "axes.titlesize": 14 * font_scale,
             "xtick.labelsize": 10 * font_scale,
             "ytick.labelsize": 10 * font_scale,
             "legend.fontsize": 10 * font_scale,
@@ -146,6 +148,7 @@ def make_aesthetic(
     )
 
     return hex_color_list
+
 
 
 
