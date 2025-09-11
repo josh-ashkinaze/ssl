@@ -124,12 +124,16 @@ def handle_advice(row, all_personal_keywords):
     # Check if any keyword matches in the combined text
     if keyword_pattern.search(combined_text):
         return 'personal-psychological'
-    return 'other'
+    return 'advice, not personal'
 
 def classify_ssl_domain(row, all_personal_keywords):
     """Classify into SSL domains based on Social Domain Theory."""
     categorization = str(row['rot-categorization']).lower()
-    all_cats = [cat.strip() for cat in categorization.split(',') if cat.strip()]
+    all_cats = [cat.strip() for cat in categorization.split('|') if cat.strip()]  # Changed from ',' to '|'
+
+    # Handle multiple categories case - return 'other'
+    if len(all_cats) > 1:
+        return 'multiple'
 
     # Handle single category case
     if len(all_cats) == 1:
@@ -140,18 +144,11 @@ def classify_ssl_domain(row, all_personal_keywords):
         elif 'advice' in all_cats[0]:
             return handle_advice(row, all_personal_keywords)
         else:
-            return 'other'
+            return 'advice, not personal'
 
-    # Handle multiple categories
-    selected_category = random.choice(all_cats)
-    if 'morality-ethics' in selected_category:
-        return 'moral'
-    elif 'social-norms' in selected_category:
-        return 'societal-conventional'
-    elif 'advice' in selected_category:
-        return handle_advice(row, all_personal_keywords)
-    else:
-        return 'other'
+    # Handle edge case where no categories found
+    return 'could not parse'
+
 
 
 def enhanced_filter(df):
@@ -167,9 +164,22 @@ def enhanced_filter(df):
     df_clean = df_clean.dropna(subset=key_cols)
     log_and_print(f"After removing missing key attributes: {len(df_clean)}")
 
+    # Remove entries with multiple categories
+    df_clean = df_clean[df_clean['rot-categorization'].apply(lambda x: count_ssl_domain(x) == 1)]
+    log_and_print(f"After removing multiple categories: {len(df_clean)}")
 
     return df_clean
 
+
+def count_ssl_domain(categorization):
+    """Classify into SSL domains based on Social Domain Theory."""
+    try:
+        categorization = str(categorization).lower()
+        all_cats = [cat.strip() for cat in categorization.split('|') if cat.strip()]
+        return len(all_cats)
+    except Exception as e:
+        print(f"Error counting categories: {e} - {categorization}")
+        return 0
 
 def analyze_norm_concordance(df):
     """Analyze agreement levels for experimental design"""
@@ -340,6 +350,20 @@ def main():
     log_and_print(f"Loading data from {SOCIAL_CHEM_PATH}")
     df = pd.read_csv(SOCIAL_CHEM_PATH, sep="\t")
     log_and_print(f"Original dataset size: {len(df)}")
+
+
+    df['number_categories'] = df['rot-categorization'].apply(count_ssl_domain)
+    log_and_print(f"Entries with multiple categories: {(df['number_categories'] > 1).sum()}")
+    log_and_print(f"Entries with single category: {(df['number_categories'] == 1).sum()}")
+
+    df['number_categories'] = df['rot-categorization'].apply(lambda x: count_ssl_domain(x))
+    log_and_print(f"Entries with multiple categories: {(df['number_categories'] > 1).sum()}")
+    log_and_print(f"Entries with single category: {(df['number_categories'] == 1).sum()}")
+
+    # by agreement levels
+    log_and_print(message=pd.crosstab(df['rot-agree'], df['number_categories']).to_string())
+
+
 
     # Set up profanity filtering
     profane_words_url = "https://raw.githubusercontent.com/coffee-and-fun/google-profanity-words/604bad087123a4ed4425f05d13e119b98e270d30/data/en.txt"
