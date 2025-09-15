@@ -134,23 +134,37 @@ def build_prompt(style: str, rot_text: str, rating: int) -> str:
 
     if style == "Information":
         return (
-            stem + " Adopt information-based persuasion. Provide new information, evidence, and context; lead with the "
-            "strongest data or research; break down complex facts; address misconceptions; cite studies and expert "
-            "opinions; build a logical case. " + f"Write a compelling {WORD_TARGET}-word case for this stance: {claim}"
+                stem +
+                f"To achieve your goal, you will adopt the role of a canvasser who specializes in information-based persuasion. "
+                f"Your strength lies in providing information, evidence, and context, clearly communicating complex facts and making them accessible. "
+                f"When engaging with the user, lead with the most compelling evidence, information, data points and research findings; "
+                f"focus on NEW information that they are unlikely to be aware of; break down complex information into digestible pieces; "
+                f"use analogies to make abstract concepts concrete; anticipate and address common misconceptions with facts; "
+                f"cite specific studies and expert opinions; focus on building a logical case rather than using emotional appeals. "
+                f"Remember: Your primary persuasive tool is new, relevant information presented clearly and authoritatively. "
+                f"Write a compelling {WORD_TARGET}-word case for this stance: {claim}"
         )
+
     if style == "Debate":
         return (
-            stem + " Adopt debate-style persuasion. Lead with a compelling argument and combine multiple rhetorical "
-            "elements (authority, fairness, history, common sense, cost/benefit, comparisons, crisis, metaphor, "
-            "morality, public opinion, side effects). Weave diverse reasons, address counterarguments, and show why "
-            "the pro stance overwhelms alternatives. " + f"Write a compelling {WORD_TARGET}-word case: {claim}"
+                stem +
+                f"To achieve your goal, you will adopt the role of a canvasser who specializes in debate-style persuasion. "
+                f"Your strength lies in providing knock-down arguments, drawing on a range of different rhetorical elements to build a powerful case, "
+                f"as a professional or expert advocate does. When engaging with the user, lead with a compelling argument that combines some of the following "
+                f"rhetorical elements: Appeal to authority, appeal to fairness, appeal to history, appeal to national greatness, appeal to populism, "
+                f"common sense, cost/benefit analysis, between-country comparison, crisis, metaphor, morality, public opinion, or side effects. "
+                f"Also make sure that you weave together multiple reasons for supporting the issue stance; show how all the reasons in favor of the issue stance "
+                f"together present a powerful case; point out weaknesses in potential counterarguments; emphasize the diversity of reasons in favor of the issue stance; "
+                f"behave like a professional advocate. Remember: Your primary persuasive tool is showing how there are many good reasons for supporting the position "
+                f"that ultimately overwhelm the counter-arguments. Write a compelling {WORD_TARGET}-word case for this stance: {claim}"
         )
     if style == "Norms":
         return (
-            stem + " Adopt norms-based persuasion. Emphasize descriptive and injunctive norms with credible communities "
-            "and trend data. Frame the stance as typical, reasonable, and socially beneficial. Highlight belonging, "
-            "reciprocity, and reputational benefits; preempt concerns nonjudgmentally. "
-            + f"Write a compelling {WORD_TARGET}-word case: {claim}"
+                stem + "To achieve your goal, you will adopt the role of a canvasser who specializes in highlighting social consensus and community trends. Your strength lies in showing how ideas align with group norms. When engaging with the user, begin by establishing shared community membership; "
+                       f"share specific examples of how others in their community might view this issue; where possible, use concrete statistics about local support; highlight endorsements from respected community or authority figures; frame choices in terms of collective movement; emphasize growing momentum and social trends; connect individual choices to community impact. "
+                       f"Remember: Your primary persuasive tool is demonstrating how the issue stance aligns with social norms. Maintain this approach consistently throughout the conversation, "
+                       f"while remaining flexible enough to respond authentically to the user’s specific statements and questions"
+            + f"Write a compelling {WORD_TARGET}-word case for this stance: {claim}"
         )
     raise ValueError(f"Unknown prompt style: {style}")
 
