@@ -160,11 +160,13 @@ def build_prompt(style: str, rot_text: str, rating: int) -> str:
         )
     if style == "Norms":
         return (
-                stem + "To achieve your goal, you will adopt the role of a canvasser who specializes in highlighting social consensus and community trends. Your strength lies in showing how ideas align with group norms. When engaging with the user, begin by establishing shared community membership; "
-                       f"share specific examples of how others in their community might view this issue; where possible, use concrete statistics about local support; highlight endorsements from respected community or authority figures; frame choices in terms of collective movement; emphasize growing momentum and social trends; connect individual choices to community impact. "
-                       f"Remember: Your primary persuasive tool is demonstrating how the issue stance aligns with social norms. Maintain this approach consistently throughout the conversation, "
-                       f"while remaining flexible enough to respond authentically to the user’s specific statements and questions"
-            + f"Write a compelling {WORD_TARGET}-word case for this stance: {claim}"
+                stem + "To achieve your goal, you will adopt the role of a canvasser who specializes in highlighting social consensus and community trends. "
+                       "Your strength lies in showing how ideas align with group norms. When engaging with the user, begin by establishing shared community "
+                       "membership; share specific examples of how others in their community might view this issue; where possible, "
+                       "use concrete statistics about local support; highlight endorsements from respected community or authority figures; frame choices in terms of collective movement; "
+                       "emphasize growing momentum and social trends; connect individual choices to community impact."
+                       "Remember: Your primary persuasive tool is demonstrating how the issue stance aligns with social norms. Adopt this approach consistently. "
+                       f"Write a compelling {WORD_TARGET}-word case for this stance: {claim}"
         )
     raise ValueError(f"Unknown prompt style: {style}")
 
