@@ -1,0 +1,456 @@
+---
+title: "SSL Survey Analysis"
+output: html_document
+date: "2026-01-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(survey)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(scales)
+library(tidyr)
+library(marginaleffects)
+library(broom)
+library(stargazer)
+
+# ==============================================================================
+# DEFINE COLORS & THEME
+# ==============================================================================
+
+# --- Define Custom Colors First ---
+mine_hex_list <- c(
+  "#00A896", # Teal
+  "#826AED", # Purple
+  "#E3B505", # Yellow
+  "#89DAFF", # Light Blue
+  "#F45B69", # Pink
+  "#F18805", # Orange
+  "#D41876", # Magenta
+  "#020887"  # Dark Blue
+)
+
+# --- Define Scale Functions ---
+scale_fill_mine <- function(...) {
+  scale_fill_manual(values = mine_hex_list, ...)
+}
+
+scale_color_mine <- function(...) {
+  scale_color_manual(values = mine_hex_list, ...)
+}
+
+# --- Define Custom Theme (Fixed) ---
+theme_mine <- function(font_scale = 1,
+                       font_hierarchy_ratio = 1.25,
+                       smallest_font_size = 12,
+                       text_color = '#424242',
+                       font_family = 'sans', 
+                       bold_title = TRUE,
+                       save_transparent = FALSE, 
+                       figsize = NULL, 
+                       base_reference_size = c(9, 6)) {
+  
+  # Auto-Scaling Logic
+  if (!is.null(figsize)) {
+    ref_diag <- sqrt(base_reference_size[1]^2 + base_reference_size[2]^2)
+    target_diag <- sqrt(figsize[1]^2 + figsize[2]^2)
+    scale_factor <- target_diag / ref_diag
+    font_scale <- font_scale * scale_factor
+  }
+  
+  # Hierarchy sizes
+  small_size <- smallest_font_size * font_scale
+  medium_size <- small_size * font_hierarchy_ratio
+  large_size  <- medium_size * font_hierarchy_ratio
+  
+  # Base theme
+  theme_minimal(base_size = small_size, base_family = font_family) +
+    theme(
+      # Text
+      text = element_text(color = text_color),
+      axis.title = element_text(size = medium_size, color = text_color),
+      axis.text = element_text(size = small_size, color = text_color),
+      plot.title = element_text(
+        size = large_size,
+        face = if (bold_title) "bold" else "plain",
+        hjust = 0,
+        margin = margin(b = 10 * font_scale),
+        color = text_color
+      ),
+      legend.text = element_text(size = small_size),
+      legend.title = element_text(size = small_size, face = "bold"),
+      
+      # Grid & Spines (Fixed: using linewidth)
+      panel.grid.major = element_line(
+        color = scales::alpha("black", 0.2), 
+        linewidth = 0.5 * font_scale, 
+        linetype = "dotted"
+      ),
+      panel.grid.minor = element_blank(),
+      panel.border = element_blank(),
+      
+      # Axis Lines
+      axis.line.x.bottom = element_line(color = text_color, linewidth = 0.8 * font_scale),
+      axis.line.y.left   = element_line(color = text_color, linewidth = 0.8 * font_scale),
+      
+      # Backgrounds (Fixed: alpha inside color func, not as argument)
+      panel.background = element_rect(fill = "white", color = NA),
+      plot.background = element_rect(
+        fill = if (save_transparent) "transparent" else "white", 
+        color = NA
+      ),
+      
+      # Legend (Fixed: alpha inside color func)
+      legend.background = element_rect(fill = scales::alpha("white", 0.95), color = NA),
+      legend.key = element_rect(fill = "white", color = NA),
+      legend.position = "bottom"
+    )
+}
+```
+
+## Load Data
+
+```{r load-data}
+raw_path <- "../data/qualtrics_experiments/[ssl]+ssl_survey+-+ShortForm_January+4,+2026_14.08.csv"
+
+raw_full <- read_csv(raw_path, col_names = TRUE, show_col_types = FALSE)
+raw <- raw_full %>% slice(3:n())
+```
+
+## Extract Variables
+
+```{r extract-variables}
+df <- raw %>%
+  select(
+    pid,
+    duration = `Duration (in seconds)`,
+    any_llm = dv_llm_usage,
+    moral = dv_use_moral,
+    personal = dv_use_personal,
+    con = dv_use_con,
+    commit,
+    attn1
+  )
+```
+
+## Create Usage Variables
+
+```{r usage-variables}
+# Map for general LLM usage frequency
+LLM_FREQ_MAP <- c(
+  "Yes - almost constantly" = 5,
+  "Yes - several times a day" = 4,
+  "Yes - about once a day" = 3,
+  "Yes - several times a week" = 2,
+  "Yes - less often than several times a week" = 1,
+  "No - never used" = 0
+)
+
+# Map for domain-specific usage counts
+DOMAIN_USAGE_MAP <- c(
+  "Yes - once or twice" = 1,
+  "Yes - 3-10 times" = 2,
+  "Yes - 11-20 times" = 3,
+  "Yes - more than 20 times" = 4,
+  "No - never" = 0
+)
+
+df <- df %>%
+  mutate(
+    duration = as.numeric(duration) / 60,
+    any_llm_num = LLM_FREQ_MAP[any_llm],
+    moral_num = DOMAIN_USAGE_MAP[moral],
+    personal_num = DOMAIN_USAGE_MAP[personal],
+    con_num = DOMAIN_USAGE_MAP[con],
+    any_any_llm = if_else(any_llm_num > 0, 1, 0),
+    any_moral = if_else(moral_num > 0, 1, 0),
+    any_personal = if_else(personal_num > 0, 1, 0),
+    any_con = if_else(con_num > 0, 1, 0),
+    any_usage = pmax(any_moral, any_personal, any_con, na.rm = TRUE)
+  )
+```
+
+## Apply Filters
+
+```{r apply-filters}
+df <- df %>%
+  filter(attn1 == '25' & commit == 'Yes, I will')
+
+cat("Filtering out non-llm users\n")
+cat(paste("Original N:", nrow(df), "\n"))
+
+df <- df %>%
+  filter(any_llm != 'No - never used')
+
+cat(paste("N after filtering:", nrow(df), "\n\n"))
+```
+
+## Compute Weights Using Raking
+
+```{r compute-weights-raking}
+```{r compute-weights-raking}
+library(survey)
+
+# 1. Define Raw Population Ratios (Relative importance/frequency)
+# These do not need to sum to 1 or N yet; we will scale them.
+raw_pop_ratios <- c(
+  "Yes - almost constantly" = 5,
+  "Yes - several times a day" = 7,
+  "Yes - about once a day" = 5,
+  "Yes - several times a week" = 10,
+  "Yes - less often than several times a week" = 25
+)
+
+# 2. Align Population Targets with Sample Data
+# We filter the targets to ensure we only target categories that actually exist 
+# in the current filtered dataframe (preventing 0-division errors).
+sample_levels <- unique(as.character(df$any_llm))
+matched_ratios <- raw_pop_ratios[names(raw_pop_ratios) %in% sample_levels]
+
+# 3. Create the Population Dataframe (The "Control" Total)
+# CRITICAL: We scale the frequencies so they sum to the current sample size (nrow(df)).
+# This ensures the resulting weights average to 1.
+target_n <- nrow(df) 
+scaled_freqs <- (matched_ratios / sum(matched_ratios)) * target_n
+
+pop_llm <- data.frame(
+  any_llm = names(scaled_freqs),
+  Freq = as.numeric(scaled_freqs)
+)
+
+print("Target Frequencies (Sum should match Sample N):")
+print(pop_llm)
+
+# 4. Create Unweighted Design
+# Ensure the variable in df is a factor with the same levels as the target
+df$any_llm <- factor(df$any_llm, levels = pop_llm$any_llm)
+d_unw <- svydesign(ids = ~1, data = df)
+
+# 5. Apply Raking
+d_rake <- rake(
+  design = d_unw,
+  sample.margins = list(~any_llm),
+  population.margins = list(pop_llm),
+  control = list(maxit = 50, epsilon = 1e-7)
+)
+
+# 6. Validate Weights
+# The sum of weights should equal the sample size
+cat(paste("\nSum of weights:", round(sum(weights(d_rake)), 2)))
+cat(paste("\nSample size:   ", nrow(df)))
+cat("\n\nWeight Summary:\n")
+print(summary(weights(d_rake)))
+```
+
+## Usage Rates
+
+```{r usage-rates}
+for (use_type in c('moral', 'personal', 'con')) {
+  cat(paste0("\n", toupper(use_type), " USAGE:\n"))
+  
+  # Unweighted
+  unweighted_tab <- prop.table(table(df[[use_type]])) * 100
+  cat("\nUnweighted:\n")
+  print(round(unweighted_tab, 2))
+  
+  # Weighted using survey package
+  weighted_result <- svytable(as.formula(paste0("~", use_type)), svy_design)
+  weighted_pct <- prop.table(weighted_result) * 100
+  cat("\nWeighted:\n")
+  print(round(weighted_pct, 2))
+  cat("\n")
+}
+```
+
+## Any Usage Summary
+
+```{r any-usage}
+cat("\n=== Any Usage (Moral OR Personal OR Con) ===\n\n")
+
+# Unweighted
+# make df2 which is 6 times df
+unweighted_mean <- mean(df$any_usage)
+unweighted_se <- sqrt(unweighted_mean * (1 - unweighted_mean) / nrow(df))
+unweighted_moe <- 1.96 * unweighted_se
+
+# Weighted using survey package
+weighted_result <- svymean(~any_usage, svy_design)
+weighted_mean <- as.numeric(weighted_result)
+weighted_se <- as.numeric(SE(weighted_result))
+weighted_moe <- 1.96 * weighted_se
+
+# Create summary table
+summary_table <- data.frame(
+  Type = c("Unweighted", "Weighted"),
+  Mean = round(c(unweighted_mean, weighted_mean) * 100, 2),
+  SE = round(c(unweighted_se, weighted_se) * 100, 2),
+  MoE = round(c(unweighted_moe, weighted_moe) * 100, 2),
+  CI_Lower = round(c(unweighted_mean - unweighted_moe, 
+                     weighted_mean - weighted_moe) * 100, 2),
+  CI_Upper = round(c(unweighted_mean + unweighted_moe, 
+                     weighted_mean + weighted_moe) * 100, 2)
+)
+
+colnames(summary_table) <- c("Type", "Mean", "SE", "MoE", "CI_Lower", "CI_Upper")
+
+# make ggplot graph
+p <- ggplot(summary_table, aes(x = Type, y = Mean, fill = Type)) +
+  geom_bar(stat = "identity", position = position_dodge(), width = 0.5) +
+  geom_errorbar(aes(ymin = CI_Lower, ymax = CI_Upper), 
+                width = 0.2, position = position_dodge(0.5)) +
+  labs(title = "Any SSL Usage Rates",
+       y = "Mean",
+       x = "") +
+  theme_mine() +
+  scale_fill_mine() +
+  theme(legend.position = "none")
+print(p)
+```
+
+
+
+## Standardize Variables and Fit Model
+
+```{r fit-model}
+library(marginaleffects)
+
+# Define variable groups
+cat_vars <- c("any_llm")
+numeric_vars <- c("duration")
+
+# Standardize numeric variables
+for (var in numeric_vars) {
+  df[[paste0(var, "_z")]] <- scale(df[[var]])[,1]
+}
+
+# Update survey design with standardized variables
+svy_design <- rake(
+  design = svydesign(ids = ~1, data = df),
+  sample.margins = list(~any_llm),
+  population.margins = list(pop_llm),
+  control = list(maxit = 50, epsilon = 1e-7)
+)
+
+# Fit logistic model
+
+formula_obj <- as.formula("any_usage ~ any_llm + duration_z")
+logistic_model.survey <- svyglm(formula_obj, design = svy_design, family = binomial())
+logistic_model.raw <- glm(formula_obj, data = df, family = binomial())
+
+cat("\n=== Model Summary ===\n")
+print(summary(logistic_model))
+
+library(stargazer)
+s <- stargazer(logistic_model.raw, logistic_model.survey,
+          type = "text",
+          title = "Logistic Regression Results",
+          dep.var.labels = c("Any SSL Usage"),
+          covariate.labels = c("Any LLM Usage", "Duration (standardized)"),
+          out = NULL)
+print(s)
+```
+
+## Average Marginal Effects
+
+```{r ame-plot, fig.width=10, fig.height=6}
+library(ggplot2)
+
+# Compute AMEs for all variables
+ame_results <- avg_comparisons(logistic_model)
+
+# Extract results as dataframe
+ame_df <- as.data.frame(ame_results)
+
+cat("\n=== Average Marginal Effects ===\n")
+print(ame_df[, c("term", "contrast", "estimate")])
+
+####################
+# Prepare Plot Data
+####################
+
+# Add variable type
+ame_df$var_type <- ifelse(
+  gsub("_z$", "", ame_df$term) %in% cat_vars,
+  "categorical",
+  "numeric"
+)
+
+# Create variable grouping (clean names)
+ame_df$variable <- gsub("_z$", "", ame_df$term)
+
+# Create simple labels with variable name embedded
+ame_df$display_label <- NA
+
+for (i in 1:nrow(ame_df)) {
+  var_name <- ame_df$term[i]
+  
+  if (ame_df$var_type[i] == "categorical") {
+    contrast_text <- as.character(ame_df$contrast[i])
+    parts <- strsplit(contrast_text, " - ")[[1]]
+    
+    if (length(parts) >= 2) {
+      midpoint <- ceiling(length(parts) / 2)
+      comparison <- paste(parts[1:midpoint], collapse = " - ")
+      reference <- paste(parts[(midpoint+1):length(parts)], collapse = " - ")
+      
+      ame_df$display_label[i] <- paste0(
+        var_name, ": ", comparison, "\n(ref: ", reference, ")"
+      )
+    } else {
+      ame_df$display_label[i] <- paste0(var_name, ": ", contrast_text)
+    }
+    
+  } else {
+    # For numeric
+    var_name_clean <- gsub("_z$", "", var_name)
+    ame_df$display_label[i] <- paste0(var_name_clean, ": +1 SD")
+  }
+}
+
+# Order by variable type and variable
+ame_df <- ame_df %>%
+  arrange(desc(var_type), variable) %>%
+  mutate(row_id = row_number())
+
+####################
+# Plot AMEs
+####################
+
+# Define colors for each variable
+var_colors <- c(
+  "any_llm" = mine_hex_list[1],
+  "duration" = mine_hex_list[2]
+)
+
+p <- ggplot(ame_df, aes(x = estimate, y = reorder(display_label, row_id))) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_errorbarh(
+    aes(xmin = conf.low, xmax = conf.high, color = variable),
+    height = 0,
+    linewidth = 1
+  ) +
+  geom_point(
+    aes(color = variable),
+    size = 3
+  ) +
+  scale_color_manual(
+    values = var_colors,
+    name = "Variable"
+  ) +
+  labs(
+    title = "Average Marginal Effects on SSL Usage",
+    x = "Average Marginal Effect (Percentage Points)",
+    y = NULL,
+    caption = "Note: Numeric variables standardized (M=0, SD=1)"
+  ) +
+  theme_mine() +
+  theme(
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    axis.text.y = element_text(hjust = 1, size = 10)
+  )
+
+print(p)
+```
