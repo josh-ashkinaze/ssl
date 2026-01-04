@@ -113,7 +113,7 @@ theme_mine <- function(font_scale = 1,
 ## Load Data
 
 ```{r load-data}
-raw_path <- "../data/qualtrics_experiments/[ssl]+ssl_survey+-+ShortForm_January+4,+2026_14.08.csv"
+raw_path <- "../data/qualtrics_experiments/[ssl]+ssl_survey+-+ShortForm_January+4,+2026_15.49.csv"
 
 raw_full <- read_csv(raw_path, col_names = TRUE, show_col_types = FALSE)
 raw <- raw_full %>% slice(3:n())
@@ -190,12 +190,10 @@ cat(paste("N after filtering:", nrow(df), "\n\n"))
 ## Compute Weights Using Raking
 
 ```{r compute-weights-raking}
-```{r compute-weights-raking}
 library(survey)
 
-# 1. Define Raw Population Ratios (Relative importance/frequency)
-# These do not need to sum to 1 or N yet; we will scale them.
-raw_pop_ratios <- c(
+# Define population PROPORTIONS (not counts)
+LLM_USAGE_PROPS <- c(
   "Yes - almost constantly" = 5,
   "Yes - several times a day" = 7,
   "Yes - about once a day" = 5,
@@ -203,45 +201,71 @@ raw_pop_ratios <- c(
   "Yes - less often than several times a week" = 25
 )
 
-# 2. Align Population Targets with Sample Data
-# We filter the targets to ensure we only target categories that actually exist 
-# in the current filtered dataframe (preventing 0-division errors).
-sample_levels <- unique(as.character(df$any_llm))
-matched_ratios <- raw_pop_ratios[names(raw_pop_ratios) %in% sample_levels]
+# Rescale to sum to sample size
+LLM_USAGE_COUNTS <- (LLM_USAGE_PROPS / sum(LLM_USAGE_PROPS)) * nrow(df)
 
-# 3. Create the Population Dataframe (The "Control" Total)
-# CRITICAL: We scale the frequencies so they sum to the current sample size (nrow(df)).
-# This ensures the resulting weights average to 1.
-target_n <- nrow(df) 
-scaled_freqs <- (matched_ratios / sum(matched_ratios)) * target_n
+# Filter to sample categories
+sample_categories <- names(table(df$any_llm))
+LLM_USAGE_COUNTS <- LLM_USAGE_COUNTS[names(LLM_USAGE_COUNTS) %in% sample_categories]
 
+# Convert to data frame
 pop_llm <- data.frame(
-  any_llm = names(scaled_freqs),
-  Freq = as.numeric(scaled_freqs)
+  any_llm = names(LLM_USAGE_COUNTS),
+  Freq = LLM_USAGE_COUNTS
 )
 
-print("Target Frequencies (Sum should match Sample N):")
+cat("\n=== Population Margins Data Frame ===\n")
 print(pop_llm)
 
-# 4. Create Unweighted Design
-# Ensure the variable in df is a factor with the same levels as the target
-df$any_llm <- factor(df$any_llm, levels = pop_llm$any_llm)
-d_unw <- svydesign(ids = ~1, data = df)
+####################
+# Create Unweighted Survey Design
+####################
 
-# 5. Apply Raking
-d_rake <- rake(
-  design = d_unw,
-  sample.margins = list(~any_llm),
-  population.margins = list(pop_llm),
-  control = list(maxit = 50, epsilon = 1e-7)
+svy_unweighted <- svydesign(
+  ids = ~1,        # No clustering
+  data = df
 )
 
-# 6. Validate Weights
-# The sum of weights should equal the sample size
-cat(paste("\nSum of weights:", round(sum(weights(d_rake)), 2)))
-cat(paste("\nSample size:   ", nrow(df)))
-cat("\n\nWeight Summary:\n")
-print(summary(weights(d_rake)))
+cat("\n=== Unweighted Design Summary ===\n")
+cat("N:", nrow(df), "\n")
+cat("All weights = 1 (unweighted)\n")
+
+####################
+# Apply Raking (Post-Stratification Weighting)
+####################
+
+cat("\n=== Applying Raking Weights ===\n")
+
+svy_design <- rake(
+  design = svy_unweighted,
+  sample.margins = list(~any_llm),          # Variable to weight on
+  population.margins = list(pop_llm),       # Target distribution
+  control = list(maxit = 50, epsilon = 1e-7)  # Convergence parameters
+)
+
+cat("Raking converged successfully.\n")
+
+####################
+# Check Resulting Weights
+####################
+
+cat("\n=== Weight Summary ===\n")
+print(summary(weights(svy_design)))
+
+cat("\n=== Weighted Distribution (After Raking) ===\n")
+weighted_dist <- svytable(~any_llm, svy_design)
+cat("Weighted frequencies:\n")
+print(weighted_dist)
+cat("\nWeighted proportions:\n")
+print(prop.table(weighted_dist) * 100)
+
+cat("\n=== Comparison: Target vs Weighted ===\n")
+comparison <- data.frame(
+  Category = names(LLM_USAGE_COUNTS),
+  Target_Prop = round(prop.table(LLM_USAGE_COUNTS) * 100, 2),
+  Weighted_Prop = round(prop.table(weighted_dist) * 100, 2)
+)
+print(comparison)
 ```
 
 ## Usage Rates
@@ -307,6 +331,8 @@ p <- ggplot(summary_table, aes(x = Type, y = Mean, fill = Type)) +
   scale_fill_mine() +
   theme(legend.position = "none")
 print(p)
+
+print(summary_table)
 ```
 
 
@@ -454,3 +480,85 @@ p <- ggplot(ame_df, aes(x = estimate, y = reorder(display_label, row_id))) +
 
 print(p)
 ```
+
+
+# Simple simulation (no multiverse)
+```{r}
+####################
+# Simulation: Total SSL Conversations in US
+####################
+
+# Define conversation ranges for each frequency level
+CONV_RANGES <- list(
+  "Yes - once or twice" = c(1, 2),
+  "Yes - 3-10 times" = c(3, 10),
+  "Yes - 11-20 times" = c(11, 20),
+  "Yes - more than 20 times" = c(21, 30),  # Upper bound assumption
+  "No - never" = c(0, 0)
+)
+
+# Get max frequency for each person (moral, personal, con)
+# (Well, we could sum them, but max is more conservative since we are assuming a total overlap)
+df$max_domain <- pmax(df$moral_num, df$personal_num, df$con_num, na.rm = TRUE)
+
+# Map back to category labels
+df$max_domain_label <- names(DOMAIN_USAGE_MAP)[match(df$max_domain, DOMAIN_USAGE_MAP)]
+
+# US parameters
+US_ADULTS <- 260000000  # ~260 million adults
+
+# Prevalence from prior study
+SSL_PREVALENCE_LOW <- 0.48
+SSL_PREVALENCE_HIGH <- 0.52
+
+# Run simulation
+n_sims <- 10000
+total_convos <- numeric(n_sims)
+
+set.seed(123)  # For reproducibility
+
+for (i in 1:n_sims) {
+  # For each person, sample a number of conversations from their range
+  person_convos <- sapply(df$max_domain_label, function(label) {
+    range <- CONV_RANGES[[label]]
+    runif(1, min = range[1], max = range[2])
+  })
+  
+  # Average conversations per SSL user
+  avg_convos_per_user <- mean(person_convos)
+  
+  # Get prevalence
+  SSL_PREVALENCE <- runif(1, min = SSL_PREVALENCE_LOW, max = SSL_PREVALENCE_HIGH)
+  
+  # Total US conversations
+  total_convos[i] <- avg_convos_per_user * SSL_PREVALENCE * US_ADULTS
+}
+
+# Summary statistics
+cat("\n=== Total SSL Conversations in US (Simulation) ===\n")
+cat(sprintf("Mean: %.2f billion\n", mean(total_convos) / 1e9))
+cat(sprintf("Median: %.2f billion\n", median(total_convos) / 1e9))
+cat(sprintf("95%% CI: [%.2f billion, %.2f billion]\n", 
+            quantile(total_convos, 0.025) / 1e9,
+            quantile(total_convos, 0.975) / 1e9))
+
+# Histogram
+
+subtitle_str = "Based on %d Monte Carlo estimations | Mean: %.0f Million, 95%% CI = [%.0f Million, %.0f Million]"
+subtitle_str = sprintf(subtitle_str, n_sims, mean(total_convos) / 1e6,
+                       quantile(total_convos, 0.025) / 1e6,
+                       quantile(total_convos, 0.975) / 1e6)
+
+ggplot(data.frame(total = total_convos / 1e6), aes(x = total)) +
+  geom_histogram(bins = 30, fill = "#377EB8", color = "white") +
+  geom_vline(xintercept = mean(total_convos) / 1e6, 
+             linetype = "dashed", color = "red", linewidth = 1) +
+  labs(
+    title = "Total Synthetic Social Learning Conversations in US",
+    subtitle = subtitle_str,
+    x = "Total Conversations (Millions)",
+    y = "Count"
+  ) +
+  theme_mine()
+```
+
