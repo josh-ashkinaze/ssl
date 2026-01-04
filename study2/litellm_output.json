@@ -1,0 +1,7 @@
+[
+  {
+    "model": "gemini/gemini-2.5-flash",
+    "prompt": "\n\nCONTEXT\nSocial domain theorists have defined three domains of social knowledge. \n\n<start>\nThe moral domain is \u201cPrescriptive, generalizable understandings of\nhow individuals ought to behave toward others\u201d\u2014what is right and wrong. The societal-conventional \ndomain is \u201cEmpirical, descriptive knowledge based upon a recognition of the uniformities in the social environment\u201d \nincluding \u201csocietal arrangements, social organization, and social norms and customs\u201d. \nThe personal-psychological domain is knowledge that \u201cdefine[s] the private aspects of one\u2019s life\u201d \nand \u201cinferences about others\u2019 thoughts, feelings, intentions, and knowledge of personality, self, and identity\u201d \n<end>\n\nRETURN\nA list of 20 unigrams that are high-precision for the personal domain as a Python list and nothing else. It's important these unigrams will not be confused with other domains.\n",
+    "raw_response": "['self', 'feelings', 'thoughts', 'intentions', 'personal', 'private', 'identity', 'personality', 'emotion', 'mind', 'inner', 'conscious', 'desire', 'motive', 'perspective', 'unique', 'character', 'reflection', 'ego', 'subjective']"
+  }
+]
