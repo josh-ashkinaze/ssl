@@ -1,6 +1,8 @@
 ---
 title: "SSL Survey Analysis"
-output: html_document
+output: 
+  html_document: 
+    toc: true
 date: "2026-01-04"
 ---
 
@@ -15,6 +17,7 @@ library(tidyr)
 library(marginaleffects)
 library(broom)
 library(stargazer)
+library(readr)
 
 # ==============================================================================
 # DEFINE COLORS & THEME
@@ -117,11 +120,7 @@ raw_path <- "../data/qualtrics_experiments/[ssl]+ssl_survey+-+ShortForm_January+
 
 raw_full <- read_csv(raw_path, col_names = TRUE, show_col_types = FALSE)
 raw <- raw_full %>% slice(3:n())
-```
 
-## Extract Variables
-
-```{r extract-variables}
 df <- raw %>%
   select(
     pid,
@@ -134,6 +133,7 @@ df <- raw %>%
     attn1
   )
 ```
+
 
 ## Create Usage Variables
 
@@ -222,7 +222,7 @@ print(pop_llm)
 ####################
 
 svy_unweighted <- svydesign(
-  ids = ~1,        # No clustering
+  ids = ~1,       
   data = df
 )
 
@@ -329,9 +329,15 @@ p <- ggplot(summary_table, aes(x = Type, y = Mean, fill = Type)) +
        x = "") +
   theme_mine() +
   scale_fill_mine() +
-  theme(legend.position = "none")
-print(p)
+  theme(legend.position = "none") + 
+  # add exact number to graph
+  geom_text(aes(label = paste0(Mean, "%")), 
+            vjust = 6.5, 
+            color = "white",
+            position = position_dodge(0.5), 
+            size = 5)
 
+print(p)
 print(summary_table)
 ```
 
@@ -340,11 +346,21 @@ print(summary_table)
 ## Standardize Variables and Fit Model
 
 ```{r fit-model}
-library(marginaleffects)
 
 # Define variable groups
 cat_vars <- c("any_llm")
 numeric_vars <- c("duration")
+
+llm_order <- c(
+  "Yes - less often than several times a week",
+  "Yes - several times a week",
+  "Yes - about once a day",
+  "Yes - several times a day",
+  "Yes - almost constantly"
+)
+# Convert to ordered factor
+df$any_llm <- factor(df$any_llm, levels = llm_order, ordered = FALSE)
+
 
 # Standardize numeric variables
 for (var in numeric_vars) {
@@ -365,15 +381,11 @@ formula_obj <- as.formula("any_usage ~ any_llm + duration_z")
 logistic_model.survey <- svyglm(formula_obj, design = svy_design, family = binomial())
 logistic_model.raw <- glm(formula_obj, data = df, family = binomial())
 
-cat("\n=== Model Summary ===\n")
-print(summary(logistic_model))
 
-library(stargazer)
 s <- stargazer(logistic_model.raw, logistic_model.survey,
           type = "text",
           title = "Logistic Regression Results",
           dep.var.labels = c("Any SSL Usage"),
-          covariate.labels = c("Any LLM Usage", "Duration (standardized)"),
           out = NULL)
 print(s)
 ```
@@ -384,7 +396,7 @@ print(s)
 library(ggplot2)
 
 # Compute AMEs for all variables
-ame_results <- avg_comparisons(logistic_model)
+ame_results <- avg_comparisons(logistic_model.survey )
 
 # Extract results as dataframe
 ame_df <- as.data.frame(ame_results)
@@ -482,7 +494,62 @@ print(p)
 ```
 
 
-# Simple simulation (no multiverse)
+# Simulation of total conversations
+
+
+The total number of SSL conversations is estimated as the product of three things, (A) x (B) x (C):
+- (A) The number of U.S. adults (approximately 260 million)
+- (B) The proportion of U.S. adults who engage in SSL (from prior study)
+- (C) The average number of SSL conversations per SSL user (from current survey).
+
+We use Monte Carlo simulations to propagate uncertainty.  For (B), we sample from a normal distribution parameterized by the mean and standard error from a prior study. For (C),  respondents selected categorical frequency ranges (e.g., '3-10 times'). We sample uniformly within each respondent's reported range. Across 10k iterations, we then multiply (A) x (B) x (C) to arrive at a distribution of total SSL conversations.
+
+We make one major conservative assumption that makes our estimate likely a lower bound. When a respondent reported different frequencies across domains (moral, personal, conventional), we take the maximum rather than the sum, assuming complete overlap. For example, if a participant said "Between 3-10 times" for moral, personal, conventional, we go with "3-10" rather than sum({3-10, 3-10, 3-10}). Intuitively, this is summing that a person had 3-10 total SSL conversations that overlapped across each domain.
+
+
+### Algorithm
+
+Input:
+- `A`: Number of U.S. adults (constant = 260,000,000)
+- `mu_B, sigma_B`: Mean and SE of SSL prevalence from prior study
+- `S`: Survey data with `n` respondents, each reporting frequency category
+- `R`: Mapping from categories to numeric ranges
+- `N`: Number of Monte Carlo iterations (= 10,000)
+
+Procedure:
+
+1. For each respondent `i` in `S`:
+   ```
+   range[i] <- maximum frequency range (moral, personal, conventional)
+   ```
+
+2. For iteration `j = 1` to `N`:
+   
+   (a) For each respondent `i` in `S`:
+   ```
+   convos[i] ← uniform(range.lower, range.upper)
+   ```
+   
+   (b) Compute average conversations per SSL user:
+   ```
+   C_j ← mean(convos)
+   ```
+   
+   (c) Sample prevalence (truncated to [0,1]):
+   ```
+   B_j <-  Normal(u_B, sigma_B) clipped to 1
+   ```
+   
+   (d) Compute total SSL conversations:
+   ```
+   T_j <- A × B_j × C_j
+   ```
+
+3. Return: Distribution of `{T_1, T_2, ..., T_N}`
+
+
+
+
 ```{r}
 ####################
 # Simulation: Total SSL Conversations in US
@@ -493,12 +560,12 @@ CONV_RANGES <- list(
   "Yes - once or twice" = c(1, 2),
   "Yes - 3-10 times" = c(3, 10),
   "Yes - 11-20 times" = c(11, 20),
-  "Yes - more than 20 times" = c(21, 30),  # Upper bound assumption
+  "Yes - more than 20 times" = c(21, 25),  # Upper bound assumption
   "No - never" = c(0, 0)
 )
 
 # Get max frequency for each person (moral, personal, con)
-# (Well, we could sum them, but max is more conservative since we are assuming a total overlap)
+# (Well, we could sum them, but max is more conservative since we are assuming total overlap)
 df$max_domain <- pmax(df$moral_num, df$personal_num, df$con_num, na.rm = TRUE)
 
 # Map back to category labels
@@ -507,9 +574,19 @@ df$max_domain_label <- names(DOMAIN_USAGE_MAP)[match(df$max_domain, DOMAIN_USAGE
 # US parameters
 US_ADULTS <- 260000000  # ~260 million adults
 
-# Prevalence from prior study
-SSL_PREVALENCE_LOW <- 0.48
-SSL_PREVALENCE_HIGH <- 0.52
+# Prevalence from prior study (sample proportion with sampling uncertainty)
+SSL_PREVALENCE_MEAN <- 0.50    # Point estimate
+SSL_PREVALENCE_LOWER <- 0.48   # 95% CI lower bound
+SSL_PREVALENCE_UPPER <- 0.52   # 95% CI upper bound
+
+# Calculate SE from 95% CI
+# CI = mean ± 1.96*SE  =>  SE = (upper - lower) / (2 * 1.96)
+SSL_PREVALENCE_SE <- (SSL_PREVALENCE_UPPER - SSL_PREVALENCE_LOWER) / (2 * 1.96)
+
+cat("\n=== Prevalence Parameters ===\n")
+cat(sprintf("Mean: %.3f\n", SSL_PREVALENCE_MEAN))
+cat(sprintf("95%% CI: [%.3f, %.3f]\n", SSL_PREVALENCE_LOWER, SSL_PREVALENCE_UPPER))
+cat(sprintf("SE: %.4f\n", SSL_PREVALENCE_SE))
 
 # Run simulation
 n_sims <- 10000
@@ -518,7 +595,7 @@ total_convos <- numeric(n_sims)
 set.seed(123)  # For reproducibility
 
 for (i in 1:n_sims) {
-  # For each person, sample a number of conversations from their range
+  # For each person, sample number of conversations uniformly from their range
   person_convos <- sapply(df$max_domain_label, function(label) {
     range <- CONV_RANGES[[label]]
     runif(1, min = range[1], max = range[2])
@@ -527,15 +604,16 @@ for (i in 1:n_sims) {
   # Average conversations per SSL user
   avg_convos_per_user <- mean(person_convos)
   
-  # Get prevalence
-  SSL_PREVALENCE <- runif(1, min = SSL_PREVALENCE_LOW, max = SSL_PREVALENCE_HIGH)
+  # Sample prevalence from normal distribution (sampling distribution)
+  SSL_PREVALENCE <- rnorm(1, mean = SSL_PREVALENCE_MEAN, sd = SSL_PREVALENCE_SE)
+  SSL_PREVALENCE <- max(0, min(1, SSL_PREVALENCE))  # Truncate to [0, 1]
   
   # Total US conversations
   total_convos[i] <- avg_convos_per_user * SSL_PREVALENCE * US_ADULTS
 }
 
 # Summary statistics
-cat("\n=== Total SSL Conversations in US (Simulation) ===\n")
+cat("\nRotal SSL Conversations in US (Simulation)\n")
 cat(sprintf("Mean: %.2f billion\n", mean(total_convos) / 1e9))
 cat(sprintf("Median: %.2f billion\n", median(total_convos) / 1e9))
 cat(sprintf("95%% CI: [%.2f billion, %.2f billion]\n", 
@@ -543,13 +621,12 @@ cat(sprintf("95%% CI: [%.2f billion, %.2f billion]\n",
             quantile(total_convos, 0.975) / 1e9))
 
 # Histogram
-
 subtitle_str = "Based on %d Monte Carlo estimations | Mean: %.0f Million, 95%% CI = [%.0f Million, %.0f Million]"
 subtitle_str = sprintf(subtitle_str, n_sims, mean(total_convos) / 1e6,
                        quantile(total_convos, 0.025) / 1e6,
                        quantile(total_convos, 0.975) / 1e6)
 
-ggplot(data.frame(total = total_convos / 1e6), aes(x = total)) +
+p <- ggplot(data.frame(total = total_convos / 1e6), aes(x = total)) +
   geom_histogram(bins = 30, fill = "#377EB8", color = "white") +
   geom_vline(xintercept = mean(total_convos) / 1e6, 
              linetype = "dashed", color = "red", linewidth = 1) +
@@ -559,6 +636,41 @@ ggplot(data.frame(total = total_convos / 1e6), aes(x = total)) +
     x = "Total Conversations (Millions)",
     y = "Count"
   ) +
-  theme_mine()
+  theme_minimal()
+
+print(p)
+```
+
+# Does ANY SSL differ by USage intensity? Probably
+
+```{r}
+
+cat("\n=== ANY SSL Usage by LLM Usage Intensity ===\n\n")
+
+usage_levels <- levels(df$any_llm)
+
+ug <- ggplot(
+  df,
+  aes(x = any_llm, fill = factor(any_usage))
+) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = percent_format()) +
+  scale_fill_manual(
+    name = "Any SSL Usage",
+    labels = c("No", "Yes"),
+    values = c("#E41A1C", "#377EB8")  # Adjust colors as needed
+  ) +
+  labs(
+    title = "Any SSL Usage by LLM Usage Intensity",
+    x = "LLM Usage Frequency",
+    y = "Proportion"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+print(ug)
+
 ```
 
