@@ -44,7 +44,7 @@ scale_color_mine <- function(...) {
   scale_color_manual(values = mine_hex_list, ...)
 }
 
-# --- Define Custom Theme (Fixed) ---
+# R version of my Python seaborn theme for aesthetic consistency
 theme_mine <- function(font_scale = 1,
                        font_hierarchy_ratio = 1.25,
                        smallest_font_size = 12,
@@ -85,7 +85,7 @@ theme_mine <- function(font_scale = 1,
       legend.text = element_text(size = small_size),
       legend.title = element_text(size = small_size, face = "bold"),
       
-      # Grid & Spines (Fixed: using linewidth)
+      # Grid & Spines 
       panel.grid.major = element_line(
         color = scales::alpha("black", 0.2), 
         linewidth = 0.5 * font_scale, 
@@ -105,7 +105,7 @@ theme_mine <- function(font_scale = 1,
         color = NA
       ),
       
-      # Legend (Fixed: alpha inside color func)
+      # Legend
       legend.background = element_rect(fill = scales::alpha("white", 0.95), color = NA),
       legend.key = element_rect(fill = "white", color = NA),
       legend.position = "bottom"
@@ -192,7 +192,7 @@ cat(paste("N after filtering:", nrow(df), "\n\n"))
 ```{r compute-weights-raking}
 library(survey)
 
-# Define population PROPORTIONS (not counts)
+# Define population PROPORTIONS (this excludes No-never used)
 LLM_USAGE_PROPS <- c(
   "Yes - almost constantly" = 5,
   "Yes - several times a day" = 7,
@@ -243,7 +243,6 @@ svy_design <- rake(
   control = list(maxit = 50, epsilon = 1e-7)  # Convergence parameters
 )
 
-cat("Raking converged successfully.\n")
 
 ####################
 # Check Resulting Weights
@@ -256,45 +255,36 @@ cat("\n=== Weighted Distribution (After Raking) ===\n")
 weighted_dist <- svytable(~any_llm, svy_design)
 cat("Weighted frequencies:\n")
 print(weighted_dist)
+
 cat("\nWeighted proportions:\n")
 print(prop.table(weighted_dist) * 100)
 
-cat("\n=== Comparison: Target vs Weighted ===\n")
-comparison <- data.frame(
-  Category = names(LLM_USAGE_COUNTS),
-  Target_Prop = round(prop.table(LLM_USAGE_COUNTS) * 100, 2),
-  Weighted_Prop = round(prop.table(weighted_dist) * 100, 2)
+####################
+# Compare Sample vs Population Proportions
+####################
+
+cat("\n=== Sample vs Population Proportions ===\n")
+
+sample_dist <- prop.table(table(df$any_llm)) * 100
+pop_proportions <- (LLM_USAGE_COUNTS / sum(LLM_USAGE_COUNTS)) * 100
+
+comparison_df <- data.frame(
+  Category = names(sample_dist),
+  Sample_Proportion = as.numeric(sample_dist),
+  Population_Proportion = pop_proportions[names(sample_dist)]
 )
-print(comparison)
+
+print(comparison_df)
+
 ```
 
 ## Usage Rates
 
-```{r usage-rates}
-for (use_type in c('moral', 'personal', 'con')) {
-  cat(paste0("\n", toupper(use_type), " USAGE:\n"))
-  
-  # Unweighted
-  unweighted_tab <- prop.table(table(df[[use_type]])) * 100
-  cat("\nUnweighted:\n")
-  print(round(unweighted_tab, 2))
-  
-  # Weighted using survey package
-  weighted_result <- svytable(as.formula(paste0("~", use_type)), svy_design)
-  weighted_pct <- prop.table(weighted_result) * 100
-  cat("\nWeighted:\n")
-  print(round(weighted_pct, 2))
-  cat("\n")
-}
-```
 
-## Any Usage Summary
-
-```{r any-usage}
+```{r}
 cat("\n=== Any Usage (Moral OR Personal OR Con) ===\n\n")
 
 # Unweighted
-# make df2 which is 6 times df
 unweighted_mean <- mean(df$any_usage)
 unweighted_se <- sqrt(unweighted_mean * (1 - unweighted_mean) / nrow(df))
 unweighted_moe <- 1.96 * unweighted_se
@@ -305,41 +295,50 @@ weighted_mean <- as.numeric(weighted_result)
 weighted_se <- as.numeric(SE(weighted_result))
 weighted_moe <- 1.96 * weighted_se
 
+# IVW Average
+precisions <- 1 / c(unweighted_se^2, weighted_se^2)
+weights <- precisions / sum(precisions)
+ivw_mean <- sum(weights * c(unweighted_mean, weighted_mean))
+ivw_se <- sqrt(1 / sum(precisions))
+ivw_moe <- 1.96 * ivw_se
+
 # Create summary table
 summary_table <- data.frame(
-  Type = c("Unweighted", "Weighted"),
-  Mean = round(c(unweighted_mean, weighted_mean) * 100, 2),
-  SE = round(c(unweighted_se, weighted_se) * 100, 2),
-  MoE = round(c(unweighted_moe, weighted_moe) * 100, 2),
+  Type = c("Unweighted", "Weighted", "IVW Average"),
+  Mean = round(c(unweighted_mean, weighted_mean, ivw_mean) * 100, 2),
+  SE = round(c(unweighted_se, weighted_se, ivw_se) * 100, 2),
+  MoE = round(c(unweighted_moe, weighted_moe, ivw_moe) * 100, 2),
   CI_Lower = round(c(unweighted_mean - unweighted_moe, 
-                     weighted_mean - weighted_moe) * 100, 2),
+                     weighted_mean - weighted_moe,
+                     ivw_mean - ivw_moe) * 100, 2),
   CI_Upper = round(c(unweighted_mean + unweighted_moe, 
-                     weighted_mean + weighted_moe) * 100, 2)
+                     weighted_mean + weighted_moe,
+                     ivw_mean + ivw_moe) * 100, 2)
 )
 
-colnames(summary_table) <- c("Type", "Mean", "SE", "MoE", "CI_Lower", "CI_Upper")
+colnames(summary_table) <- c("Type", "Mean (%)", "SE (pp)", "MoE (pp)", "95% CI Lower", "95% CI Upper")
 
-# make ggplot graph
-p <- ggplot(summary_table, aes(x = Type, y = Mean, fill = Type)) +
+# Make ggplot graph
+p <- ggplot(summary_table, aes(x = Type, y = `Mean (%)`, fill = Type)) +
   geom_bar(stat = "identity", position = position_dodge(), width = 0.5) +
-  geom_errorbar(aes(ymin = CI_Lower, ymax = CI_Upper), 
+  geom_errorbar(aes(ymin = `95% CI Lower`, ymax = `95% CI Upper`), 
                 width = 0.2, position = position_dodge(0.5)) +
-  labs(title = "Any SSL Usage Rates",
-       y = "Mean",
-       x = "") +
-  theme_mine() +
-  scale_fill_mine() +
-  theme(legend.position = "none") + 
-  # add exact number to graph
-  geom_text(aes(label = paste0(Mean, "%")), 
+  geom_text(aes(label = paste0(`Mean (%)`, "%")), 
             vjust = 6.5, 
             color = "white",
             position = position_dodge(0.5), 
-            size = 5)
+            size = 5) +
+  labs(title = "Any SSL Usage Rates",
+       y = "Mean (%)",
+       x = "") +
+  scale_fill_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A")) +
+  theme_minimal() +
+  theme(legend.position = "none")
 
 print(p)
 print(summary_table)
 ```
+
 
 
 
@@ -527,12 +526,12 @@ Procedure:
    
    (a) For each respondent `i` in `S`:
    ```
-   convos[i] ← uniform(range.lower, range.upper)
+   convos[i] <- uniform(range.lower, range.upper)
    ```
    
    (b) Compute average conversations per SSL user:
    ```
-   C_j ← mean(convos)
+   C_j <- mean(convos)
    ```
    
    (c) Sample prevalence (truncated to [0,1]):
@@ -621,7 +620,7 @@ cat(sprintf("95%% CI: [%.2f billion, %.2f billion]\n",
             quantile(total_convos, 0.975) / 1e9))
 
 # Histogram
-subtitle_str = "Based on %d Monte Carlo estimations | Mean: %.0f Million, 95%% CI = [%.0f Million, %.0f Million]"
+subtitle_str = "Based on %d Monte Carlo estimations | Mean: %.0f Million, 95%% CI [%.0f Million, %.0f Million]"
 subtitle_str = sprintf(subtitle_str, n_sims, mean(total_convos) / 1e6,
                        quantile(total_convos, 0.025) / 1e6,
                        quantile(total_convos, 0.975) / 1e6)
@@ -636,7 +635,7 @@ p <- ggplot(data.frame(total = total_convos / 1e6), aes(x = total)) +
     x = "Total Conversations (Millions)",
     y = "Count"
   ) +
-  theme_minimal()
+  theme_mine()
 
 print(p)
 ```
@@ -644,33 +643,237 @@ print(p)
 # Does ANY SSL differ by USage intensity? Probably
 
 ```{r}
+####################
+# Create Custom Labels
+####################
 
-cat("\n=== ANY SSL Usage by LLM Usage Intensity ===\n\n")
+label_map <- c(
+  "Yes - less often than several times a week" = "Less often than\nseveral times a week",
+  "Yes - several times a week" = "Several times a week",
+  "Yes - about once a day" = "About once a day",
+  "Yes - several times a day" = "Several times a day",
+  "Yes - almost constantly" = "Almost constantly"
+)
 
-usage_levels <- levels(df$any_llm)
+####################
+# Plot 1: SSL Usage by Domain Type
+####################
 
-ug <- ggplot(
-  df,
-  aes(x = any_llm, fill = factor(any_usage))
-) +
-  geom_bar(position = "fill") +
-  scale_y_continuous(labels = percent_format()) +
-  scale_fill_manual(
-    name = "Any SSL Usage",
-    labels = c("No", "Yes"),
-    values = c("#E41A1C", "#377EB8")  # Adjust colors as needed
-  ) +
+usage_long <- usage_long %>%
+  mutate(any_llm_clean = label_map[any_llm])
+
+p1 <- ggplot(usage_long, aes(x = any_llm_clean, y = percentage, fill = usage_type)) +
+  geom_bar(stat = "identity", position = "dodge") +
   labs(
-    title = "Any SSL Usage by LLM Usage Intensity",
-    x = "LLM Usage Frequency",
-    y = "Proportion"
+    x = "LLM Usage",
+    y = "Percentage",
+    fill = "Domain Type"
   ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1)
+  scale_fill_mine() +
+  coord_flip() +
+  theme_mine()
+
+####################
+# Plot 2: Average Number of SSL Domains
+####################
+
+domain_count <- domain_count %>%
+  mutate(any_llm_clean = label_map[any_llm])
+
+p2 <- ggplot(domain_count, aes(x = any_llm_clean, y = avg_domains)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_errorbar(aes(ymin = avg_domains - se_domains, ymax = avg_domains + se_domains), 
+                width = 0.2) +
+  labs(
+    x = "LLM Usage",
+    y = "Average Number of SSL Domains"
+  ) +
+  coord_flip() +
+  theme_mine()
+
+####################
+# Plot 3: Any SSL Usage
+####################
+
+any_ssl_summary <- any_ssl_summary %>%
+  mutate(any_llm_clean = label_map[any_llm])
+
+p3 <- ggplot(any_ssl_summary, aes(x = any_llm_clean, y = pct_any_ssl)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(
+    x = "LLM Usage",
+    y = "Percentage with Any SSL"
+  ) +
+  coord_flip() +
+  theme_mine()
+
+####################
+# Arrange in Grid
+####################
+
+gridExtra::grid.arrange(p1, p2, p3, nrow = 3)
+```
+
+
+
+
+# Are SSL Uses Correlated 
+
+```{r}
+df$num_ssl_uses <- df$any_personal + df$any_moral + df$any_con
+# number of SSL uses by frequency 
+
+# make a 
+
+
+
+```
+
+
+```{r}
+# Get census key
+env_path <- "../src/.env"
+env_lines <- readLines(env_path)
+census_api_key <- sub("CENSUS_API_KEY=", "", env_lines[grep("CENSUS_API_KEY=", env_lines)])
+
+library(tidycensus)
+library(dplyr)
+library(stringr)
+
+census_api_key(census_api_key)
+
+# Get B15003 - Educational Attainment for Population 25+ 2021
+education_data <- get_acs(
+  geography = "us",
+  table = "B15003",
+  year = 2021,
+  survey = "acs5"
+)
+
+# Get variable labels
+vars <- load_variables(2021, "acs5")
+
+education_full <- education_data %>%
+  left_join(vars, by = c("variable" = "name")) %>%
+  mutate(
+    education_level = str_remove(label, "^Estimate!!Total:!!"),
+    education_level = str_trim(education_level)
   )
 
-print(ug)
+# Categorize into 5 groups with complete mapping
+education_categorized <- education_full %>%
+  filter(variable != "B15003_001") %>%  # Remove total
+  mutate(
+    education_category = case_when(
+      # Less than high school (no diploma)
+      grepl("No schooling|Nursery|Kindergarten|1st grade|2nd grade|3rd grade|4th grade|5th grade|6th grade|7th grade|8th grade|9th grade|10th grade|11th grade|12th grade, no diploma", education_level) ~ 
+        "Less than high school",
+      
+      # High school graduate (diploma or GED)
+      grepl("Regular high school diploma|GED or alternative credential", education_level) ~ 
+        "High school graduate",
+      
+      # Some college, no degree
+      grepl("Some college, less than 1 year|Some college, 1 or more years, no degree", education_level) ~ 
+        "Some college, no degree",
+      
+      # Associate's degree
+      grepl("Associate's degree", education_level) ~ 
+        "Associate's degree",
+      
+      # Bachelor's degree
+      grepl("Bachelor's degree", education_level) ~ 
+        "Bachelor's degree",
+      
+      # Graduate or professional degree
+      grepl("Master's degree|Professional school degree|Doctorate degree", education_level) ~ 
+        "Graduate or professional degree",
+      
+      TRUE ~ "Other"
+    )
+  )
+
+# Aggregate to 5 categories
+education_5cat <- education_categorized %>%
+  group_by(education_category) %>%
+  summarise(
+    N = sum(estimate, na.rm = TRUE),
+    MOE = sqrt(sum(moe^2, na.rm = TRUE))
+  ) %>%
+  arrange(match(education_category, c(
+    "Less than high school",
+    "High school graduate", 
+    "Some college, no degree",
+    "Associate's degree",
+    "Bachelor's degree",
+    "Graduate or professional degree"
+  )))
+
+print(education_5cat)
+
+education_5cat <- education_5cat %>%
+  mutate(
+    Percent = round(N / sum(N) * 100, 2)
+  )
+
+print(education_5cat)
+```
+
+```{r}
+# I want frequency tables of usage for moral, perosnal, conventional by wrighted and unweighted
+
+library(survey)
+# Unweighted survey design
+svy_unweighted <- svydesign(
+  ids = ~1,       
+  data = df
+)
+
+# Weighted survey design
+svy_design <- rake(
+  design = svy_unweighted,
+  sample.margins = list(~any_llm),          # Variable to weight on
+  population.margins = list(pop_llm),       # Target distribution
+  control = list(maxit = 50, epsilon = 1e-7)
+)
+
+# Function to get frequency table
+get_freq_table <- function(var, design, weighted = FALSE) {
+  if (weighted) {
+    freq_table <- svytable(as.formula(paste("~", var)), design)
+  } else {
+    freq_table <- table(design$variables[[var]])
+  }
+  prop_table <- prop.table(freq_table) * 100
+  result <- data.frame(
+    Category = names(freq_table),
+    Frequency = as.numeric(freq_table),
+    Percentage = round(as.numeric(prop_table), 2)
+  )
+  return(result)
+}
+
+# Variables to analyze
+variables <- c("moral", "personal", "con")
+results <- list()
+for (var in variables) {
+  unweighted_table <- get_freq_table(var, svy_unweighted, weighted = FALSE)
+  weighted_table <- get_freq_table(var, svy_design, weighted = TRUE)
+  
+  results[[var]] <- list(
+    unweighted = unweighted_table,
+    weighted = weighted_table
+  )
+}
+
+# Print results
+for (var in variables) {
+  cat(paste0("\n=== Frequency Table for ", var, " ===\n"))
+  cat("\n-- Unweighted --\n")
+  print(results[[var]]$unweighted)
+  cat("\n-- Weighted --\n")
+  print(results[[var]]$weighted)
+}
 
 ```
 
