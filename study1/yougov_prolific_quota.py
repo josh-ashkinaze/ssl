@@ -15,6 +15,8 @@ Inputs:
 Outputs:
 - Prints demographic breakdown table (Yes / No / Overall / Delta / RR)
 - Writes demographic breakdown as LaTeX longtable to yougov_demographics.tex
+- Writes demographic breakdown as CSV with category, group, yes, no, overall,
+  delta, and rr columns
 - Prints Prolific income quota table
 """
 
@@ -82,7 +84,8 @@ PROLIFIC_BRACKETS = [
     {"label": "More than $150,000",  "pool": 1369, "bucket": "$100K+"},
 ]
 
-LATEX_OUTPUT_PATH = "../tables/yougov_quota.tex"
+LATEX_OUTPUT_PATH = "yougov_quota.tex"
+CSV_OUTPUT_PATH = "yougov_quota.csv"
 
 ####################
 # Demographics
@@ -123,6 +126,30 @@ def compute_category_breakdown(df, category):
             "Delta":   round(yes_pct - overall_pct, 1),
             "RR":      round(yes_pct / overall_pct, 2) if overall_pct > 0 else float("nan"),
         })
+    return pd.DataFrame(rows)
+
+def clean_csv_label(value):
+    """Remove LaTeX-only escaping from labels used in plain CSV output."""
+    return str(value).replace(r"\$", "$").replace("--", "-")
+
+def build_demographic_breakdown_table(groups):
+    """Return the full demographic breakdown as tidy CSV-friendly rows."""
+    df = compute_cell_counts(groups)
+    rows = []
+
+    for category in df["category"].unique():
+        breakdown = compute_category_breakdown(df, category)
+        for _, row in breakdown.iterrows():
+            rows.append({
+                "category": clean_csv_label(category),
+                "group": clean_csv_label(row["Group"]),
+                "yes": row["Yes"],
+                "no": row["No"],
+                "overall": row["Overall"],
+                "delta": row["Delta"],
+                "rr": row["RR"],
+            })
+
     return pd.DataFrame(rows)
 
 def print_demographic_breakdowns(groups):
@@ -191,11 +218,22 @@ def build_latex_longtable(groups):
 
 def write_latex_table(groups, path):
     """Write the LaTeX longtable to a .tex file, creating dirs if needed."""
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    output_dir = os.path.dirname(path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
     latex = build_latex_longtable(groups)
     with open(path, "w") as f:
         f.write(latex)
     print(f"\n  LaTeX table written to: {path}")
+
+def write_csv_table(groups, path):
+    """Write the demographic breakdown to a CSV file, creating dirs if needed."""
+    output_dir = os.path.dirname(path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+    table = build_demographic_breakdown_table(groups)
+    table.to_csv(path, index=False)
+    print(f"  CSV table written to: {path}")
 
 ####################
 # Prolific Quotas
@@ -265,6 +303,7 @@ def print_prolific_quotas(brackets, income_targets, total_n):
 def main():
     print_demographic_breakdowns(DEMOGRAPHIC_GROUPS)
     write_latex_table(DEMOGRAPHIC_GROUPS, LATEX_OUTPUT_PATH)
+    write_csv_table(DEMOGRAPHIC_GROUPS, CSV_OUTPUT_PATH)
     print_prolific_quotas(PROLIFIC_BRACKETS, INCOME_TARGETS, TARGET_SAMPLE_SIZE)
 
 if __name__ == "__main__":
