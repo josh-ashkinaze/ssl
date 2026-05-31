@@ -83,7 +83,7 @@ class StatsmodelsHandler:
         })
 
         if drop_intercept:
-            sum_res = sum_res[sum_res["var"] != "Intercept"]
+            sum_res = sum_res[~sum_res["var"].isin(["Intercept", "const"])]
 
         if exp:
             threshold = 1
