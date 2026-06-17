@@ -125,9 +125,15 @@ def fig1_optout(data):
     """Opt-out does not protect: solid (all) and dashed (non-users) track together."""
     make_aesthetic()
     M, S = data["fig1"]
+    M0, _ = data["fig1_noai"]
 
     fig, ax = plt.subplots(figsize=(8, 4.5))
     ax.set_title("AI Influence Spreads Beyond AI Users", fontsize=14, pad=12)
+
+    # No-AI baseline: average across domains (all ≈ 0, single gray trace)
+    noai_avg = np.mean([M0[f"pop_drift_{d}"] for d in DOMAINS], axis=0)
+    ax.plot(np.arange(T + 1), noai_avg, color="#aaaaaa", lw=1.4, ls=":",
+            label="No AI (baseline)", zorder=1)
 
     for d in DOMAINS:
         shade(ax, M[f"pop_drift_{d}"], S[f"pop_drift_{d}"], DCOLORS[d], lw=2.2, alpha=0.08)
@@ -159,14 +165,13 @@ def fig1_optout(data):
                    label=f"{DLABELS[d]} ({pct}% SSL)"))
 
     style_handles = [
-        plt.Line2D([0], [0], color="#555", lw=2.2, ls="-",  label="All agents"),
-        plt.Line2D([0], [0], color="#555", lw=1.8, ls="--", label="Non-users"),
+        plt.Line2D([0], [0], color="#555", lw=2.2, ls="-",  label="All agents (with AI)"),
+        plt.Line2D([0], [0], color="#555", lw=1.8, ls="--", label="Non-users (with AI)"),
+        plt.Line2D([0], [0], color="#aaa", lw=1.4, ls=":",  label="No AI (baseline)"),
     ]
-    # Single legend below the plot — avoids clipping at right edge
     fig.legend(handles=legend_handles + style_handles, fontsize=10,
-               loc="lower center", bbox_to_anchor=(0.5, -0.18), ncol=3,
-               title="Domain (SSL %)   —solid = all agents   – – dashed = non-users",
-               title_fontsize=9)
+               loc="lower center", bbox_to_anchor=(0.5, -0.22), ncol=3,
+               title="Domain (SSL %)", title_fontsize=9)
 
     savefig(fig, "fig1_optout")
 

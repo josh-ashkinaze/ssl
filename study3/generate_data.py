@@ -73,9 +73,10 @@ def generate():
     data = {}
     t0 = time.time()
 
-    # --- Fig 1: default condition, full time series ---
+    # --- Fig 1: default condition + no-AI baseline ---
     print("Fig 1 data …")
     data["fig1"] = _rc({}, seed=1)
+    data["fig1_noai"] = _rc({"p_chatbot": 0.0}, seed=200)
 
     # --- Fig 2A: delta sweep, full time series ---
     print("Fig 2A data (delta sweep) …")
