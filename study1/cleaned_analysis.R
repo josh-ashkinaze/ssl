@@ -358,6 +358,10 @@ SCALE_COLS <- c("aias4_score","anthrotech_score","sias4_score","lsns6_score",
                 "tipi_emotional_stability","tipi_openness","ai_social_use_index",
                 "use_freq_code","age_num","ideo_num","income_ord")
 for (col in SCALE_COLS) df_analysis[[paste0(col,"_z")]] <- standardize(df_analysis[[col]])
+# Conservatism: signed 1=liberal to 7=conservative, z-scored
+df_analysis$ideo_conservatism <- df_analysis$ideo_num            # signed 1-7
+df_analysis$ideo_conservatism_z <- standardize(df_analysis$ideo_conservatism)
+
 
 write_csv(df,          file.path(OUTPUT_DIR, "study1_qualtrics_scored_with_flags.csv"))
 write_csv(df_analysis, file.path(OUTPUT_DIR, "study1_analysis_sample.csv"))
@@ -994,28 +998,212 @@ rq2 <- substantive_crosstab |>
 print(rq2)
 write_csv(rq2, file.path(OUTPUT_DIR,"rq2_motivation_bucket_by_domain.csv"))
 
+# ── Overall average endorsement per specific motivation (pooled across domains) ──
+# Respondents appear once per domain they used → cluster SEs by ResponseId.
+# svyglm intercept-only model on the binary endorsed indicator gives a properly
+# clustered, survey-weighted mean and SE for each item averaged across all domains.
+{
+  norm_apos <- function(x) stringr::str_replace_all(x, "’|‘|‚", "'")
+  all_items <- setdiff(unlist(motivation_options, use.names=FALSE), "None of these reasons applies") |>
+    norm_apos() |> unique()
+
+  # SSL users = anyone who used at least one domain
+  ssl_users <- df_analysis |> dplyr::filter(used_any_ssl == 1)
+
+  overall_motiv <- purrr::map_dfr(all_items, function(item) {
+    item_norm   <- norm_apos(item)
+    bucket_name <- names(which(purrr::map_lgl(motivation_options, ~ item_norm %in% norm_apos(.x))))[1]
+    if (is.na(bucket_name)) return(NULL)
+
+    # For each SSL user, did they endorse this item in ANY domain they used?
+    person_df <- purrr::map_dfr(names(domain_specs), function(domain) {
+      spec   <- domain_specs[[domain]]
+      dom_df <- ssl_users |> dplyr::filter(.data[[spec$used_col]] == 1)
+      if (nrow(dom_df) == 0) return(NULL)
+      col_vals <- replace_na(as.character(dom_df[[paste0(spec$prefix,"_",bucket_name)]]), "") |>
+        norm_apos()
+      tibble(
+        ResponseId = dom_df$ResponseId,
+        weight     = dom_df[[WGT]],
+        endorsed   = as.integer(stringr::str_detect(col_vals, fixed(item_norm)))
+      )
+    }) |>
+      dplyr::group_by(ResponseId, weight) |>
+      dplyr::summarise(endorsed = as.integer(any(endorsed == 1L)), .groups="drop")
+
+    if (nrow(person_df) == 0 || sum(person_df$endorsed) == 0) return(NULL)
+    des <- survey::svydesign(ids=~1, weights=~weight, data=person_df)
+    est <- survey::svymean(~endorsed, des, na.rm=TRUE)
+    ci  <- confint(est)
+    tibble(
+      bucket   = bucket_name,
+      item     = item,
+      mean_pct = as.numeric(est) * 100,
+      se_pct   = as.numeric(survey::SE(est)) * 100,
+      ci_lo    = ci[1] * 100,
+      ci_hi    = ci[2] * 100
+    )
+  }) |>
+    dplyr::mutate(
+      bucket_lbl = factor(BUCKET_DISPLAY[bucket], levels=BUCKET_DISPLAY[BUCKET_ORDER]),
+      item_short = item
+    ) |>
+    dplyr::arrange(bucket_lbl, desc(mean_pct))
+
+  # Order items within each bucket by mean endorsement; factor per-panel
+  overall_motiv <- overall_motiv |>
+    dplyr::group_by(bucket_lbl) |>
+    dplyr::mutate(item_short = factor(item_short, levels=rev(item_short[order(mean_pct)]))) |>
+    dplyr::ungroup()
+
+  # 2×2 quadrant, one panel per bucket, bars colored by bucket
+  panel_overall <- purrr::map(BUCKET_ORDER, function(bkt) {
+    sub <- dplyr::filter(overall_motiv, bucket == bkt)
+    ggplot(sub, aes(x=mean_pct, y=item_short)) +
+      geom_col(width=0.65, alpha=0.88, fill=BUCKET_COLORS[bkt]) +
+      geom_errorbarh(aes(xmin=pmax(ci_lo,0), xmax=pmin(ci_hi,100)),
+                     height=0.35, linewidth=0.45, color="gray30") +
+      scale_x_continuous(limits=c(0, 100), labels=function(x) paste0(x, "%"),
+                         expand=expansion(mult=c(0, 0.02))) +
+      labs(title=BUCKET_DISPLAY[bkt], x=NULL, y=NULL) +
+      theme_aesthetic_ggplot(font_scale=0.9) +
+      theme(legend.position    = "none",
+            plot.title         = element_text(size=10, face="bold", color=BUCKET_COLORS[bkt]),
+            axis.text.y        = element_text(size=8),
+            axis.text.x        = element_text(size=8),
+            panel.grid.major.x = element_line(color="gray92", linewidth=0.3),
+            panel.grid.major.y = element_blank())
+  })
+
+  p_overall_motiv <- patchwork::wrap_plots(panel_overall, ncol=2) +
+    patchwork::plot_annotation(
+      caption="% of SSL users who endorsed each motivation in at least one domain (survey-weighted)"
+    ) &
+    theme(plot.caption = element_text(size=7, color="gray50", hjust=0))
+
+  print(p_overall_motiv)
+  ggsave(file.path(OUTPUT_DIR,"motivation_overall_endorsement.pdf"),
+         p_overall_motiv, width=12, height=9, device="pdf")
+  ggsave(file.path(OUTPUT_DIR,"motivation_overall_endorsement.png"),
+         p_overall_motiv, width=12, height=9, dpi=300)
+  write_csv(overall_motiv |> dplyr::select(bucket, item, mean_pct, se_pct, ci_lo, ci_hi),
+            file.path(OUTPUT_DIR,"motivation_overall_endorsement.csv"))
+
+  # ── APA summary ────────────────────────────────────────────────────────────
+  apa_motiv_lines <- c("Overall motivation endorsement (% of SSL users, survey-weighted)", "")
+  for (bkt in BUCKET_ORDER) {
+    apa_motiv_lines <- c(apa_motiv_lines, paste0(BUCKET_DISPLAY[bkt], ":"))
+    rows <- overall_motiv |>
+      dplyr::filter(bucket == bkt) |>
+      dplyr::arrange(desc(mean_pct)) |>
+      dplyr::rowwise() |>
+      dplyr::mutate(apa = sprintf(
+        "  %s: %.1f%%, 95%% CI [%.1f%%, %.1f%%]", item, mean_pct, ci_lo, ci_hi
+      )) |>
+      dplyr::pull(apa)
+    apa_motiv_lines <- c(apa_motiv_lines, rows, "")
+  }
+  writeLines(apa_motiv_lines, file.path(OUTPUT_DIR, "apa_motivation_endorsement.txt"))
+  cat(paste(apa_motiv_lines, collapse="
+"), "
+")
+}
+
+# Survey-weighted pairwise domain tests for each motivation
+# Respondents can appear in multiple domains → cluster by ResponseId
+motiv_domain_tests <- imap_dfr(motivation_options, function(options, bucket) {
+  purrr::map_dfr(setdiff(options, "None of these reasons applies"), function(option) {
+    option_norm <- str_replace_all(option, "’|‘|‚", "'")
+
+    long_df <- purrr::imap_dfr(domain_specs, function(spec, domain) {
+      dom_df   <- dplyr::filter(df_analysis, .data[[spec$used_col]] == 1)
+      col_vals <- replace_na(as.character(dom_df[[paste0(spec$prefix, "_", bucket)]]), "") |>
+        str_replace_all("’|‘|‚", "'")
+      dom_df |>
+        dplyr::transmute(
+          ResponseId,
+          domain   = domain,
+          endorsed = as.integer(str_detect(col_vals, fixed(option_norm))),
+          weight_trimmed
+        )
+    })
+
+    # overall F-test: endorsed ~ domain, clustered by respondent
+    d_long  <- survey::svydesign(ids=~ResponseId, weights=~weight_trimmed, data=long_df)
+    fit     <- survey::svyglm(endorsed ~ domain, design=d_long, family=quasibinomial())
+    p_overall <- as.numeric(survey::regTermTest(fit, ~domain)$p)
+
+    # all three pairwise comparisons
+    domain_lvls <- names(domain_specs)
+    pair_tbl <- purrr::map_dfr(combn(domain_lvls, 2, simplify=FALSE), function(pr) {
+      sub2 <- dplyr::filter(long_df, domain %in% pr) |>
+        dplyr::mutate(domain = factor(domain, levels=pr))
+      d2   <- survey::svydesign(ids=~ResponseId, weights=~weight_trimmed, data=sub2)
+      f2   <- survey::svyglm(endorsed ~ domain, design=d2, family=quasibinomial())
+      tibble(pair=paste(pr, collapse=" vs "), p_raw=coef(summary(f2))[2, "Pr(>|t|)"])
+    }) |>
+      dplyr::mutate(p_holm = p.adjust(p_raw, method="fdr"))
+
+    tibble(
+      general_bucket  = bucket,
+      specific_factor = option,
+      p_overall       = p_overall,
+      sig_pairs       = list(dplyr::filter(pair_tbl, p_holm < 0.05)$pair)
+    )
+  })
+})
+
+# star label: * if overall p<0.05 (Holm-corrected within bucket below)
+motiv_domain_tests <- motiv_domain_tests |>
+  dplyr::group_by(general_bucket) |>
+  dplyr::mutate(p_overall_holm = p.adjust(p_overall, method="fdr"),
+                sig_label = dplyr::case_when(
+                  p_overall_holm < 0.001 ~ " ***",
+                  p_overall_holm < 0.01  ~ " **",
+                  p_overall_holm < 0.05  ~ " *",
+                  TRUE                   ~ ""
+                )) |>
+  dplyr::ungroup()
+
 # Motivation quadrant plot (2×2 panels, one per bucket)
 Y_OFF <- c(personal_psychological=-0.26, societal_conventional=0, moral=0.26)
 
-panel_plots <- map(BUCKET_ORDER, function(bucket) {
-  sub <- substantive_crosstab |> filter(general_bucket == bucket)
-  factor_ord  <- sub |> group_by(specific_factor) |>
-    summarise(m=mean(weighted_percent_of_domain_users),.groups="drop") |>
-    arrange(desc(m)) |> pull(specific_factor)
+panel_plots <- purrr::map(BUCKET_ORDER, function(bucket) {
+  sub      <- substantive_crosstab |> dplyr::filter(general_bucket == bucket)
+  sig_lkp  <- motiv_domain_tests |>
+    dplyr::filter(general_bucket == bucket) |>
+    dplyr::select(specific_factor, sig_label)
+
+  factor_ord <- sub |>
+    dplyr::group_by(specific_factor) |>
+    dplyr::summarise(m=mean(weighted_percent_of_domain_users), .groups="drop") |>
+    dplyr::arrange(desc(m)) |>
+    dplyr::pull(specific_factor)
+
+  # significance annotation data frame (one row per significant motivation)
+  sig_ann <- sig_lkp |>
+    dplyr::filter(sig_label != "") |>
+    dplyr::mutate(y_pos = match(specific_factor, factor_ord))
 
   sub |>
-    mutate(specific_factor = factor(specific_factor, levels=factor_ord),
-           y_pos = as.numeric(specific_factor) + Y_OFF[domain]) |>
+    dplyr::mutate(specific_factor = factor(specific_factor, levels=factor_ord),
+                  y_pos = as.numeric(specific_factor) + Y_OFF[domain]) |>
     ggplot(aes(x=weighted_percent_of_domain_users, y=y_pos,
                color=domain, shape=domain)) +
     geom_errorbarh(aes(xmin=weighted_ci_low_percent, xmax=weighted_ci_high_percent),
                    height=0.1, linewidth=0.85, alpha=0.7) +
     geom_point(size=2.5) +
+    { if (nrow(sig_ann) > 0)
+        geom_text(data=sig_ann,
+                  aes(x=90, y=y_pos, label=trimws(sig_label)),
+                  inherit.aes=FALSE, color="gray20", size=5, hjust=0.5)
+    } +
     scale_color_manual(values=DOMAIN_COLORS, labels=DOMAIN_DISPLAY) +
     scale_shape_manual(values=c(personal_psychological=16,
                                 societal_conventional =18, moral=17),
                        labels=DOMAIN_DISPLAY) +
-    scale_x_continuous(limits=c(0,100), labels=function(x) paste0(x,"%")) +
+    scale_x_continuous(limits=c(0, 100),
+                       labels=function(x) paste0(x,"%")) +
     scale_y_continuous(breaks=seq_along(factor_ord),
                        labels=str_wrap(factor_ord, 25), trans="reverse") +
     labs(title  = paste0("Motivation: ", BUCKET_DISPLAY[bucket]),
@@ -1095,8 +1283,8 @@ for (i in seq_along(all_items)) {
 
 # Short labels for plot
 short_labels <- c(
-  "Nobody was available at the time"                                        = "Nobody available",
-  "I needed a response right away"                                          = "Needed it fast",
+  "Nobody was available at the time"                                        = "Nobody available at time",
+  "I needed a response right away"                                          = "Needed fast response",
   "I can think out loud without needing to pre-organize my thoughts"        = "Think out loud",
   "I wanted an unbiased opinion"                                            = "Unbiased opinion",
   "I thought using a chatbot would save me time"                            = "Save time",
@@ -1104,7 +1292,7 @@ short_labels <- c(
   "I thought I would learn something"                                       = "Learn something",
   "I thought using a chatbot would produce something valuable"              = "Produce value",
   "I wanted someone to talk to"                                             = "Someone to talk to",
-  "I didn't have a person I could talk to about this in my life"            = "No person to ask",
+  "I didn't have a person I could talk to about this in my life"            = "Don't have person to ask",
   "I wanted AI to provide a particular perspective I didn't have access to" = "Fresh perspective",
   "I didn't want to burden my friends or family"                            = "Don't burden others",
   "I was bored"                                                             = "Bored",
@@ -1210,129 +1398,146 @@ cat(sprintf("Parallel analysis suggests %d factor(s)\n", pa$nfact))
 
 N_FACTORS <- pa$nfact
 
-efa <- psych::fa(item_mat_cc, nfactors=N_FACTORS, rotate="oblimin",
-                 scores="regression", fm="ml")
+# Weighted EFA: pass raw data + weight vector directly to psych::fa
+weights_cc  <- motiv_matrix_resp$weight[complete.cases(item_mat)]
 
-cat("\nEFA loadings (pattern matrix, oblimin):\n")
+efa <- psych::fa(item_mat_cc, nfactors=N_FACTORS, weight=weights_cc,
+                 rotate="oblimin", fm="ml")
+
+cat("\nEFA loadings (pattern matrix, oblimin, survey-weighted):\n")
 print(psych::fa.sort(efa), digits=2, cutoff=0.25)
 
-# Factor scores — one row per respondent in item_mat_cc, one col per factor
-factor_scores <- as.data.frame(efa$scores)
-# psych names factors ML1, ML2, ... — keep track of those internal names
-ml_names <- colnames(factor_scores)   # e.g. "ML1" "ML3" "ML2" (psych reorders by variance)
+# Factor scores via regression on raw data using weighted loading solution
+factor_scores <- as.data.frame(psych::factor.scores(item_mat_cc, efa)$scores)
+ml_names <- colnames(factor_scores)
 
-# Auto-label each factor by its top 2 loading items (after applying short_labels)
+# Auto-label each factor: top 2 items unless gap between them > 0.20, then top 1 only
 factor_labels <- sapply(ml_names, function(fn) {
   loadings_vec <- abs(efa$loadings[, fn])
-  top2         <- names(sort(loadings_vec, decreasing=TRUE)[1:2])
-  paste(short_labels[top2], collapse=" / ")
+  sorted       <- sort(loadings_vec, decreasing=TRUE)
+  top2         <- names(sorted)[1:2]
+  if (sorted[1] - sorted[2] > 0.20)
+    short_labels[top2[1]]
+  else
+    paste(short_labels[top2], collapse=" / ")
 })
 names(factor_labels) <- ml_names
 cat("\nFactor labels (top 2 items):\n"); print(factor_labels)
 
-# Plain unnamed vector of label strings — safe for all_of() and colnames()
-factor_col_names <- unname(factor_labels)
+# Map each factor to a final name by its highest-loading item (robust to psych reordering)
+top_item_to_name <- c(
+  "I wanted an unbiased opinion"                                            = "Epistemic value",
+  "I wanted AI to provide a particular perspective I didn't have access to" = "Epistemic value",
+  "I thought I would learn something"                                       = "Epistemic value",
+  "I didn't have a person I could talk to about this in my life"            = "Social unavailability",
+  "Nobody was available at the time"                                        = "Social unavailability",
+  "I wanted someone to talk to"                                             = "Social unavailability",
+  "I thought using a chatbot would save me time"                            = "Efficiency",
+  "I thought using a chatbot would save me effort"                          = "Efficiency",
+  "I needed a response right away"                                          = "Urgency",
+  "I was bored"                                                             = "Exploration and stimulation",
+  "I wanted to be distracted"                                               = "Exploration and stimulation",
+  "I was experimenting with different chatbots"                             = "Exploration and stimulation",
+  "I didn't want to burden my friends or family"                            = "Social burden avoidance",
+  "I can think out loud without needing to pre-organize my thoughts"        = "Social burden avoidance"
+)
+top_item_to_name <- setNames(top_item_to_name, normalize_apos(names(top_item_to_name)))
 
-# Rename factor score columns to their auto-labels
+factor_col_names <- unname(sapply(ml_names, function(fn) {
+  top_item <- names(which.max(abs(efa$loadings[, fn])))
+  name     <- unname(top_item_to_name[top_item])
+  if (is.na(name)) paste0("Factor_", fn) else name   # fallback if unmapped
+}))
+cat("\nFinal factor names:\n"); print(setNames(factor_col_names, ml_names))
+
+# Rename factor score columns to their final names
 colnames(factor_scores) <- factor_col_names
 
-# Loadings heatmap (items × factors, factors in psych's variance order)
+# Loadings heatmap — transposed: factors on y, items on x (wider layout)
+ml_to_name <- setNames(factor_col_names, ml_names)   # ML1 → "Epistemic value" etc.
+
 load_df <- as.data.frame(unclass(efa$loadings)) |>
   rownames_to_column("item") |>
   pivot_longer(-item, names_to="factor_raw", values_to="loading") |>
-  mutate(item   = short_labels[item],
-         item   = factor(item, levels=rev(hc_order)),
-         factor = factor(factor_labels[factor_raw], levels=factor_col_names))
+  mutate(
+    item       = short_labels[item],
+    item       = factor(item, levels=hc_order),
+    factor_lbl = factor(ml_to_name[factor_raw], levels=factor_col_names)
+  )
 
-p_loadings <- ggplot(load_df, aes(x=factor, y=item, fill=loading)) +
+p_loadings <- ggplot(load_df, aes(x=item, y=factor_lbl, fill=loading)) +
   geom_tile(color="white", linewidth=0.4) +
   geom_text(aes(label=sprintf("%.2f", loading)),
             size=2.6,
             color=ifelse(abs(load_df$loading) > 0.35, "white", "gray20")) +
   scale_fill_gradient2(low="#33658A", mid="#f7f7f7", high="#F26419",
                        midpoint=0, limits=c(-1, 1), name="Loading") +
-  labs(x=NULL, y=NULL, title=NULL) +
+  guides(fill=guide_colorbar(title.vjust=2)) +
+  labs(x="Specific Motivation", y="Latent Factor", title=NULL) +
   theme_aesthetic_ggplot(font_scale=0.95) +
-  theme(axis.text.x    = element_text(angle=25, hjust=1, size=9),
-        axis.text.y    = element_text(size=9),
-        legend.position = "right",
-        panel.grid     = element_blank())
-
-print(p_loadings)
-ggsave(file.path(OUTPUT_DIR,"motivation_efa_loadings.pdf"), p_loadings, width=8, height=9, device="pdf")
-ggsave(file.path(OUTPUT_DIR,"motivation_efa_loadings.png"), p_loadings, width=8, height=9, dpi=300)
-
-# ── (d) k-means clustering on continuous motivation counts (0–3) ─────────────
-# Each cell: number of domains in which respondent listed that motivation (0–3)
-clust_mat <- item_mat_cc   # complete cases, raw counts
-
-# Elbow plot: WSS for k = 1..9
-wss_vals <- sapply(1:9, function(k) {
-  set.seed(42)
-  kmeans(clust_mat, centers=k, nstart=50, iter.max=100)$tot.withinss
-})
-p_elbow <- ggplot(data.frame(k=1:9, wss=wss_vals), aes(x=k, y=wss)) +
-  geom_line(color="#33658A", linewidth=0.8) +
-  geom_point(color="#33658A", size=2.5) +
-  geom_vline(xintercept=4, linetype="dashed", color="#F26419", linewidth=0.7) +
-  scale_x_continuous(breaks=1:9) +
-  labs(x="Number of clusters (k)", y="Total within-cluster SS", title="Elbow plot") +
-  theme_aesthetic_ggplot(font_scale=1.0)
-ggsave(file.path(OUTPUT_DIR, "elbow_plot.pdf"), p_elbow, width=5, height=3.5, device="pdf")
-ggsave(file.path(OUTPUT_DIR, "elbow_plot.png"), p_elbow, width=5, height=3.5, dpi=300)
-
-best_k <- 4
-cat(sprintf("\nUsing k=%d clusters (continuous motivation counts)\n", best_k))
-
-set.seed(42)
-km <- kmeans(clust_mat, centers=best_k, nstart=50, iter.max=100)
-
-clust_clustered <- as_tibble(clust_mat) |>
-  dplyr::mutate(cluster = km$cluster)
-
-# Heatmap: mean count per item per cluster
-cluster_means <- clust_clustered |>
-  dplyr::group_by(cluster) |>
-  dplyr::summarise(dplyr::across(dplyr::all_of(all_items), mean), n=dplyr::n(), .groups="drop") |>
-  dplyr::arrange(cluster)
-
-cat("\nCluster sizes:\n"); print(cluster_means |> dplyr::select(cluster, n))
-
-cluster_hm_df <- cluster_means |>
-  tidyr::pivot_longer(dplyr::all_of(all_items), names_to="item", values_to="avg") |>
-  dplyr::mutate(
-    item        = short_labels[item],
-    item        = factor(item, levels=short_labels[all_items]),
-    cluster_lbl = factor(
-      paste0("Cluster ", cluster, "\n(n=", cluster_means$n[cluster], ")"),
-      levels = paste0("Cluster ", seq_len(best_k), "\n(n=", cluster_means$n, ")")
-    )
-  )
-
-n_items <- length(all_items)
-hm_h    <- max(5, n_items * 0.28)
-
-p_cluster_hm <- ggplot(cluster_hm_df, aes(x=cluster_lbl, y=item, fill=avg)) +
-  geom_tile(color="white", linewidth=0.5) +
-  geom_text(aes(label=sprintf("%.2f", avg)),
-            size=2.8, fontface="bold",
-            color=ifelse(cluster_hm_df$avg > 1.5, "white", "gray20")) +
-  scale_fill_gradient(low="#f7f7f7", high="#33658A", limits=c(0, 3),
-                      name="Mean count\n(0–3)") +
-  labs(x=NULL, y=NULL, title=NULL) +
-  theme_aesthetic_ggplot(font_scale=1.0) +
-  theme(axis.text.x     = element_text(size=10),
-        axis.text.y     = element_text(size=8),
+  theme(axis.text.x     = element_text(angle=40, hjust=1, size=8),
+        axis.text.y     = element_text(size=8, lineheight=0.85),
         legend.position = "right",
         panel.grid      = element_blank())
 
-print(p_cluster_hm)
-ggsave(file.path(OUTPUT_DIR,"motivation_clusters.pdf"), p_cluster_hm,
-       width=8, height=hm_h, device="pdf")
-ggsave(file.path(OUTPUT_DIR,"motivation_clusters.png"), p_cluster_hm,
-       width=8, height=hm_h, dpi=300)
+print(p_loadings)
+ggsave(file.path(OUTPUT_DIR,"motivation_efa_loadings.pdf"), p_loadings, width=9, height=5, device="pdf")
 
-write_csv(cluster_means, file.path(OUTPUT_DIR, "motivation_cluster_profiles.csv"))
+
+# ── (d) Classify respondents by dominant EFA factor — two methods ────────────
+fs_z <- scale(factor_scores)
+
+make_group_heatmap <- function(groups, scores_mat, col_names, label_prefix) {
+  tbl <- as_tibble(scores_mat) |>
+    dplyr::mutate(group = groups) |>
+    dplyr::group_by(group) |>
+    dplyr::summarise(dplyr::across(dplyr::all_of(col_names), mean),
+                     n = dplyr::n(), .groups="drop") |>
+    dplyr::arrange(match(group, col_names))
+
+  cat(sprintf("\n%s group sizes:\n", label_prefix)); print(tbl |> dplyr::select(group, n))
+
+  hm_df <- tbl |>
+    tidyr::pivot_longer(dplyr::all_of(col_names), names_to="factor", values_to="z") |>
+    dplyr::mutate(
+      factor    = factor(factor, levels=col_names),
+      grp_lbl   = factor(
+        paste0(group, "\n(n=", tbl$n[match(group, tbl$group)], ")"),
+        levels = paste0(tbl$group, "\n(n=", tbl$n, ")")
+      )
+    )
+
+  max_z <- max(abs(hm_df$z)) * 1.05
+  ggplot(hm_df, aes(x=grp_lbl, y=factor, fill=z)) +
+    geom_tile(color="white", linewidth=0.6) +
+    geom_text(aes(label=sprintf("%.2f", z)), size=3.2, fontface="bold",
+              color=ifelse(abs(hm_df$z) > max_z * 0.4, "white", "gray20")) +
+    scale_fill_gradient2(low="#33658A", mid="#f7f7f7", high="#F26419",
+                         midpoint=0, limits=c(-max_z, max_z), name="Mean\nz-score") +
+    labs(x=NULL, y=NULL, title=NULL) +
+    theme_aesthetic_ggplot(font_scale=1.0) +
+    theme(axis.text.x=element_text(size=9), axis.text.y=element_text(size=9),
+          legend.position="right", panel.grid=element_blank())
+}
+
+# Classification 1: highest raw factor score
+dom_raw <- factor_col_names[max.col(factor_scores, ties.method="first")]
+p_hm_raw <- make_group_heatmap(dom_raw, fs_z, factor_col_names, "Raw-score dominant factor")
+print(p_hm_raw)
+ggsave(file.path(OUTPUT_DIR,"motivation_clusters_raw.pdf"),  p_hm_raw, width=9, height=5, device="pdf")
+ggsave(file.path(OUTPUT_DIR,"motivation_clusters_raw.png"),  p_hm_raw, width=9, height=5, dpi=300)
+
+# Classification 2: highest z-scored factor score
+dom_z   <- factor_col_names[max.col(fs_z, ties.method="first")]
+p_hm_z  <- make_group_heatmap(dom_z,   fs_z, factor_col_names, "Z-score dominant factor")
+print(p_hm_z)
+ggsave(file.path(OUTPUT_DIR,"motivation_clusters_zscore.pdf"), p_hm_z, width=9, height=5, device="pdf")
+ggsave(file.path(OUTPUT_DIR,"motivation_clusters_zscore.png"), p_hm_z, width=9, height=5, dpi=300)
+
+cat(sprintf("\nAgreement between raw and z-score classification: %.1f%%\n",
+            mean(dom_raw == dom_z) * 100))
+
+write_csv(tibble(dom_raw, dom_z), file.path(OUTPUT_DIR, "motivation_cluster_profiles.csv"))
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 5  Outcomes (satisfaction & recommendation)
@@ -1434,7 +1639,7 @@ svy <- svydesign(ids=~1, weights=as.formula(paste0("~",WGT)), data=df_analysis)
 MODEL_PREDS <- c(
   "age_num_z","gender_male","gender_other","race_white","race_black",
   "pid_republican","pid_democrat","income_ord_z","college_degree",
-  "employed","retired","ideo_num_z",
+  "employed","retired","ideo_conservatism_z",
   "use_freq_code_z","aias4_score_z","anthrotech_score_z",
   "sias4_score_z","lsns6_score_z",
   "tipi_extraversion_z","tipi_agreeableness_z","tipi_conscientiousness_z",
@@ -1453,7 +1658,7 @@ PREDICTOR_LABELS <- c(
   college_degree             = "College degree",
   employed                   = "Employed  [ref: not]",
   retired                    = "Retired  [ref: not]",
-  ideo_num_z                 = "Ideology: conservative (z)",
+  ideo_conservatism_z        = "Conservatism (z)",
   use_freq_code_z            = "LLM use frequency (z)",
   aias4_score_z              = "AI attitudes (z)",
   anthrotech_score_z         = "AI anthropomorphism (z)",
@@ -1467,6 +1672,173 @@ PREDICTOR_LABELS <- c(
   ai_social_use_index_z      = "AI social use index (z)"
 )
 label_pred <- function(t) { l <- PREDICTOR_LABELS[t]; if(is.na(l)) t else unname(l) }
+
+# ── (c2) Predictor → latent-factor weighted OLS heatmap ─────────────────────
+# Each EFA factor score (z-standardised outcome) regressed on all MODEL_PREDS
+# simultaneously via survey-weighted OLS. Raw p-values, no correction.
+{
+  pred_factor_df <- motiv_matrix_resp |>
+    dplyr::select(ResponseId, weight) |>
+    dplyr::inner_join(
+      df_analysis |> dplyr::select(ResponseId, dplyr::all_of(MODEL_PREDS)),
+      by = "ResponseId"
+    ) |>
+    dplyr::inner_join(
+      as_tibble(scale(factor_scores)) |>
+        dplyr::mutate(ResponseId = motiv_matrix_resp$ResponseId[complete.cases(item_mat)]),
+      by = "ResponseId"
+    ) |>
+    dplyr::mutate(dplyr::across(dplyr::all_of(MODEL_PREDS), as.numeric)) |>
+    drop_na()
+
+  factor_fits <- purrr::map(factor_col_names, function(fc) {
+    fml <- as.formula(paste0("`", fc, "` ~ ", paste(MODEL_PREDS, collapse=" + ")))
+    des <- survey::svydesign(ids=~1, weights=~weight, data=pred_factor_df)
+    survey::svyglm(fml, design=des)
+  })
+  names(factor_fits) <- factor_col_names
+
+  factor_reg_tbl <- purrr::map_dfr(factor_col_names, function(fc) {
+    co <- as.data.frame(summary(factor_fits[[fc]])$coefficients)
+    co$predictor <- rownames(co)
+    co |>
+      dplyr::filter(predictor != "(Intercept)") |>
+      dplyr::transmute(
+        factor    = fc,
+        predictor = predictor,
+        beta      = Estimate,
+        se        = `Std. Error`,
+        t         = `t value`,
+        p         = `Pr(>|t|)`,
+        sig       = !is.na(p) & p < 0.05
+      )
+  }) |>
+    dplyr::mutate(
+      predictor_lbl = factor(PREDICTOR_LABELS[predictor], levels=rev(PREDICTOR_LABELS[MODEL_PREDS])),
+      factor_lbl    = factor(factor, levels=factor_col_names)
+    )
+
+  # ── Heatmap ────────────────────────────────────────────────────────────────
+  beta_lim <- max(abs(factor_reg_tbl$beta), na.rm=TRUE)
+
+  p_pred_factor <- ggplot(factor_reg_tbl, aes(x=factor_lbl, y=predictor_lbl)) +
+    geom_tile(data=dplyr::filter(factor_reg_tbl, !sig),
+              fill="gray88", color="white", linewidth=0.4) +
+    geom_tile(data=dplyr::filter(factor_reg_tbl, sig),
+              aes(fill=beta), color="white", linewidth=0.4) +
+    geom_text(aes(label=sprintf("%.2f", beta),
+                  color=ifelse(sig & abs(beta) > beta_lim * 0.45, "white", "gray30")),
+              size=2.4) +
+    scale_fill_gradient2(low="#33658A", mid="#f7f7f7", high="#F26419",
+                         midpoint=0, limits=c(-beta_lim, beta_lim),
+                         name="Std. β", na.value="gray88") +
+    scale_color_identity() +
+    guides(fill=guide_colorbar(title.vjust=2)) +
+    labs(x="Latent Factor", y="Predictor",
+         caption="Survey-weighted OLS; outcome = z-scored factor score. Grayed cells: p > .05 (uncorrected).") +
+    theme_aesthetic_ggplot(font_scale=0.9) +
+    theme(axis.text.x  = element_text(angle=30, hjust=1, size=8),
+          axis.text.y  = element_text(size=8),
+          panel.grid   = element_blank(),
+          plot.caption = element_text(size=7, color="gray50", hjust=0))
+
+  print(p_pred_factor)
+  ggsave(file.path(OUTPUT_DIR,"motivation_predictor_factor_reg.pdf"),
+         p_pred_factor, width=9, height=8, device="pdf")
+  ggsave(file.path(OUTPUT_DIR,"motivation_predictor_factor_reg.png"),
+         p_pred_factor, width=9, height=8, dpi=300)
+
+  # ── Coefficient plot ───────────────────────────────────────────────────────
+  coef_plot_df <- factor_reg_tbl |>
+    dplyr::mutate(ci_lo = beta - 1.96 * se, ci_hi = beta + 1.96 * se)
+
+  p_coef <- ggplot(coef_plot_df, aes(x=beta, y=predictor_lbl, color=sig)) +
+    geom_vline(xintercept=0, linetype="dashed", color="gray60", linewidth=0.4) +
+    geom_errorbarh(aes(xmin=ci_lo, xmax=ci_hi), height=0.3, linewidth=0.5) +
+    geom_point(size=1.8) +
+    scale_color_manual(values=c("TRUE"="#F26419","FALSE"="gray60"), guide="none") +
+    facet_wrap(~factor_lbl, nrow=1) +
+    labs(x="Standardised β (95% CI)", y=NULL,
+         caption="Survey-weighted OLS. Orange = p < .05 (uncorrected).") +
+    theme_aesthetic_ggplot(font_scale=0.85) +
+    theme(strip.text          = element_text(size=7, face="bold"),
+          axis.text.y         = element_text(size=7),
+          axis.text.x         = element_text(size=7),
+          panel.grid.major.x  = element_line(color="gray92", linewidth=0.3),
+          panel.grid.major.y  = element_blank(),
+          plot.caption        = element_text(size=7, color="gray50", hjust=0))
+
+  print(p_coef)
+  ggsave(file.path(OUTPUT_DIR,"motivation_predictor_factor_coefplot.pdf"),
+         p_coef, width=2.2*length(factor_col_names), height=8, device="pdf")
+  ggsave(file.path(OUTPUT_DIR,"motivation_predictor_factor_coefplot.png"),
+         p_coef, width=2.2*length(factor_col_names), height=8, dpi=300)
+
+  # ── Stargazer LaTeX table ──────────────────────────────────────────────────
+  # modelsummary handles svyglm cleanly; fall back to xtable if not installed
+  if (requireNamespace("modelsummary", quietly=TRUE)) {
+    modelsummary::modelsummary(
+      factor_fits,
+      estimate  = "{estimate} ({std.error}){stars}",
+      statistic = NULL,
+      stars     = c("*"=.05, "**"=.01, "***"=.001),
+      coef_map  = setNames(PREDICTOR_LABELS[MODEL_PREDS], MODEL_PREDS),
+      gof_map   = c("nobs","r.squared"),
+      title     = "Survey-weighted OLS: predictors of EFA factor scores (z-standardised outcomes)",
+      notes     = "Entries are $b$ (SE). $^{*}p<.05$, $^{**}p<.01$, $^{***}p<.001$ (uncorrected).",
+      output    = file.path(OUTPUT_DIR, "motivation_factor_reg_table.tex")
+    )
+    cat("\nWrote LaTeX table to motivation_factor_reg_table.tex\n")
+  } else {
+    wide_tbl <- factor_reg_tbl |>
+      dplyr::mutate(
+        stars = dplyr::case_when(p < .001 ~ "***", p < .01 ~ "**", p < .05 ~ "*", TRUE ~ ""),
+        cell  = sprintf("%.2f (%.2f)%s", beta, se, stars)
+      ) |>
+      dplyr::select(predictor, factor, cell) |>
+      tidyr::pivot_wider(names_from=factor, values_from=cell) |>
+      dplyr::mutate(predictor = PREDICTOR_LABELS[predictor]) |>
+      dplyr::rename(Predictor=predictor)
+    print(xtable::xtable(wide_tbl,
+      caption = "Survey-weighted OLS regressions predicting z-scored EFA factor scores. Entries are $b$ (SE). $^{*}p<.05$, $^{**}p<.01$, $^{***}p<.001$.",
+      label   = "tab:factor_regs"),
+      include.rownames=FALSE, booktabs=TRUE,
+      file=file.path(OUTPUT_DIR, "motivation_factor_reg_table.tex"))
+    cat("\nWrote LaTeX table to motivation_factor_reg_table.tex\n")
+  }
+
+  # ── APA statistics for significant results ─────────────────────────────────
+  apa_reg_lines <- c("Significant predictors of EFA factor scores (p < .05, uncorrected)", "")
+  for (fc in factor_col_names) {
+    rows <- factor_reg_tbl |>
+      dplyr::filter(sig, factor == fc) |>
+      dplyr::arrange(p) |>
+      dplyr::rowwise() |>
+      dplyr::mutate(apa = sprintf(
+        "  %s: b = %.2f, SE = %.2f, t = %.2f, p %s",
+        PREDICTOR_LABELS[predictor], beta, se, t,
+        if (p < .001) "< .001" else sprintf("= %.3f", p)
+      )) |>
+      dplyr::pull(apa)
+    if (length(rows) > 0)
+      apa_reg_lines <- c(apa_reg_lines, paste0(fc, ":"), rows, "")
+  }
+  writeLines(apa_reg_lines, file.path(OUTPUT_DIR, "apa_factor_regressions.txt"))
+  cat(paste(apa_reg_lines, collapse="
+"), "
+")
+
+  write_csv(
+    factor_reg_tbl |> dplyr::select(factor, predictor, beta, se, t, p, sig),
+    file.path(OUTPUT_DIR, "motivation_predictor_factor_reg.csv")
+  )
+}
+
+
+
+
+
+
 
 LOGIT_OUTCOMES <- c(any="used_any_ssl", personal="used_personal_ssl",
                     conventional="used_conventional_ssl", moral="used_moral_ssl")
@@ -1537,21 +1909,24 @@ print(spearman_table |>
         arrange(outcome_label, predictor, model), n = Inf)
 write_csv(spearman_table, file.path(OUTPUT_DIR,"regression_zero_order_spearman.csv"))
 
-# ── Significant Spearman rhos — copy-pasteable LaTeX strings ──────────────
-cat("\n── Significant Spearman rhos (p < .05) — paste into Python/LaTeX ─────────\n")
-spearman_table |>
-  filter(!is.na(p), p < .05) |>
-  arrange(outcome_label, model, p) |>
+# Significant Spearman correlations (weighted, p < .05)
+apa_spearman_lines <- c("Significant Spearman correlations (weighted, p < .05)", "")
+spearman_apa_rows <- spearman_table |>
+  filter(!is.na(p), p < .05, model == "weighted") |>
+  arrange(outcome_label, p) |>
   rowwise() |>
-  mutate(latex_str = sprintf(
-    '"%s | %s | %s":  r"$\\rho = %.2f$, 95\\%% CI $[%.2f,\\, %.2f]$, $p %s$"',
-    outcome_label, predictor, model,
+  mutate(apa_str = sprintf(
+    "  [%s] %s: rho = %.2f, 95%% CI [%.2f, %.2f], p %s",
+    outcome_label, predictor,
     spearman_r, ci_low, ci_high,
     if (p < .001) "< .001" else sprintf("= %.3f", p)
   )) |>
-  pull(latex_str) |>
-  cat(sep = "\n")
-cat("\n")
+  pull(apa_str)
+apa_spearman_lines <- c(apa_spearman_lines, spearman_apa_rows)
+writeLines(apa_spearman_lines, file.path(OUTPUT_DIR, "apa_spearman_correlations.txt"))
+cat(paste(apa_spearman_lines, collapse="
+"), "
+")
 
 # Spearman forest plots — unweighted + weighted dodged (intensity outcomes only)
 walk(names(OLS_OUTCOMES), function(olbl) {
