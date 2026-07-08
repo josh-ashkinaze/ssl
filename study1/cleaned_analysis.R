@@ -6,8 +6,8 @@
 # ═══════════════════════════════════════════════════════════════════════════
 
 # Which variables to rake on. Options:
-#   "union"        – variables meeting EITHER gap ≥ 5 pp OR predicts any SSL
-#   "intersection" – variables meeting BOTH  gap ≥ 5 pp AND predicts any SSL
+#   "union"        – variables meeting EITHER gap >= 5 pp OR predicts any SSL
+#   "intersection" – variables meeting BOTH  gap >= 5 pp AND predicts any SSL
 RAKE_MODE <- "union"
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -419,7 +419,7 @@ pid3_yg      <- quota_df |> filter(category == "Party ID") |>
 
 # ── Raking variable selection ─────────────────────────────────────────────
 # Candidate variables evaluated on two criteria:
-#   (A) gap  – max absolute gap vs. YouGov LLM-user proportions ≥ 5 pp
+#   (A) gap  – max absolute gap vs. YouGov LLM-user proportions >= 5 pp
 #   (B) pred – variable significantly predicts any-SSL (logistic LRT p < .05)
 # RAKE_MODE (set at top of script) determines which variables are included:
 #   "union"        → gap_crit OR ssl_crit
@@ -501,7 +501,7 @@ wt_sel_tbl <- wt_sel_tbl |>
 
 cat(sprintf("\n── Raking variable selection  [RAKE_MODE = \"%s\"] ──────────────────────\n",
             RAKE_MODE))
-cat("(A) gap_crit: max gap vs. YouGov LLM-user % ≥ 5 pp\n")
+cat("(A) gap_crit: max gap vs. YouGov LLM-user % >= 5 pp\n")
 cat("(B) ssl_crit: LRT p < .05 for any-SSL prediction\n\n")
 print(wt_sel_tbl)
 
@@ -831,7 +831,7 @@ p_prev <- ggplot(prev_plot_df,
                  height = 0.15, color = "#333333", linewidth = 0.9) +
   geom_text(aes(x = weighted_ci_high_pct + 2,
                 label = paste0(weighted_percent,"%")), hjust=0, size=4.5) +
-  scale_x_continuous(limits=c(0,105), labels=function(x) paste0(x,"%")) +
+  scale_x_continuous(limits=c(0,115), labels=function(x) paste0(x,"%")) +
   labs(# title="Synthetic Social Learning (SSL)\nPrevalence Among U.S. Chatbot Users",
        x="Weighted % of respondents (95% CI)", y=NULL) +
   theme_aesthetic_ggplot(font_scale=1.2) +
@@ -878,6 +878,28 @@ motivation_options <- list(
                  "I was curious what the chatbot would say",
                  "I was experimenting with different chatbots",
                  "I wanted to be distracted")
+)
+
+
+# Augmentation: AI adds value beyond what humans offer
+# Deprivation:  AI compensates for an absence or constraint
+ITEM_CODING <- c(
+  "I wanted an unbiased opinion"                                            = "augmentation",
+  "I can think out loud without needing to pre-organize my thoughts"        = "augmentation",
+  "I needed a response right away"                                          = "augmentation",
+  "I thought using a chatbot would produce something valuable"              = "augmentation",
+  "I thought I would learn something"                                       = "augmentation",
+  "I wanted AI to provide a particular perspective I didn't have access to" = "augmentation",
+  "I was curious what the chatbot would say"                                = "augmentation",
+  "I was experimenting with different chatbots"                             = "augmentation",
+  "Nobody was available at the time"                                        = "deprivation",
+  "I thought using a chatbot would save me time"                            = "deprivation",
+  "I thought using a chatbot would save me effort"                          = "deprivation",
+  "I didn't have a person I could talk to about this in my life"            = "deprivation",
+  "I didn't want to burden my friends or family"                            = "deprivation",
+  "I wanted someone to talk to"                                             = "deprivation",
+  "I was bored"                                                             = "deprivation",
+  "I wanted to be distracted"                                               = "deprivation"
 )
 
 domain_specs <- list(
@@ -1109,6 +1131,299 @@ write_csv(rq2, file.path(OUTPUT_DIR,"rq2_motivation_bucket_by_domain.csv"))
 ")
 }
 
+
+# ── Augmentation vs. Deprivation ─────────────────────────────────────────────
+{
+  norm2 <- function(x) stringr::str_replace_all(x, "’|‘|‚", "'")
+  ic    <- setNames(ITEM_CODING, norm2(names(ITEM_CODING)))
+
+  ssl_users <- df_analysis |> dplyr::filter(used_any_ssl == 1)
+  n_aug <- sum(ic == "augmentation")
+  n_dep <- sum(ic == "deprivation")
+
+  # Per person: how many aug / dep items did they endorse (across any domain)?
+  # Collect person × item × domain; deduplicate by item so cross-domain repeats don't inflate counts
+  item_person_long <- purrr::map_dfr(names(domain_specs), function(domain) {
+    spec   <- domain_specs[[domain]]
+    dom_df <- ssl_users |> dplyr::filter(.data[[spec$used_col]] == 1)
+    if (nrow(dom_df) == 0) return(NULL)
+    purrr::imap_dfr(motivation_options, function(options, bucket) {
+      col_vals <- norm2(replace_na(as.character(dom_df[[paste0(spec$prefix,"_",bucket)]]), ""))
+      purrr::map_dfr(setdiff(options, "None of these reasons applies"), function(item) {
+        item_n <- norm2(item)
+        coding <- ic[item_n]
+        if (is.na(coding)) return(NULL)
+        tibble(ResponseId=dom_df$ResponseId, weight=dom_df[[WGT]],
+               item=item_n, coding=coding,
+               endorsed=as.integer(stringr::str_detect(col_vals, fixed(item_n))))
+      })
+    })
+  }) |>
+    # Deduplicate: one row per person × item (endorsed in ANY domain counts as endorsed)
+    dplyr::group_by(ResponseId, weight, item, coding) |>
+    dplyr::summarise(endorsed=as.integer(any(endorsed==1L)), .groups="drop")
+
+  item_person <- item_person_long |>
+    dplyr::group_by(ResponseId, weight, coding) |>
+    dplyr::summarise(n_endorsed=sum(endorsed), .groups="drop") |>
+    tidyr::pivot_wider(names_from=coding, values_from=n_endorsed, values_fill=0L)
+
+  person_scores <- item_person |>
+    dplyr::mutate(
+      aug_rate = augmentation / n_aug,
+      dep_rate = deprivation  / n_dep,
+      aug_type = dplyr::case_when(
+        augmentation > 0 & deprivation > 0 ~ "Both",
+        augmentation > 0 & deprivation == 0 ~ "Augmentation only",
+        augmentation == 0 & deprivation > 0 ~ "Deprivation only",
+        TRUE ~ NA_character_   # endorsed nothing — excluded
+      )
+    ) |>
+    dplyr::filter(!is.na(aug_type))  # keep only those who endorsed >=1 item
+
+  des_all <- survey::svydesign(ids=~1, weights=~weight, data=person_scores)
+
+  # Panel A: mean aug rate and dep rate
+  mean_aug <- survey::svymean(~aug_rate, des_all)
+  mean_dep <- survey::svymean(~dep_rate, des_all)
+  ci_aug   <- confint(mean_aug)
+  ci_dep   <- confint(mean_dep)
+
+  rate_df <- tibble(
+    type   = c("Augmentation", "Deprivation"),
+    mean   = c(as.numeric(mean_aug), as.numeric(mean_dep)) * 100,
+    ci_lo  = c(ci_aug[1], ci_dep[1]) * 100,
+    ci_hi  = c(ci_aug[2], ci_dep[2]) * 100,
+    color  = c(PALETTE[1], PALETTE[3])
+  ) |> dplyr::mutate(type=factor(type, levels=c("Augmentation","Deprivation")))
+
+  p_rates <- ggplot(rate_df, aes(x=type, y=mean, fill=color)) +
+    geom_col(width=0.55, alpha=0.88) +
+    geom_errorbar(aes(ymin=pmax(ci_lo,0), ymax=ci_hi),
+                  width=0.15, linewidth=0.9, color="#333333") +
+    geom_text(aes(y=ci_hi, label=sprintf("%.1f%%", mean)), vjust=-0.6, size=3.2, color="gray20") +
+    scale_fill_identity() +
+    scale_y_continuous(limits=c(0, max(rate_df$ci_hi)*1.20),
+                       labels=function(x) paste0(x,"%"),
+                       expand=expansion(mult=c(0,0))) +
+    labs(x=NULL, y="Avg. % of items endorsed") +
+    theme_aesthetic_ggplot(font_scale=0.95) +
+    theme(panel.grid.major.y = element_line(color="gray92", linewidth=0.3),
+          panel.grid.major.x = element_blank(),
+          plot.tag = element_blank())
+
+  # Panel B: proportion aug-only / dep-only / both (among endorsers)
+  type_tbl <- survey::svymean(~aug_type, des_all)
+  type_ci  <- confint(type_tbl)
+  type_df  <- tibble(
+    type  = stringr::str_remove(rownames(type_ci), "^aug_type"),
+    mean  = as.numeric(type_tbl) * 100,
+    ci_lo = type_ci[,1] * 100,
+    ci_hi = type_ci[,2] * 100,
+    color = dplyr::case_when(
+      type == "Augmentation only" ~ PALETTE[1],
+      type == "Deprivation only"  ~ PALETTE[3],
+      TRUE                        ~ PALETTE[7]
+    )
+  ) |>
+    dplyr::mutate(type=factor(type, levels=c("Augmentation only","Both","Deprivation only")))
+
+  p_types <- ggplot(type_df, aes(x=type, y=mean, fill=color)) +
+    geom_col(width=0.55, alpha=0.88) +
+    geom_errorbar(aes(ymin=pmax(ci_lo,0), ymax=pmax(ci_hi, mean+1)),
+                  width=0.15, linewidth=0.9, color="#333333") +
+    geom_text(aes(y=pmax(ci_hi, mean+1), label=sprintf("%.1f%%", mean)),
+              vjust=-0.6, size=3.2, color="gray20") +
+    scale_fill_identity() +
+    scale_y_continuous(limits=c(0, max(pmax(type_df$ci_hi, type_df$mean+1))*1.20),
+                       labels=function(x) paste0(x,"%"),
+                       expand=expansion(mult=c(0,0))) +
+    labs(x=NULL, y="% of SSL users") +
+    theme_aesthetic_ggplot(font_scale=0.95) +
+    theme(panel.grid.major.y = element_line(color="gray92", linewidth=0.3),
+          panel.grid.major.x = element_blank(),
+          axis.text.x = element_text(size=8, angle=15, hjust=1),
+          plot.tag = element_blank())
+
+  p_aug_dep <- (p_rates | p_types) &
+    theme(plot.tag = element_blank())
+  p_aug_dep <- p_aug_dep +
+    patchwork::plot_annotation(caption="Error bars = 95% CIs (survey-weighted). % of SSL users who endorsed >=1 item.",
+                               tag_levels = NULL)
+  print(p_aug_dep)
+  ggsave(file.path(OUTPUT_DIR,"motivation_aug_dep.pdf"), p_aug_dep, width=10, height=5, device="pdf")
+  ggsave(file.path(OUTPUT_DIR,"motivation_aug_dep.png"), p_aug_dep, width=10, height=5, dpi=300)
+
+  # APA output
+  apa_lines <- c("Augmentation vs. Deprivation (among SSL users who endorsed >=1 item)", "",
+    sprintf("  Mean augmentation endorsement: %.1f%%, 95%% CI [%.1f%%, %.1f%%]",
+            rate_df$mean[1], rate_df$ci_lo[1], rate_df$ci_hi[1]),
+    sprintf("  Mean deprivation endorsement:  %.1f%%, 95%% CI [%.1f%%, %.1f%%]",
+            rate_df$mean[2], rate_df$ci_lo[2], rate_df$ci_hi[2]), "",
+    "  Motivation type (% of endorsers):")
+  for (i in seq_len(nrow(type_df)))
+    apa_lines <- c(apa_lines, sprintf("    %s: %.1f%%, 95%% CI [%.1f%%, %.1f%%]",
+                                      type_df$type[i], type_df$mean[i],
+                                      type_df$ci_lo[i], type_df$ci_hi[i]))
+  writeLines(apa_lines, file.path(OUTPUT_DIR,"apa_aug_dep.txt"))
+  cat(paste(apa_lines, collapse="\n"), "\n")
+
+  write_csv(person_scores |> dplyr::select(ResponseId, weight, augmentation, deprivation,
+                                           aug_rate, dep_rate, aug_type),
+            file.path(OUTPUT_DIR,"motivation_aug_dep_person.csv"))
+
+  # ── By domain ──────────────────────────────────────────────────────────────
+  domain_labels <- c(
+    personal_psychological = "Personal",
+    societal_conventional  = "Societal",
+    moral                  = "Moral"
+  )
+
+  domain_aug_dep <- purrr::map_dfr(names(domain_specs), function(domain) {
+    spec   <- domain_specs[[domain]]
+    dom_df <- ssl_users |> dplyr::filter(.data[[spec$used_col]] == 1)
+    if (nrow(dom_df) == 0) return(NULL)
+
+    # Per person × item within this domain
+    dom_long <- purrr::imap_dfr(motivation_options, function(options, bucket) {
+      col_vals <- norm2(replace_na(as.character(dom_df[[paste0(spec$prefix,"_",bucket)]]), ""))
+      purrr::map_dfr(setdiff(options, "None of these reasons applies"), function(item) {
+        item_n <- norm2(item)
+        coding <- ic[item_n]
+        if (is.na(coding)) return(NULL)
+        tibble(ResponseId=dom_df$ResponseId, weight=dom_df[[WGT]],
+               item=item_n, coding=coding,
+               endorsed=as.integer(stringr::str_detect(col_vals, fixed(item_n))))
+      })
+    })
+
+    dom_person <- dom_long |>
+      dplyr::group_by(ResponseId, weight, coding) |>
+      dplyr::summarise(n_endorsed=sum(endorsed), .groups="drop") |>
+      tidyr::pivot_wider(names_from=coding, values_from=n_endorsed, values_fill=0L) |>
+      dplyr::mutate(
+        aug_rate = augmentation / n_aug,
+        dep_rate = deprivation  / n_dep,
+        aug_type = dplyr::case_when(
+          augmentation > 0 & deprivation > 0 ~ "Both",
+          augmentation > 0 & deprivation == 0 ~ "Augmentation only",
+          augmentation == 0 & deprivation > 0 ~ "Deprivation only",
+          TRUE ~ NA_character_
+        )
+      ) |>
+      dplyr::filter(!is.na(aug_type))
+
+    des_d <- survey::svydesign(ids=~1, weights=~weight, data=dom_person)
+
+    m_aug <- survey::svymean(~aug_rate, des_d)
+    m_dep <- survey::svymean(~dep_rate, des_d)
+    ci_a  <- confint(m_aug)
+    ci_d  <- confint(m_dep)
+
+    type_m  <- survey::svymean(~aug_type, des_d)
+    type_ci <- confint(type_m)
+    type_rows <- tibble(
+      metric  = stringr::str_remove(rownames(type_ci), "^aug_type"),
+      mean    = as.numeric(type_m) * 100,
+      ci_lo   = type_ci[,1] * 100,
+      ci_hi   = type_ci[,2] * 100
+    )
+
+    dplyr::bind_rows(
+      tibble(metric="aug_rate", mean=as.numeric(m_aug)*100, ci_lo=ci_a[1]*100, ci_hi=ci_a[2]*100),
+      tibble(metric="dep_rate", mean=as.numeric(m_dep)*100, ci_lo=ci_d[1]*100, ci_hi=ci_d[2]*100),
+      type_rows
+    ) |> dplyr::mutate(domain=domain_labels[domain])
+  })
+
+  # Panel A by domain: mean rates, faceted
+  rate_by_domain <- domain_aug_dep |>
+    dplyr::filter(metric %in% c("aug_rate","dep_rate")) |>
+    dplyr::mutate(
+      type  = ifelse(metric=="aug_rate","Augmentation","Deprivation"),
+      color = ifelse(metric=="aug_rate",PALETTE[1],PALETTE[3]),
+      domain = factor(domain, levels=domain_labels)
+    )
+
+  p_rates_domain <- ggplot(rate_by_domain,
+                           aes(x=type, y=mean, fill=color)) +
+    geom_col(width=0.55, alpha=0.88) +
+    geom_errorbar(aes(ymin=pmax(ci_lo,0), ymax=ci_hi),
+                  width=0.15, linewidth=0.9, color="#333333") +
+    geom_text(aes(y=ci_hi, label=sprintf("%.0f%%", mean)), vjust=-0.6, size=2.8, color="gray20") +
+    scale_fill_identity() +
+    scale_y_continuous(limits=c(0, max(rate_by_domain$ci_hi)*1.22),
+                       labels=function(x) paste0(x,"%"),
+                       expand=expansion(mult=c(0,0))) +
+    facet_wrap(~domain, nrow=1) +
+    labs(x=NULL, y="Avg. % of items endorsed") +
+    theme_aesthetic_ggplot(font_scale=0.9) +
+    theme(panel.grid.major.y = element_line(color="gray92", linewidth=0.3),
+          panel.grid.major.x = element_blank(),
+          strip.text = element_text(size=9, face="bold"))
+
+  # Panel B by domain: type proportions, faceted
+  type_by_domain <- domain_aug_dep |>
+    dplyr::filter(metric %in% c("Augmentation only","Deprivation only","Both")) |>
+    dplyr::mutate(
+      type  = factor(metric, levels=c("Augmentation only","Both","Deprivation only")),
+      color = dplyr::case_when(
+        metric=="Augmentation only" ~ PALETTE[1],
+        metric=="Deprivation only"  ~ PALETTE[3],
+        TRUE                        ~ PALETTE[7]
+      ),
+      domain = factor(domain, levels=domain_labels)
+    )
+
+  p_types_domain <- ggplot(type_by_domain,
+                           aes(x=type, y=mean, fill=color)) +
+    geom_col(width=0.55, alpha=0.88) +
+    geom_errorbar(aes(ymin=pmax(ci_lo,0), ymax=pmax(ci_hi, mean+1)),
+                  width=0.15, linewidth=0.9, color="#333333") +
+    geom_text(aes(y=pmax(ci_hi, mean+1), label=sprintf("%.0f%%", mean)),
+              vjust=-0.6, size=2.8, color="gray20") +
+    scale_fill_identity() +
+    scale_y_continuous(limits=c(0, max(pmax(type_by_domain$ci_hi, type_by_domain$mean+1))*1.22),
+                       labels=function(x) paste0(x,"%"),
+                       expand=expansion(mult=c(0,0))) +
+    facet_wrap(~domain, nrow=1) +
+    labs(x=NULL, y="% of SSL users") +
+    theme_aesthetic_ggplot(font_scale=0.9) +
+    theme(panel.grid.major.y = element_line(color="gray92", linewidth=0.3),
+          panel.grid.major.x = element_blank(),
+          axis.text.x = element_text(size=7.5, angle=20, hjust=1),
+          strip.text  = element_text(size=9, face="bold"))
+
+  p_aug_dep_domain <- (p_rates_domain / p_types_domain) +
+    patchwork::plot_annotation(caption="Error bars = 95% CIs (survey-weighted). % of SSL users per domain who endorsed >=1 item.")
+  print(p_aug_dep_domain)
+  ggsave(file.path(OUTPUT_DIR,"motivation_aug_dep_domain.pdf"), p_aug_dep_domain,
+         width=10, height=9, device="pdf")
+  ggsave(file.path(OUTPUT_DIR,"motivation_aug_dep_domain.png"), p_aug_dep_domain,
+         width=10, height=9, dpi=300)
+
+  # APA by domain
+  apa_domain_lines <- c("Augmentation vs. Deprivation by domain", "")
+  for (dom in unique(domain_aug_dep$domain)) {
+    apa_domain_lines <- c(apa_domain_lines, dom, "")
+    sub <- domain_aug_dep |> dplyr::filter(domain==dom)
+    ar  <- sub |> dplyr::filter(metric=="aug_rate")
+    dr  <- sub |> dplyr::filter(metric=="dep_rate")
+    apa_domain_lines <- c(apa_domain_lines,
+      sprintf("  Mean augmentation: %.1f%%, 95%% CI [%.1f%%, %.1f%%]", ar$mean, ar$ci_lo, ar$ci_hi),
+      sprintf("  Mean deprivation:  %.1f%%, 95%% CI [%.1f%%, %.1f%%]", dr$mean, dr$ci_lo, dr$ci_hi))
+    for (t in c("Augmentation only","Both","Deprivation only")) {
+      r <- sub |> dplyr::filter(metric==t)
+      if (nrow(r) > 0)
+        apa_domain_lines <- c(apa_domain_lines,
+          sprintf("  %s: %.1f%%, 95%% CI [%.1f%%, %.1f%%]", t, r$mean, r$ci_lo, r$ci_hi))
+    }
+    apa_domain_lines <- c(apa_domain_lines, "")
+  }
+  cat(paste(apa_domain_lines, collapse="\n"), "\n")
+  writeLines(c(apa_lines, "", apa_domain_lines), file.path(OUTPUT_DIR,"apa_aug_dep.txt"))
+}
+
 # Survey-weighted pairwise domain tests for each motivation
 # Respondents can appear in multiple domains → cluster by ResponseId
 motiv_domain_tests <- imap_dfr(motivation_options, function(options, bucket) {
@@ -1268,7 +1583,7 @@ item_mat <- motiv_matrix_resp |>
   as.matrix()
 
 # ── (a) Jaccard co-occurrence heatmap ──────────────────────────────────────
-# Binarize for Jaccard (mentioned in ≥1 domain = 1)
+# Binarize for Jaccard (mentioned in >=1 domain = 1)
 item_mat_bin <- (item_mat > 0) * 1L
 jaccard_mat <- matrix(NA_real_, nrow=length(all_items), ncol=length(all_items),
                       dimnames=list(all_items, all_items))
