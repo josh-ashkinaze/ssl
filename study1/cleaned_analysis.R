@@ -2353,4 +2353,62 @@ for (lbl in names(OLS_OUTCOMES)) {
          p, width=9, height=8, device="pdf")
 }
 
+# ── AI companion outcome regressions ──────────────────────────────────────
+# Three outcomes: AI as friend, AI as partner, and sum (friend + partner).
+# ai_social_use_index_z is a predictor elsewhere; drop it to avoid self-prediction.
+COMPANION_PREDS <- setdiff(MODEL_PREDS, "ai_social_use_index_z")
+
+# Build companion outcomes on df_analysis
+df_analysis <- df_analysis |>
+  mutate(
+    air_companion_sum = air_friend_num + air_rship_num
+  )
+
+COMPANION_OUTCOMES <- list(
+  list(col="air_friend_num",      label="AI as Friend (frequency)"),
+  list(col="air_rship_num",       label="AI as Partner (frequency)"),
+  list(col="air_companion_sum",   label="AI as Friend + Partner (sum)")
+)
+
+companion_forest_plot <- function(outcome_col, outcome_label) {
+  dat <- df_analysis |>
+    select(all_of(c(outcome_col, COMPANION_PREDS, WGT))) |>
+    mutate(across(everything(), as.numeric)) |> drop_na()
+  svy <- svydesign(ids=~1, weights=~weight_trimmed, data=dat)
+  fml <- as.formula(paste(outcome_col, "~", paste(COMPANION_PREDS, collapse=" + ")))
+  uw <- tidy(glm(fml, data=dat), conf.int=TRUE) |>
+    mutate(model="unweighted")
+  wt <- tidy(svyglm(fml, design=svy), conf.int=TRUE) |>
+    mutate(model="weighted")
+  tbl <- bind_rows(uw, wt) |>
+    filter(term != "(Intercept)") |>
+    mutate(
+      predictor = map_chr(term, label_pred),
+      sig       = !is.na(p.value) & p.value < .05,
+      dot_color = case_when(sig & estimate > 0 ~ PALETTE[1],
+                            sig & estimate < 0 ~ PALETTE[7], TRUE ~ "#aaaaaa")
+    ) |>
+    group_by(predictor) |> mutate(m = mean(abs(estimate))) |> ungroup() |>
+    arrange(m) |> mutate(predictor = fct_inorder(predictor))
+
+  ggplot(tbl, aes(x=estimate, y=predictor, color=I(dot_color), shape=model)) +
+    geom_vline(xintercept=0, color="#cccccc", linetype="dashed", linewidth=0.7) +
+    geom_errorbarh(aes(xmin=conf.low, xmax=conf.high),
+                   height=0.2, linewidth=0.85, position=position_dodge(0.4)) +
+    geom_point(size=3, position=position_dodge(0.4)) +
+    scale_shape_manual(values=c(unweighted=16, weighted=18)) +
+    labs(title=outcome_label, shape=NULL, x="Coefficient (95% CI)", y=NULL) +
+    theme_aesthetic_ggplot(font_scale=1.0) +
+    theme(legend.position="bottom", panel.grid.major.y=element_blank())
+}
+
+for (o in COMPANION_OUTCOMES) {
+  p <- companion_forest_plot(o$col, o$label)
+  slug <- gsub(" ", "_", gsub("[^a-zA-Z0-9 ]", "", tolower(o$label)))
+  print(p)
+  ggsave(file.path(OUTPUT_DIR, paste0("ols_coef_", slug, ".pdf")), p, width=9, height=8, device="pdf")
+  ggsave(file.path(OUTPUT_DIR, paste0("ols_coef_", slug, ".png")), p, width=9, height=8, dpi=180)
+  cat("Saved:", slug, "\n")
+}
+
 cat("\nDone. Outputs in:", OUTPUT_DIR, "\n")

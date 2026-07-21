@@ -29,8 +29,8 @@ from tqdm import tqdm
 from litellm import batch_completion
 
 # ---- config ----
-IN_PATH = "../data/clean/ssl_stimuli_final_sample_annotated.csv"
-OUT_PATH = "../data/clean/rot_stimuli_pilot.csv"
+IN_PATH = "../data/clean/ssl_stimuli_final_annot.csv"
+OUT_PATH = "../data/clean/rot_stimuli_new.csv"
 
 MODEL = "gpt-4o"
 WORD_TARGET = 200
